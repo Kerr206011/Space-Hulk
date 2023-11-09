@@ -1,0 +1,5 @@
+Modelle bekommen die interact funktion
+modelle bekommen tiles
+
+tiles verlieren die draw methode für modelle
+tiles bekommen konkrete koordinaten
