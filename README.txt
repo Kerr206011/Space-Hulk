@@ -6,4 +6,4 @@ the Genstealers, vicious Aliens, dead set on killing all of humanity.
 This is a fan project and not for commercial use(GW don't sue me!). I like the idea of
 the original board game and want to make it PC compatible.
 
-WOP ofc.
+WiP ofc.

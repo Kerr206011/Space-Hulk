@@ -1,5 +1,9 @@
-Modelle bekommen die interact funktion
-modelle bekommen tiles
+Game braucht eine Vision methode
+Game breucht eine Turn methode zum drehen der Modelle
 
-tiles verlieren die draw methode für modelle
-tiles bekommen konkrete koordinaten
+seperate run methoden für verschiedene Gamestates?
+seperate move/turn methoden für die Beiden Spieler? oder seperate Parameter?
+Save/Load in/aus speicherfile
+Siegesbedingungen für verschiedene Level
+Musik und Optionen
+wie user Input? (WASD oder Buttons?)
