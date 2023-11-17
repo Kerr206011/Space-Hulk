@@ -67,52 +67,11 @@ class Game:                                         #can variables be exported t
         pass
 
     def moveModel(self):
-        if(self.selected_Model != None):
-            if(self.is_playing == self.player1) and (self.selected_Model in SM_ModellList):
-                if(self.selected_Model.AP > 0) or (self.CP > 0):
-                    if(self.selected_Model.AP == 0):
-                        self.CP -= 1
-                    else:
-                        self.selected_Model.AP -= 1
-
-                    pos_x = self.selected_tile.x
-                    pos_y = self.selected_tile.y
-
-                    self.selected_tile.is_occupied = False
-                    self.selected_tile.occupand = None
-
-                    match self.selected_Model.face:
-                        case 'right':
-                            self.selected_tile = map[pos_y][pos_x+1]
-                            self.selected_tile.occupand = self.selected_Model
-                            self.selected_tile.is_occupied = True
-                        case 'left':
-                            pass
-                        case 'up':
-                            pass
-                        case 'down':
-                            pass
-
-        if(self.is_playing == self.player2) and (self.selected_Model in GS_ModellList):
-            if self.selected_Model.AP > 0:
-                self.selected_Model.Ap -= 1
-
-                pos_x = self.selected_tile.x
-                pos_y = self.selected_tile.y
-                self.selected_tile.is_occupied = False
-                self.selected_tile.occupand = None
-                match self.selected_Model.face:
-                    case 'right':
-                        self.selected_tile = map[pos_x+1,pos_y]
-                        self.selected_tile.occupand = self.selected_Model
-                        self.selected_tile.is_occupied = True
-                        
-                    case 'left':
-                        pass
-                    case 'up':
-                        pass
-                    case 'down':
-                        pass
+        game.clicked_tile.occupand = game.selected_tile.occupand
+        game.selected_tile.is_occupied = False
+        game.clicked_tile.is_occupied = True
+        game.selected_tile.occupand = None
+        
 game = Game()
 
 class Player1Turn:
