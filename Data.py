@@ -1,6 +1,9 @@
 import pygame
 import random 
 
+SM_ModellList = []                     #a list of Space Marine models
+GS_ModellList = []                     #a list of Genstealer models
+
 #Button class
 class Button():
     def __init__(self, x, y, image, scale) -> None:
@@ -49,13 +52,11 @@ class Game:                                         #can variables be exported t
         self.player2 = ''                           #name of player 2
         self.selected_Model = None
         self.selected_tile = None                  #saves the selected model for other classes to interact with
-        self.SM_ModellList = []                     #a list of Space Marine models
-        self.GS_ModellList = []                     #a list of Genstealer models
         self.CP = random.randint(1,6)               #a random number of CP for the sm player to use
 
     def change_turn(self):                          #list of things to do when changing the active players
         if(self.is_playing == self.player2):
-            for Model in self.SM_ModellList:
+            for Model in SM_ModellList:
                 self.AP = 4
                 self.overwatch = False
                 self.guard = False
@@ -66,7 +67,7 @@ class Game:                                         #can variables be exported t
 
     def moveModel(self):
         if(self.selected_Model != None):
-            if(self.is_playing == self.player1) and (self.selected_Model in self.SM_ModellList):
+            if(self.is_playing == self.player1) and (self.selected_Model in SM_ModellList):
                 if(self.selected_Model.AP > 0) or (self.CP > 0):
                     if(self.selected_Model.AP == 0):
                         self.CP -= 1
@@ -91,7 +92,7 @@ class Game:                                         #can variables be exported t
                         case 'down':
                             pass
 
-        if(self.is_playing == self.player2) and (self.selected_Model in self.GS_ModellList):
+        if(self.is_playing == self.player2) and (self.selected_Model in GS_ModellList):
             if self.selected_Model.AP > 0:
                 self.selected_Model.Ap -= 1
 
@@ -112,6 +113,11 @@ class Game:                                         #can variables be exported t
                     case 'down':
                         pass
 game = Game()
+
+class Player1Turn:
+    def __init__(self) -> None:
+        for Model in SM_ModellList:
+            pass
 
 class Tile:
     def __init__(self, x, y, size):
@@ -177,8 +183,7 @@ map = [[Tile(x, y, tile_size, ) for x in range(map_width)] for y in range(map_he
 
 class Sidebar():
     def __init__(self):
-        self.SM_Modelcount = game.SM_ModellList
-        self.GS_Modelcount = int
+        self.SM_Modelcount = len(SM_ModellList)
         self.Assault_cannon_Ammo = int
         self.Heavy_flamer_ammo = int
         self.timer = int
@@ -193,10 +198,12 @@ class Sidebar():
         round_Text = my_font.render('Round: '+str(game.round), False, (0, 0, 0))
         player1_Text = my_font.render('SM: '+game.player1,False,(0,0,0))
         player2_Text = my_font.render('GS: '+game.player2, False, (0,0,0))
+        GS_count_Text = my_font.render('GS Modells: '+str(len(GS_ModellList)),False,(0,0,0))
         screen.blit(CP_Text, (500,90))
         screen.blit(round_Text, (500,60))
         screen.blit(player1_Text, (500,0))
         screen.blit(player2_Text, (500,30))
+        screen.blit(GS_count_Text, (500,120))
 SB = Sidebar()  #initiates an Object of Sidebar(singelton)
 
 class Bottombar():

@@ -23,8 +23,8 @@ pygame.display.set_caption('Space Hulk')
 
 gs = Blip()
 cp = SpaceMarine('bolter', 'none')
-game.SM_ModellList.append(cp)
-game.GS_ModellList.append(gs)
+SM_ModellList.append(cp)
+GS_ModellList.append(gs)
 
 map[0][0].occupand = cp
 map[0][0].is_occupied = True
