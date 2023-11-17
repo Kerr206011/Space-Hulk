@@ -45,13 +45,14 @@ class Button():
 class Game:                                         #can variables be exported to individual gamestates?
     def __init__(self) -> None:
         self.gameStateManager = None                       #class defined above, manages wich gamestate is active
-        self.states = {'mainMenu'}                            #a list of gamestates that the game can have
+        self.states = {}                            #a list of gamestates that the game can have
         self.is_playing = str                       #the name of the player who is playing
         self.round = 1                              #the current round of the game
         self.player1 = ''                           #name of player 1
         self.player2 = ''                           #name of player 2
         self.selected_Model = None
         self.selected_tile = None                  #saves the selected model for other classes to interact with
+        self.clicked_tile = None
         self.CP = random.randint(1,6)               #a random number of CP for the sm player to use
 
     def change_turn(self):                          #list of things to do when changing the active players
@@ -116,8 +117,14 @@ game = Game()
 
 class Player1Turn:
     def __init__(self) -> None:
+        pass
+
+    def start(self):
         for Model in SM_ModellList:
-            pass
+            self.AP = 4
+            self.overwatch = False
+            self.guard = False
+            self.jam = False
 
 class Tile:
     def __init__(self, x, y, size):
@@ -148,6 +155,9 @@ class Tile:
                 game.selected_Model = self.occupand
                 print(self.occupand.AP)
                 game.selected_tile = self
+            else:
+                game.clicked_tile = self
+                print(game.clicked_tile)
             self.clicked = False
 
 class Model:
@@ -190,7 +200,7 @@ class Sidebar():
         self.pos = (500,0)
 
     def display(self,screen):
-        my_font = pygame.font.SysFont('CASTELLAR', 25)
+        my_font = pygame.font.SysFont('CASTELLAR', 20)
         image = pygame.image.load('Pictures/Sidebar.png')
         image2 = pygame.transform.scale(image, (int(200), int(500)))
         screen.blit(image2, self.pos)
@@ -198,12 +208,14 @@ class Sidebar():
         round_Text = my_font.render('Round: '+str(game.round), False, (0, 0, 0))
         player1_Text = my_font.render('SM: '+game.player1,False,(0,0,0))
         player2_Text = my_font.render('GS: '+game.player2, False, (0,0,0))
-        GS_count_Text = my_font.render('GS Modells: '+str(len(GS_ModellList)),False,(0,0,0))
+        GS_count_Text = my_font.render('GS Models: '+str(len(GS_ModellList)),False,(0,0,0))
+        SM_count_Text = my_font.render('SM Models: '+str(len(SM_ModellList)),False,(0,0,0))
         screen.blit(CP_Text, (500,90))
         screen.blit(round_Text, (500,60))
         screen.blit(player1_Text, (500,0))
         screen.blit(player2_Text, (500,30))
         screen.blit(GS_count_Text, (500,120))
+        screen.blit(SM_count_Text, (500,150))
 SB = Sidebar()  #initiates an Object of Sidebar(singelton)
 
 class Bottombar():
