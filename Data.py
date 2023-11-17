@@ -1,8 +1,14 @@
 import pygame
 import random 
+import sys
 
 SM_ModellList = []                     #a list of Space Marine models
 GS_ModellList = []                     #a list of Genstealer models
+
+pygame.init()
+screen = pygame.display.set_mode((700,600))
+screen.fill('black')
+pygame.display.set_caption('Space Hulk')
 
 #Button class
 class Button():
@@ -44,8 +50,8 @@ class Button():
 
 class Game:                                         #can variables be exported to individual gamestates?
     def __init__(self) -> None:
-        self.gameStateManager = None                       #class defined above, manages wich gamestate is active
         self.states = {}                            #a list of gamestates that the game can have
+        self.state = ''
         self.is_playing = str                       #the name of the player who is playing
         self.round = 1                              #the current round of the game
         self.player1 = ''                           #name of player 1
@@ -53,24 +59,19 @@ class Game:                                         #can variables be exported t
         self.selected_Model = None
         self.selected_tile = None                  #saves the selected model for other classes to interact with
         self.clicked_tile = None
-        self.CP = random.randint(1,6)               #a random number of CP for the sm player to use
-
-    def change_turn(self):                          #list of things to do when changing the active players
-        if(self.is_playing == self.player2):
-            for Model in SM_ModellList:
-                self.AP = 4
-                self.overwatch = False
-                self.guard = False
-                self.jam = False
+        self.CP = int                              #a random number of CP for the sm player to use
 
     def turnmodel(self):
-        pass
+        self.selected_Model.face = 'left'
 
     def moveModel(self):
         game.clicked_tile.occupand = game.selected_tile.occupand
         game.selected_tile.is_occupied = False
         game.clicked_tile.is_occupied = True
         game.selected_tile.occupand = None
+
+    def run(self):
+        self.states[self.state].run()
         
 game = Game()
 
@@ -84,6 +85,32 @@ class Player1Turn:
             self.overwatch = False
             self.guard = False
             self.jam = False
+        game.CP = random.randint(1,6)
+
+    def run(self):
+        self.start()
+        self.move_image = pygame.image.load('Pictures/Wall.png')
+        self.turn_button = Button(60, 500, self.move_image, 1.5)
+        self.move_button = Button(0, 500, self.move_image, 1.5)
+        while(True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            for row in map:
+                for tile in row:
+                    tile.render(screen)
+                    tile.interact()
+            
+            SB.display(screen)
+            BB.display(screen)
+            if(self.move_button.draw(screen)):
+                game.moveModel()
+
+            if(self.turn_button.draw(screen)):
+                game.turnmodel()
+
+            pygame.display.update()
 
 class Tile:
     def __init__(self, x, y, size):
@@ -102,7 +129,22 @@ class Tile:
     def render(self, screen):
         screen.blit(self.image, (self.x*self.size, self.y*self.size))
         if(self.is_occupied):
-            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+            match(self.occupand.face):
+                case('right'):
+                    imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                
+                case('left'):
+                    imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                    imaget = pygame.transform.rotate(imaget,180)
+                
+                case('up'):
+                    imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                    imaget = pygame.transform.rotate(imaget,90)
+
+                case('down'):
+                    imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                    imaget = pygame.transform.rotate(imaget,270)
+    
             screen.blit(imaget, (self.x*self.size, self.y*self.size))
     
     def interact(self):
@@ -185,8 +227,7 @@ class Bottombar():
         self.rect = self.image.get_rect()
         self.rect.topleft = self.pos
         self.pressed = False
-        self.move_image = pygame.image.load('Pictures/Wall.png')
-        self.move_button = Button(0, 500, self.move_image, 1.5)
+        
         # needed buttons:
             #move
             #turn
@@ -200,12 +241,11 @@ class Bottombar():
         screen.blit(self.image, self.pos)
 
     def interact(self,screen):
+        pass
         # if(self.rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0] == 1):
         #     self.pressed = True
         # if(self.pressed and pygame.mouse.get_pressed()[0] == 0):
         #     game.moveModel()
         #     self.pressed = False
-        if(self.move_button.draw(screen)):
-            game.moveModel()
 
 BB = Bottombar()    #initiates an object of Bottombar(singelton)
