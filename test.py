@@ -15,7 +15,7 @@ while(pregame):
 
 game.is_playing = game.player1
 
-game.states = {'start':Player1Turn()}
+game.states = {'start':Player1Turn(), 'run':Player2Turn()}
 game.state = 'start'
 
 gs = Blip()

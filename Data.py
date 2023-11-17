@@ -97,6 +97,42 @@ class Player1Turn:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        game.state = 'run'
+            for row in map:
+                for tile in row:
+                    tile.render(screen)
+                    tile.interact()
+            
+            SB.display(screen)
+            BB.display(screen)
+            if(self.move_button.draw(screen)):
+                game.moveModel()
+
+            if(self.turn_button.draw(screen)):
+                game.turnmodel()
+
+            pygame.display.update()
+
+class Player2Turn:
+    def __init__(self) -> None:
+        pass
+    def start(self):
+        for Model in GS_ModellList:
+            self.Ap = 6
+    def run(self):
+        self.move_image = pygame.image.load('Pictures/Wall.png')
+        self.turn_button = Button(60, 500, self.move_image, 1.5)
+        self.move_button = Button(0, 500, self.move_image, 1.5)
+        while(True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        game.state = 'start'
             for row in map:
                 for tile in row:
                     tile.render(screen)
