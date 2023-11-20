@@ -53,7 +53,7 @@ class Game:                                         #can variables be exported t
         self.states = {}                            #a list of gamestates that the game can have
         self.state = ''
         self.is_playing = str                       #the name of the player who is playing
-        self.round = 1                              #the current round of the game
+        self.round = 0                              #the current round of the game
         self.player1 = ''                           #name of player 1
         self.player2 = ''                           #name of player 2
         self.selected_Model = None
@@ -86,20 +86,20 @@ class Player1Turn:
             self.guard = False
             self.jam = False
         game.CP = random.randint(1,6)
+        game.round += 1
 
     def run(self):
+        game.is_playing = game.player1
         self.start()
         self.move_image = pygame.image.load('Pictures/Wall.png')
-        self.turn_button = Button(60, 500, self.move_image, 1.5)
-        self.move_button = Button(0, 500, self.move_image, 1.5)
+        self.turn_button = Button(60, 500, self.move_image, 1)
+        self.move_button = Button(0, 500, self.move_image, 1)
+        self.Turnover_button = Button(120,500,self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        game.state = 'run'
             for row in map:
                 for tile in row:
                     tile.render(screen)
@@ -113,6 +113,9 @@ class Player1Turn:
             if(self.turn_button.draw(screen)):
                 game.turnmodel()
 
+            if(self.Turnover_button.draw(screen)):
+                game.state = 'run'
+
             pygame.display.update()
 
 class Player2Turn:
@@ -121,10 +124,13 @@ class Player2Turn:
     def start(self):
         for Model in GS_ModellList:
             self.Ap = 6
+        game.is_playing = game.player2
     def run(self):
+        self.start()
         self.move_image = pygame.image.load('Pictures/Wall.png')
-        self.turn_button = Button(60, 500, self.move_image, 1.5)
-        self.move_button = Button(0, 500, self.move_image, 1.5)
+        self.turn_button = Button(60, 500, self.move_image, 1)
+        self.move_button = Button(0, 500, self.move_image, 1)
+        self.Turnover_button = Button,500,self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -145,6 +151,9 @@ class Player2Turn:
 
             if(self.turn_button.draw(screen)):
                 game.turnmodel()
+
+            if(self.Turnover_button.draw(screen)):
+                game.state = 'start'
 
             pygame.display.update()
 

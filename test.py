@@ -13,8 +13,6 @@ while(pregame):
     else:
         pregame = False
 
-game.is_playing = game.player1
-
 game.states = {'start':Player1Turn(), 'run':Player2Turn()}
 game.state = 'start'
 
