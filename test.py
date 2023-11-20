@@ -14,7 +14,6 @@ while(pregame):
         pregame = False
 
 game.states = {'start':Player1Turn(), 'run':Player2Turn()}
-game.state = 'start'
 
 gs = Blip()
 cp = SpaceMarine('bolter', 'none')
