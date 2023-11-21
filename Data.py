@@ -75,19 +75,48 @@ class Game:                                         #can variables be exported t
         self.round += 1
 
     def turnmodel(self):
-        self.selected_Model.face = 'left'
+        self.selected_Model.face = (-1,0) #left
+
+    def redAP(self,Model,amount):
+        if(Model in SM_ModellList):
+            if(amount > Model.AP):
+                Model.AP = 0
+                self.CP -= (amount - Model.AP)
+            else: Model.AP -= amount
+        if(Model in GS_ModellList):
+            Model.AP - amount
 
     def moveModel(self):
-        if((self.is_playing == self.player1) & (self.selected_Model in SM_ModellList)):
-            if((self.selected_Model.AP != 0) | (self.CP != 0)): 
-                if(self.selected_Model.AP != 0):self.selected_Model.AP -=1
-                else: self.CP -=1
-                game.clicked_tile.occupand = game.selected_tile.occupand
-                game.selected_tile.is_occupied = False
-                game.clicked_tile.is_occupied = True
-                game.selected_tile.occupand = None
-            else: 
-                print('kein AP/CP übrig')
+        a = False
+        b = False
+        if((self.clicked_tile != None) & (self.selected_tile != None) & (self.selected_Model != None)): 
+            a = True
+            if((self.is_playing == self.player1) & (self.selected_Model in SM_ModellList)):
+                match(self.selected_Model.face):
+                    case (1,0):
+                        if(self.selected_tile.x + 1 == self.clicked_tile.x):
+                            if((self.selected_Model.AP != 0) | (self.CP != 0)):
+                                self.redAP(self.selected_Model, 1,) 
+                                b = True
+                        elif(self.selected_tile.x - 1 == self.clicked_tile.x):
+                            if(self.selected_Model.AP + self.CP >= 2):
+                                self.redAP(self.selected_Model, 2)
+                                b = True
+                        elif((self.selected_tile.y != self.clicked_tile.y)):
+                            b = False
+                        if(self.clicked_tile.is_wall == True):
+                            b = False
+        if(a & b):
+            game.clicked_tile.occupand = game.selected_tile.occupand
+            game.selected_tile.is_occupied = False
+            game.clicked_tile.is_occupied = True
+            game.selected_tile.occupand = None
+            game.selected_tile = game.clicked_tile
+            game.clicked_tile = None
+        elif(not a):
+            print('Bitte wähle ein Model und ein Tile aus!')
+        elif(not b):
+            print('Dahin kannst du nicht gehen!/ Nicht genügend AP/CP')
 
     def run(self):
         self.states[self.Manager.givestate()].run()
@@ -101,7 +130,7 @@ class Player1Turn:
 
     def start(self):
         for Model in SM_ModellList:
-            self.AP = 4
+            Model.AP = 4
             self.overwatch = False
             self.guard = False
             self.jam = False
@@ -142,7 +171,7 @@ class Player2Turn:
         self.Manager = gameStateManager
     def start(self):
         for Model in GS_ModellList:
-            self.Ap = 6
+            Model.AP = 6
         game.is_playing = game.player2
     def run(self):
         self.start()
@@ -185,24 +214,27 @@ class Tile:
         self.rect = self.image.get_rect()
         self.rect.topleft = (x*size,y*size)
         self.clicked = False
-        self.is_wall = bool
+        self.is_wall = False
 
     def render(self, screen):
+        if(self.is_wall): 
+            image = pygame.image.load('Pictures/Wall.png')
+            self.image = pygame.transform.scale(image,(self.size,self.size))
         screen.blit(self.image, (self.x*self.size, self.y*self.size))
         if(self.is_occupied):
             match(self.occupand.face):
-                case('right'):
+                case((1,0)):
                     imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
                 
-                case('left'):
+                case(-1,0):
                     imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
                     imaget = pygame.transform.rotate(imaget,180)
                 
-                case('up'):
+                case((0,1)):
                     imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
                     imaget = pygame.transform.rotate(imaget,90)
 
-                case('down'):
+                case((0,-1)):
                     imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
                     imaget = pygame.transform.rotate(imaget,270)
     
@@ -226,7 +258,7 @@ class Model:
     def __init__(self, AP, image):
         self.AP = AP
         self.image = pygame.image.load(image)
-        self.face = 'right'
+        self.face = (1,0)
 
 class SpaceMarine(Model):
     def __init__(self, weapon, rank):
