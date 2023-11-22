@@ -84,7 +84,7 @@ class Game:                                         #can variables be exported t
                 self.CP -= (amount - Model.AP)
             else: Model.AP -= amount
         if(Model in GS_ModellList):
-            Model.AP - amount
+            Model.AP -= amount
 
     def moveModel(self):
         a = False
@@ -104,6 +104,19 @@ class Game:                                         #can variables be exported t
                                 b = True
                         elif((self.selected_tile.y != self.clicked_tile.y)):
                             b = False
+                        if(self.clicked_tile.is_wall == True):
+                            b = False
+            if((self.is_playing == self.player2) & (self.selected_Model in GS_ModellList)):
+                match(self.selected_Model.face):
+                    case (1,0):
+                        if((self.selected_tile.x + 1 == self.clicked_tile.x) | (self.selected_tile.y != self.clicked_tile.y)):
+                            if(self.selected_Model.AP != 0):
+                                self.redAP(self.selected_Model, 1,) 
+                                b = True
+                        elif(self.selected_tile.x - 1 == self.clicked_tile.x):
+                            if(self.selected_Model.AP >= 2):
+                                self.redAP(self.selected_Model, 2)
+                                b = True
                         if(self.clicked_tile.is_wall == True):
                             b = False
         if(a & b):
