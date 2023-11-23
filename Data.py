@@ -56,23 +56,33 @@ class GameStateManager:
     def givestate(self):
         return self.state
     
-gameStateManager = GameStateManager('start')
+gameStateManager = GameStateManager('main')
 
 class Game:                                         #can variables be exported to individual gamestates?
     def __init__(self) -> None:
         self.Manager = gameStateManager
         self.states = {}                            #a list of gamestates that the game can have
-        self.is_playing = str                       #the name of the player who is playing
         self.round = 0                              #the current round of the game
         self.player1 = ''                           #name of player 1
         self.player2 = ''                           #name of player 2
         self.selected_Model = None
-        self.selected_tile = None                  #saves the selected model for other classes to interact with
+        self.selected_tile = None                   #saves the selected model for other classes to interact with
         self.clicked_tile = None
-        self.CP = int                              #a random number of CP for the sm player to use
+        self.CP = random.randint(1,6)               #a random number of CP for the sm player to use
+        self.is_playing = self.player1              #the name of the player who is playing
 
     def changeturn(self):
-        self.round += 1
+        if(self.is_playing == self.player1):
+            self.round += 1
+            for Model in SM_ModellList:
+                Model.AP = 4
+                self.overwatch = False
+                self.guard = False
+                self.jam = False
+            self.CP = random.randint(1,6)
+        if(self.is_playing == self.player2):
+            for Model in GS_ModellList:
+                Model.AP = 6
 
     def turnmodel(self):
         self.selected_Model.face = (-1,0) #left
@@ -137,21 +147,79 @@ class Game:                                         #can variables be exported t
         
 game = Game()
 
+class gamestateTurn:
+    def __init__(self) -> None:
+        self.gameStateManager = gameStateManager
+    def run(self):
+        self.move_image = pygame.image.load('Pictures/Wall.png')
+        self.turnright_button = Button(80, 200, self.move_image, 1)
+        self.turnleft_button = Button(160, 200, self.move_image, 1)
+        while (True):
+            t = False
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit
+                    sys.exit
+            if(self.turnleft_button):
+                match(game.selected_Model.face):
+                    case(1,0): game.selected_Model.face = (0,1)
+                    case(0,1): game.selected_Model.face = (-1,0)
+                    case(-1,0): game.selected_Model.face = (0,-1)
+                    case(0,-1): game.selected_Model.face = (1,0)
+
+            if(self.turnright_button):
+                t
+            if(t):
+                if(game.is_playing == game.player1):
+                    self.gameStateManager.changestate('start')
+                else:
+                    self.gameStateManager.changestate('run')
+            
+class gamestateMain:
+    def __init__(self) -> None:
+        self.gameStateManager = gameStateManager
+    def run(self):
+        p1 = True
+        font = pygame.font.SysFont('CASTELLAR', 20)
+        while (True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    # Check if the key is an alphanumeric character or space
+                    if event.unicode.isalnum() or event.unicode.isspace() and not (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER):
+                        if(p1):
+                            game.player1 += event.unicode
+                        else:
+                            game.player2 += event.unicode
+                    elif event.key == pygame.K_BACKSPACE:
+                        if(p1):
+                            game.player1 = game.player1[:-1]
+                        else:
+                            game.player2 = game.player2[:-1]
+                    elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                        if(p1):p1 = False
+                        elif(game.player2 != None):
+                            self.gameStateManager.changestate('start')
+                            game.run()
+
+            # Clear the screen
+            screen.fill((255, 255, 255))
+
+            # Render the input string
+            if(p1):
+                text_surface = font.render(game.player1, True, (0, 0, 0))
+            else:
+                text_surface = font.render(game.player2, True, (0,0,0))
+            screen.blit(text_surface, (10, 10))
+            pygame.display.update()
+
 class Player1Turn:
     def __init__(self) -> None:
         self.Manager = gameStateManager
 
-    def start(self):
-        for Model in SM_ModellList:
-            Model.AP = 4
-            self.overwatch = False
-            self.guard = False
-            self.jam = False
-        game.CP = random.randint(1,6)
-
     def run(self):
-        game.is_playing = game.player1
-        self.start()
         self.move_image = pygame.image.load('Pictures/Wall.png')
         self.turn_button = Button(60, 500, self.move_image, 1)
         self.move_button = Button(0, 500, self.move_image, 1)
@@ -171,7 +239,7 @@ class Player1Turn:
                 game.moveModel()
 
             if(self.turn_button.draw(screen)):
-                #game.turnmodel()
+                game.is_playing = game.player2
                 game.changeturn()
                 self.Manager.changestate('run')
                 print(self.Manager.givestate())
@@ -182,12 +250,8 @@ class Player1Turn:
 class Player2Turn:
     def __init__(self) -> None:
         self.Manager = gameStateManager
-    def start(self):
-        for Model in GS_ModellList:
-            Model.AP = 6
-        game.is_playing = game.player2
+
     def run(self):
-        self.start()
         self.move_image = pygame.image.load('Pictures/Wall.png')
         self.turn_button = Button(60, 500, self.move_image, 1)
         self.move_button = Button(0, 500, self.move_image, 1)
@@ -207,7 +271,7 @@ class Player2Turn:
                 game.moveModel()
 
             if(self.turn_button.draw(screen)):
-                #game.turnmodel()
+                game.is_playing == game.player1
                 game.changeturn()
                 self.Manager.changestate('start')
                 print(self.Manager.givestate())
