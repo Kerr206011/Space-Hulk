@@ -158,12 +158,11 @@ class gamestateTurn:
                     pygame.quit
                     sys.exit
             if(self.turnleft_button.draw(screen)):
-                if((game.is_playing == game.player2) & (game.selected_Model in GS_ModellList)) | ((game.is_playing == game.player1) & (game.selected_Model in SM_ModellList)):
-                    match(game.selected_Model.face):
-                        case(1,0): game.selected_Model.face = (0,1)
-                        case(0,1): game.selected_Model.face = (-1,0)
-                        case(-1,0): game.selected_Model.face = (0,-1)
-                        case(0,-1): game.selected_Model.face = (1,0)
+                match(game.selected_Model.face):
+                    case(1,0): game.selected_Model.face = (0,1)
+                    case(0,1): game.selected_Model.face = (-1,0)
+                    case(-1,0): game.selected_Model.face = (0,-1)
+                    case(0,-1): game.selected_Model.face = (1,0)
                 pressed = True
 
             if(self.turnright_button.draw(screen)):
@@ -249,8 +248,10 @@ class Player1Turn:
                 game.moveModel()
 
             if(self.turn_button.draw(screen)):
-                self.Manager.changestate('turn')
-                game.run()
+                if(((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)) or ((game.is_playing == game.player2) and (game.selected_Model in GS_ModellList))):
+                    self.Manager.changestate('turn')
+                    game.run()
+                else:print('anderes model wählen')
             
             if(self.changeturn_button.draw(screen)):
                 game.is_playing = game.player2
@@ -287,8 +288,10 @@ class Player2Turn:
                 game.moveModel()
 
             if(self.turn_button.draw(screen)):
-                self.Manager.changestate('turn')
-                game.run()
+                if(((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)) or ((game.is_playing == game.player2) and (game.selected_Model in GS_ModellList))):
+                    self.Manager.changestate('turn')
+                    game.run()
+                else:print('anderes model wählen')
 
             if(self.changeturn_button):
                 game.is_playing = game.player1

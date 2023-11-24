@@ -6,5 +6,3 @@ seperate move/turn methoden für die Beiden Spieler? oder seperate Parameter?
 Save/Load in/aus speicherfile
 Siegesbedingungen für verschiedene Level
 Musik und Optionen
-wie user Input? (WASD oder Buttons?)
-Pregame(siehe Main) in Game oder wenigstens über das Pygame-window lösen
