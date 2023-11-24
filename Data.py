@@ -158,11 +158,12 @@ class gamestateTurn:
                     pygame.quit
                     sys.exit
             if(self.turnleft_button.draw(screen)):
-                match(game.selected_Model.face):
-                    case(1,0): game.selected_Model.face = (0,1)
-                    case(0,1): game.selected_Model.face = (-1,0)
-                    case(-1,0): game.selected_Model.face = (0,-1)
-                    case(0,-1): game.selected_Model.face = (1,0)
+                if((game.is_playing == game.player2) & (game.selected_Model in GS_ModellList)) | ((game.is_playing == game.player1) & (game.selected_Model in SM_ModellList)):
+                    match(game.selected_Model.face):
+                        case(1,0): game.selected_Model.face = (0,1)
+                        case(0,1): game.selected_Model.face = (-1,0)
+                        case(-1,0): game.selected_Model.face = (0,-1)
+                        case(0,-1): game.selected_Model.face = (1,0)
                 pressed = True
 
             if(self.turnright_button.draw(screen)):
