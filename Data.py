@@ -26,6 +26,7 @@ class Button():
 
         #get mouse position
         pos = pygame.mouse.get_pos()
+        #get mouse state
         mouse_state = pygame.mouse.get_pressed()[0] == 1
 
         # Check if mouse is over the button
@@ -47,7 +48,8 @@ class Button():
         self.prev_mouse_state = mouse_state
 
         return action
-    
+
+#ok bro bor
 class GameStateManager:
     def __init__(self, state) -> None:
         self.state = state
@@ -92,6 +94,161 @@ class Game:                                         #can variables be exported t
             else: Model.AP -= amount
         if(Model in GS_ModellList):
             Model.AP -= amount
+
+    def vision(self,model,tile):
+        ofset_x = 0
+        ofset_y = 0
+        ofs = model.face
+        x = tile.x
+        y = tile.y
+        is_looking_at_object = False
+        i = 1
+        seenModels = []
+        match(model.face):
+            case(1,0):
+                ofset_x = 0
+                ofset_y = 1
+            case(0,1):
+                ofset_x = 1
+                ofset_y = 0
+            case(-1,0):
+                ofset_x = 0
+                ofset_y = 1
+            case(0,-1):
+                ofset_x = 1
+                ofset_y = 0
+        runS = True
+        runL1 = True
+        runL2 = True
+        runR1 = True
+        runR2 = True
+        while(runS):
+            x += ofs[0]
+            y += ofs[1]
+            checked_tile = map[x][y]
+            if(checked_tile.is_occupied == True):
+                seenModels.append(checked_tile)
+                x = tile.x + ofset_x + ofs[0]
+                y = tile.y + ofset_y + ofs[1]
+                runS = False
+                if(i == 1):
+                    is_looking_at_object = True 
+                i == 1
+            elif(checked_tile.is_wall == True):
+                runS = False
+                if(i == 1):
+                    is_looking_at_object = True
+                i = 1
+            else:
+                i += 1
+        if(is_looking_at_object):
+            match(model.face):
+                case((1,0)):
+                    if((map[tile.x][tile.y + 1].is_wall) or (map[tile.x][tile.y + 1].is_occupied)):
+                        runL1 = False
+                        runL2 = False
+                    if((map[tile.x][tile.y - 1].is_wall) or (map[tile.x][tile.y - 1].is_occupied)):
+                        runR1 = False
+                        runR2 = False
+                    if((map[tile.x -1][tile.y].is_wall) or (map[tile.x -1][tile.y].is_occupied)):
+                        runL1 = False
+                        runL2 = False
+                    if((map[tile.x +1][tile.y].is_wall) or (map[tile.x +1][tile.y].is_occupied)):
+                        runR1 = False
+                        runR2 = False
+                case((-1,0)):
+                    if((map[tile.x][tile.y -1].is_wall) or (map[tile.x][tile.y -1].is_occupied)):
+                        runL1 = False
+                        runL2 = False
+                    if((map[tile.x][tile.y + 1].is_wall) or (map[tile.x][tile.y + 1].is_occupied)):
+                        runR1 = False
+                        runR2 = False
+                case((0,-1)):
+                    if((map[tile.x +1][tile.y].is_wall) or (map[tile.x +1][tile.y].is_occupied)):
+                        runL1 = False
+                        runL2 = False
+                    if((map[tile.x -1][tile.y].is_wall) or (map[tile.x -1][tile.y].is_occupied)):
+                        runR1 = False
+                        runR2 = False
+        while(runL1):
+            checked_tile = map[x][y]
+            if(checked_tile.is_occupied):
+                seenModels.append(checked_tile)
+            elif(checked_tile.is_wall):
+                runL1 = False
+                if(i == 1):
+                    x = tile.x + (2 * ofset_x) + (3 * ofs[0])
+                    y = tile.y + (2 * ofset_y) + (3 * ofs[1])
+                else:
+                    x = tile.x + (2 * ofset_x) + (2 * ofs[0])
+                    y = tile.y + (2 * ofset_y) + (2 * ofs[1])
+                l = 1
+            else:
+                x += ofs[0]
+                y += ofs[1]
+                i +=1
+            if(is_looking_at_object):
+                runL1 = False
+                x = tile.x + (2 * ofset_x) + (2 * ofs[0])
+                y = tile.y + (2 * ofset_y) + (2 * ofs[1])
+                if(checked_tile.is_occupied):
+                    runL2 = False
+                if(checked_tile.is_wall):
+                    runL2 = False
+                i = 1
+        while(runL2):
+            checked_tile = map[x][y]
+            if(checked_tile.is_occupied):
+                seenModels.append(checked_tile)
+            elif(checked_tile.is_wall):
+                runL2 = False
+                x = tile.x - ofset_x + ofs[0]
+                y = tile.y - ofset_y + ofs[1]
+            else:
+                x += ofs[0]
+                y += ofs[1]
+            if(is_looking_at_object):
+                runL2 = False
+                x = tile.x - ofset_x + ofs[0]
+                y = tile.y - ofset_y + ofs[1]
+        while(runR1):
+            checked_tile = map[x][y]
+            if(checked_tile.is_occupied):
+                seenModels.append(checked_tile)
+            elif(checked_tile.is_wall):
+                runR1 = False
+                if(i == 1):
+                    x = tile.x - (2 * ofset_x) + (3 * ofs[0])
+                    y = tile.y - (2 * ofset_y) + (3 * ofs[1])
+                else:
+                    x = tile.x - (2 * ofset_x) + (2 * ofs[0])
+                    y = tile.y - (2 * ofset_y) + (2 * ofs[1])
+            else:
+                x += ofs[0]
+                y += ofs[1]
+                i += 1
+            if(is_looking_at_object):
+                runR1 = False
+                x = tile.x - (2 * ofset_x) + (2 * ofs[0])
+                y = tile.y - (2 * ofset_y) + (2 * ofs[1])
+                if(checked_tile.is_occupied):
+                    runR2 = False
+                if(checked_tile.is_wall):
+                    runR2 = False
+        while(runR2):
+            checked_tile = map[x][y]
+            if(checked_tile.is_occupied):
+                seenModels.append(checked_tile)
+            elif(checked_tile.is_wall):
+                runL2 = False
+                x = tile.x - ofset_x + ofs[0]
+                y = tile.y - ofset_y + ofs[1]
+            else:
+                x += ofs[0]
+                y += ofs[1]
+            if(is_looking_at_object):
+                runR2 = False
+        return(seenModels)
 
     def moveModel(self):
         a = False
@@ -288,7 +445,7 @@ class Player2Turn:
                     pygame.quit()
                     sys.exit()
             for row in map:
-                for tile in row:
+                for tile in row: 
                     tile.render(screen)
                     tile.interact()
             
