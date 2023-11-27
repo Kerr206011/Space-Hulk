@@ -149,8 +149,9 @@ class gamestateTurn:
         self.gameStateManager = gameStateManager
     def run(self):
         self.move_image = pygame.image.load('Pictures/Wall.png')
-        self.turnright_button = Button(240, 200, self.move_image, 1)
+        self.turnright_button = Button(320, 200, self.move_image, 1)
         self.turnleft_button = Button(160, 200, self.move_image, 1)
+        self.noturn_button = Button(240, 200, self.move_image, 1)
         while(True):
             pressed = False
             for event in pygame.event.get():
@@ -163,6 +164,7 @@ class gamestateTurn:
                     case(0,1): game.selected_Model.face = (-1,0)
                     case(-1,0): game.selected_Model.face = (0,-1)
                     case(0,-1): game.selected_Model.face = (1,0)
+                game.redAP(game.selected_Model,1)
                 pressed = True
 
             if(self.turnright_button.draw(screen)):
@@ -171,6 +173,10 @@ class gamestateTurn:
                     case(0,1): game.selected_Model.face = (1,0)
                     case(-1,0): game.selected_Model.face = (0,1)
                     case(0,-1): game.selected_Model.face = (-1,0)
+                game.redAP(game.selected_Model,1)
+                pressed = True
+
+            if(self.noturn_button.draw(screen)):
                 pressed = True
             if(pressed):
                 if(game.is_playing == game.player1):
@@ -244,21 +250,25 @@ class Player1Turn:
             
             SB.display(screen)
             BB.display(screen)
+            
             if(self.move_button.draw(screen)):
                 game.moveModel()
 
             if(self.turn_button.draw(screen)):
                 if(((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)) or ((game.is_playing == game.player2) and (game.selected_Model in GS_ModellList))):
-                    self.Manager.changestate('turn')
-                    game.run()
+                    if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
+                        self.Manager.changestate('turn')
+                        game.run()
+                    else:print('no AP/CP')
                 else:print('anderes model wählen')
             
             if(self.changeturn_button.draw(screen)):
                 game.is_playing = game.player2
-                game.GS_prep()
-                self.Manager.changestate('run')
+                game.GS_prep
                 print(self.Manager.givestate())
                 print(game.is_playing)
+                print('0')
+                self.Manager.changestate('run')
                 game.run()
 
             pygame.display.update()
@@ -289,16 +299,19 @@ class Player2Turn:
 
             if(self.turn_button.draw(screen)):
                 if(((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)) or ((game.is_playing == game.player2) and (game.selected_Model in GS_ModellList))):
-                    self.Manager.changestate('turn')
-                    game.run()
+                    if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
+                        self.Manager.changestate('turn')
+                        game.run()
+                    else: print('no AP/CP')
                 else:print('anderes model wählen')
 
-            if(self.changeturn_button):
+            if(self.changeturn_button.draw(screen)):
                 game.is_playing = game.player1
                 game.SM_prep()
-                self.Manager.changestate('start')
                 print(self.Manager.givestate())
                 print(game.is_playing)
+                print('1')
+                self.Manager.changestate('start')
                 game.run()
 
             pygame.display.update()

@@ -12,5 +12,6 @@ map[0][0].occupand = cp
 map[0][0].is_occupied = True
 map[5][5].occupand = gs
 map[5][5].is_occupied = True
+map[6][5].is_wall = True
 
 game.run()

@@ -2,7 +2,6 @@ Game braucht eine Vision methode
 Game breucht eine Turn methode zum drehen der Modelle
 
 seperate run methoden für verschiedene Gamestates?
-seperate move/turn methoden für die Beiden Spieler? oder seperate Parameter?
 Save/Load in/aus speicherfile
 Siegesbedingungen für verschiedene Level
 Musik und Optionen
