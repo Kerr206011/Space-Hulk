@@ -71,6 +71,7 @@ class Game:                                         #can variables be exported t
         self.selected_Model = None
         self.selected_tile = None                   #saves the selected model for other classes to interact with
         self.clicked_tile = None
+        self.clicked_model = None
         self.CP = random.randint(1,6)               #a random number of CP for the sm player to use
 
     def SM_prep(self):
@@ -281,6 +282,32 @@ class Game:                                         #can variables be exported t
                 runR2 = False
         return(seenModels)
 
+    def shoot(self):
+        liste = game.vision(self.selected_Model,self.selected_tile)
+        print(liste)
+        hit = False
+        if(self.clicked_model != None):
+            if((self.clicked_tile in liste) and (self.clicked_model in GS_ModellList)):
+                print('pre match')
+                match(self.selected_Model.weapon):
+                    case('bolter'):
+                        a = random.randint(1,6)
+                        b = random.randint(1,6)
+                        c = 0
+                        print(a,b,c)
+                if((c == 0) and (((a == 6) or (b == 6)) or ((self.selected_Model.susf) and ((a >= 5) or (b >= 5))))):
+                    hit = True
+                elif((c != 0) and (((a >= 5) or (b >= 5) or (c >=5)) or ((self.selected_Model.susf) and ((a >= 4) or (b >= 4) (c >= 4))))):
+                    hit = True
+                elif(((a == b) or (a == c) or (c == b)) and (self.is_playing == self.player2)):
+                    game.selected_Model.jam = True
+            if(hit):
+                GS_ModellList.remove(game.clicked_model)
+                game.clicked_model = None
+                game.clicked_tile.is_occupied = False
+                game.clicked_tile.occupand = None
+                game.clicked_tile = None
+
     def moveModel(self):
         a = False
         b = False
@@ -321,6 +348,10 @@ class Game:                                         #can variables be exported t
             game.selected_tile.occupand = None
             game.selected_tile = game.clicked_tile
             game.clicked_tile = None
+            lis = game.vision(self.selected_Model, self.selected_tile)
+            if((self.is_playing == self.player1) and (lis != [])):
+                self.Manager.changestate('shoot')
+                game.run()
         elif(not a):
             print('Bitte wähle ein Model und ein Tile aus!')
         elif(not b):
@@ -508,6 +539,37 @@ class Player2Turn:
 
             pygame.display.update()
 
+class gamestate_shoot:
+    def __init__(self) -> None:
+        self.manager = gameStateManager
+    
+    def run(self):
+        self.move_image = pygame.image.load('Pictures/Wall.png')
+        self.turn_button = Button(60, 500, self.move_image, 1)
+        while(True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            for row in map:
+                for tile in row: 
+                    tile.render(screen)
+                    tile.interact()
+                
+            SB.display(screen)
+            BB.display(screen)
+
+            if(self.turn_button.draw(screen)):
+                game.shoot()
+                if(game.is_playing == game.player1):
+                   self.manager.changestate('start')
+                   game.run()
+                else:
+                    self.manager.changestate('run')
+                    game.run()
+
+            pygame.display.update()
+
 class Tile:
     def __init__(self, x, y, size):
         self.x = x                      # x position on the grid
@@ -551,13 +613,15 @@ class Tile:
         if(self.rect.collidepoint(pos)) and (pygame.mouse.get_pressed()[0] == 1):
             self.clicked = True
         if(pygame.mouse.get_pressed()[0] == 0 and self.clicked):
-            if(self.is_occupied):
+            if(((self.is_occupied) and (self.occupand in SM_ModellList) and (game.is_playing == game.player1)) or ((self.is_occupied) and (self.occupand in GS_ModellList) and (game.is_playing == game.player2))):
                 game.selected_Model = self.occupand
-                print(self.occupand.AP)
                 game.selected_tile = self
+            elif(self.is_occupied):
+                    game.clicked_model = self.occupand
+                    print(self.occupand)
+                    game.clicked_tile = self
             else:
                 game.clicked_tile = self
-                print(game.clicked_tile)
             self.clicked = False
 
 class Model:
@@ -571,6 +635,7 @@ class SpaceMarine(Model):
         super().__init__(4,'Pictures/Models/SM.png')
         self.weapon = weapon
         self.rank = rank
+        self.susf = False
         self.overwatch = False
         self.guard = False
         self.jam = False

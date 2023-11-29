@@ -1,19 +1,19 @@
 from Data import *
 from sys import exit
 
-game.states = {'start':Player1Turn(), 'run':Player2Turn(), 'main':gamestateMain(), 'turn':gamestateTurn()}
+game.states = {'start':Player1Turn(), 'run':Player2Turn(), 'main':gamestateMain(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot()}
 
 gs = Blip()
-cp = SpaceMarine('bolter', 'none')
+cp = SpaceMarine('bolter', 'None')
 SM_ModellList.append(cp)
 GS_ModellList.append(gs)
 
-map[7][1].occupand = cp
-map[7][1].is_occupied = True
+map[5][1].occupand = cp
+map[5][1].is_occupied = True
 
-# map[6][1].is_wall = True
+map[6][1].is_wall = True
 map[4][1].is_wall = True
-# map[6][2].is_wall = True
+map[6][2].is_wall = True
 map[4][2].is_wall = True
 map[6][3].is_wall = True
 map[4][3].is_wall = True
