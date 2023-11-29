@@ -8,15 +8,15 @@ cp = SpaceMarine('bolter', 'none')
 SM_ModellList.append(cp)
 GS_ModellList.append(gs)
 
-map[6][1].occupand = cp
-map[6][1].is_occupied = True
+map[7][1].occupand = cp
+map[7][1].is_occupied = True
 
 # map[6][1].is_wall = True
-# map[4][1].is_wall = True
+map[4][1].is_wall = True
 # map[6][2].is_wall = True
-# map[4][2].is_wall = True
-# map[6][3].is_wall = True
-# map[4][3].is_wall = True
+map[4][2].is_wall = True
+map[6][3].is_wall = True
+map[4][3].is_wall = True
 
 map[5][5].occupand = gs
 map[5][5].is_occupied = True

@@ -144,7 +144,6 @@ class Game:                                         #can variables be exported t
                 i = 1
             else:
                 i += 1
-        print('S')
         if(is_looking_at_object):
             match(model.face):
                 case((1,0)):
@@ -175,7 +174,6 @@ class Game:                                         #can variables be exported t
                     if((map[tile.y][tile.x -1].is_wall) or (map[tile.y][tile.x -1].is_occupied)):
                         runR1 = False
                         runR2 = False
-        print('case')
         while(runL1):
             checked_tile = map[y][x]
             if(checked_tile.is_occupied):
@@ -192,11 +190,20 @@ class Game:                                         #can variables be exported t
                     y = tile.y + (2 * ofset_y) + (2 * ofs[1])
                 i = 1
                 b = False
-            else:
+            if((map[(checked_tile.y)+(ofset_y)][(checked_tile.x)+(ofset_x)].is_wall) and (map[(checked_tile.y)-(ofset_y)][(checked_tile.x)-(ofset_x)].is_wall)):
+                runL1 = False
+                if((i == 1) or (b)):
+                    x = ((tile.x) + (2 * ofset_x) + (3 * ofs[0]))
+                    y = ((tile.y) + (2 * ofset_y) + (3 * ofs[1]))
+                else:
+                    x = tile.x + (2 * ofset_x) + (2 * ofs[0])
+                    y = tile.y + (2 * ofset_y) + (2 * ofs[1])
+                i = 1
+                b = False
+            if(runL1):
                 x += ofs[0]
                 y += ofs[1]
                 i +=1
-                checked_tile = map[y][x]
             if(is_looking_at_object):
                 runL1 = False
                 x = ((tile.x) + (2 * ofset_x) + (2 * ofs[0]))
@@ -206,7 +213,6 @@ class Game:                                         #can variables be exported t
                 if(checked_tile.is_wall):
                     runL2 = False
                 i = 1
-        print('l1')
         while(runL2):
             checked_tile = map[y][x]
             if(checked_tile.is_occupied):
@@ -215,15 +221,17 @@ class Game:                                         #can variables be exported t
                 runL2 = False
                 x = ((tile.x) - (ofset_x) + (ofs[0]))
                 y = ((tile.y) - (ofset_y) + (ofs[1]))
-            else:
+            if((map[(checked_tile.y)+(ofset_y)][(checked_tile.x)+(ofset_x)].is_wall) and (map[(checked_tile.y)-(ofset_y)][(checked_tile.x)-(ofset_x)].is_wall)):
+                runL2 = False
+                x = ((tile.x) - (ofset_x) + (ofs[0]))
+                y = ((tile.y) - (ofset_y) + (ofs[1]))
+            if(runL2):
                 x += ofs[0]
                 y += ofs[1]
-                checked_tile = map[y][x]
             if(is_looking_at_object):
                 runL2 = False
                 x = ((tile.x) - (ofset_x) + (ofs[0]))
                 y = ((tile.y) - (ofset_y) + (ofs[1]))
-        print('l2')
         while(runR1):
             checked_tile = map[y][x]
             if(checked_tile.is_occupied):
@@ -238,11 +246,18 @@ class Game:                                         #can variables be exported t
                 else:
                     x = ((tile.x) - (2 * ofset_x) + (2 * ofs[0]))
                     y = ((tile.y) - (2 * ofset_y) + (2 * ofs[1]))
-            else:
+            if((map[(checked_tile.y)+(ofset_y)][(checked_tile.x)+(ofset_x)].is_wall) and (map[(checked_tile.y)-(ofset_y)][(checked_tile.x)-(ofset_x)].is_wall)):
+                runR1 = False
+                if((i == 1) or (b)):
+                    x = ((tile.x) - (2 * ofset_x) + (3 * ofs[0]))
+                    y = ((tile.y) - (2 * ofset_y) + (3 * ofs[1]))
+                else:
+                    x = ((tile.x) - (2 * ofset_x) + (2 * ofs[0]))
+                    y = ((tile.y) - (2 * ofset_y) + (2 * ofs[1]))
+            if(runR1):
                 x += ofs[0]
                 y += ofs[1]
                 i += 1
-                checked_tile = map[y][x]
             if(is_looking_at_object):
                 runR1 = False
                 x = ((tile.x) - (2 * ofset_x) + (2 * ofs[0]))
@@ -251,22 +266,19 @@ class Game:                                         #can variables be exported t
                     runR2 = False
                 if(checked_tile.is_wall):
                     runR2 = False
-        print('r1')
         while(runR2):
             checked_tile = map[y][x]
             if(checked_tile.is_occupied):
                 seenModels.append(checked_tile)
             elif(checked_tile.is_wall):
                 runR2 = False
-                x = ((tile.x) - (ofset_x) + (ofs[0]))
-                y = ((tile.y) - (ofset_y) + (ofs[1]))
-            else:
+            if((map[(checked_tile.y)+(ofset_y)][(checked_tile.x)+(ofset_x)].is_wall) and (map[(checked_tile.y)-(ofset_y)][(checked_tile.x)-(ofset_x)].is_wall)):
+                runR2 = False
+            if(runR2):
                 x += ofs[0]
                 y += ofs[1]
-                checked_tile = map[y][x]
             if(is_looking_at_object):
                 runR2 = False
-        print('r2')
         return(seenModels)
 
     def moveModel(self):
