@@ -442,7 +442,7 @@ class gamestateNewGame:
                             game.run()
 
             # Clear the screen
-            screen.fill((255, 255, 255))
+            screen.fill((50, 50, 50))
 
             # Render the input string
             if(p1):
@@ -580,6 +580,8 @@ class gamestate_Main:
         self.Manager = gameStateManager
 
     def run(self):
+        main_image = pygame.image.load('pictures/Main_Screen.png')
+        screen.blit(main_image, (0,0))
         self.move_image = pygame.image.load('Pictures/Wall.png')
         self.start_new_button = Button(60, 250, self.move_image, 1)
         self.start_saved_button = Button(120, 250, self.move_image, 1)
@@ -614,6 +616,7 @@ class Tile:
         self.rect.topleft = (x*size,y*size)
         self.clicked = False
         self.is_wall = False
+        self.is_entrypoint = False
 
     def render(self, screen):
         if(self.is_wall): 
