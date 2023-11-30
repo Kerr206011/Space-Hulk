@@ -288,7 +288,6 @@ class Game:                                         #can variables be exported t
         hit = False
         if(self.clicked_model != None):
             if((self.clicked_tile in liste) and (self.clicked_model in GS_ModellList)):
-                print('pre match')
                 match(self.selected_Model.weapon):
                     case('bolter'):
                         a = random.randint(1,6)
@@ -399,10 +398,10 @@ class gamestateTurn:
                 pressed = True
             if(pressed):
                 if(game.is_playing == game.player1):
-                    self.gameStateManager.changestate('start')
+                    self.gameStateManager.changestate('runP1')
                     game.run()
                 else:
-                    self.gameStateManager.changestate('run')
+                    self.gameStateManager.changestate('runP2')
                     game.run()
 
             pygame.display.update()
@@ -432,9 +431,9 @@ class gamestateMain:
                             game.player2 = game.player2[:-1]
                     elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                         if(p1):p1 = False
-                        elif(game.player2 != None):
+                        elif((game.player2 != None) and (game.player2 != game.player1)):
                             game.is_playing = game.player1
-                            self.gameStateManager.changestate('start')
+                            self.gameStateManager.changestate('runP1')
                             game.run()
 
             # Clear the screen
@@ -488,12 +487,9 @@ class Player1Turn:
                 print(self.Manager.givestate())
                 print(game.is_playing)
                 print('0')
-                self.Manager.changestate('run')
+                self.Manager.changestate('runP2')
                 game.run()
-            
-            if(self.vision_button.draw(screen)):
-                l = game.vision(game.selected_Model, game.selected_tile)
-                print(l)
+
             pygame.display.update()
 
 class Player2Turn:
@@ -534,7 +530,7 @@ class Player2Turn:
                 print(self.Manager.givestate())
                 print(game.is_playing)
                 print('1')
-                self.Manager.changestate('start')
+                self.Manager.changestate('runP1')
                 game.run()
 
             pygame.display.update()
@@ -562,10 +558,10 @@ class gamestate_shoot:
             if(self.turn_button.draw(screen)):
                 game.shoot()
                 if(game.is_playing == game.player1):
-                   self.manager.changestate('start')
+                   self.manager.changestate('runP1')
                    game.run()
                 else:
-                    self.manager.changestate('run')
+                    self.manager.changestate('runP2')
                     game.run()
 
             pygame.display.update()
