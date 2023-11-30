@@ -1,7 +1,7 @@
 from Data import *
 from sys import exit
 
-game.states = {'runP1':Player1Turn(), 'run':Player2Turn(), 'main':gamestateMain(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot()}
+game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_Main(), 'start':gamestateNewGame(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot()}
 
 gs = Blip()
 cp = SpaceMarine('bolter', 'None')

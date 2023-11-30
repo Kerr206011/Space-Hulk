@@ -300,6 +300,9 @@ class Game:                                         #can variables be exported t
                     hit = True
                 elif(((a == b) or (a == c) or (c == b)) and (self.is_playing == self.player2)):
                     game.selected_Model.jam = True
+                else:
+                    game.selected_Model.susf = True
+
             if(hit):
                 GS_ModellList.remove(game.clicked_model)
                 game.clicked_model = None
@@ -348,9 +351,11 @@ class Game:                                         #can variables be exported t
             game.selected_tile = game.clicked_tile
             game.clicked_tile = None
             lis = game.vision(self.selected_Model, self.selected_tile)
-            if((self.is_playing == self.player1) and (lis != [])):
-                self.Manager.changestate('shoot')
-                game.run()
+            if(self.is_playing == self.player1):
+                self.selected_Model.susf = False
+                if(lis != []):
+                    self.Manager.changestate('shoot')
+                    game.run()
         elif(not a):
             print('Bitte wähle ein Model und ein Tile aus!')
         elif(not b):
@@ -406,7 +411,7 @@ class gamestateTurn:
 
             pygame.display.update()
             
-class gamestateMain:
+class gamestateNewGame:
     def __init__(self) -> None:
         self.gameStateManager = gameStateManager
     def run(self):
@@ -456,7 +461,7 @@ class Player1Turn:
         self.turn_button = Button(60, 500, self.move_image, 1)
         self.move_button = Button(0, 500, self.move_image, 1)
         self.changeturn_button = Button(120, 500, self.move_image, 1)
-        self.vision_button = Button(180, 500, self.move_image, 1)
+        self.shoot_button = Button(180, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -488,6 +493,10 @@ class Player1Turn:
                 print(game.is_playing)
                 print('0')
                 self.Manager.changestate('runP2')
+                game.run()
+            
+            if(self.shoot_button.draw(screen)):
+                self.Manager.changestate('shoot')
                 game.run()
 
             pygame.display.update()
@@ -564,6 +573,32 @@ class gamestate_shoot:
                     self.manager.changestate('runP2')
                     game.run()
 
+            pygame.display.update()
+
+class gamestate_Main:
+    def __init__(self) -> None:
+        self.Manager = gameStateManager
+
+    def run(self):
+        self.move_image = pygame.image.load('Pictures/Wall.png')
+        self.start_new_button = Button(60, 250, self.move_image, 1)
+        self.start_saved_button = Button(120, 250, self.move_image, 1)
+        self.options_button = Button(180, 250, self.move_image, 1)
+        self.quit_button = Button(240, 250, self.move_image, 1)
+        while(True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            if(self.start_new_button.draw(screen)):
+                self.Manager.changestate('start')
+                game.run()
+            
+            if(self.quit_button.draw(screen)):
+                pygame.quit()
+                sys.exit()
+            
             pygame.display.update()
 
 class Tile:
