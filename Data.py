@@ -72,6 +72,9 @@ class Game:                                         #can variables be exported t
         self.selected_tile = None                   #saves the selected model for other classes to interact with
         self.clicked_tile = None
         self.clicked_model = None
+        self.Assault_cannon_Ammo = 10
+        self.Assault_cannon_reload = True
+        self.Heavy_flamer_ammo = 6
         self.CP = random.randint(1,6)               #a random number of CP for the sm player to use
 
     def SM_prep(self):
@@ -294,6 +297,12 @@ class Game:                                         #can variables be exported t
                         b = random.randint(1,6)
                         c = 0
                         print(a,b,c)
+                    case('AssaultCanon'):
+                        a = random.randint(1,6)
+                        b = random.randint(1,6)
+                        c = random.randint(1,6)
+                        game.Assault_cannon_Ammo -= 1
+                        print(a,b,c)
                 if((c == 0) and (((a == 6) or (b == 6)) or ((self.selected_Model.susf) and ((a >= 5) or (b >= 5))))):
                     hit = True
                 elif((c != 0) and (((a >= 5) or (b >= 5) or (c >=5)) or ((self.selected_Model.susf) and ((a >= 4) or (b >= 4) (c >= 4))))):
@@ -313,36 +322,44 @@ class Game:                                         #can variables be exported t
     def moveModel(self):
         a = False
         b = False
+        match(game.selected_Model.face):
+            case(1,0):
+                ofset_x = 0
+                ofset_y = 1
+            case(0,1):
+                ofset_x = 1
+                ofset_y = 0
+            case(-1,0):
+                ofset_x = 0
+                ofset_y = 1
+            case(0,-1):
+                ofset_x = 1
+                ofset_y = 0
+        ofs = game.selected_Model.face
         if((self.clicked_tile != None) & (self.selected_tile != None) & (self.selected_Model != None)): 
             a = True
             if((self.is_playing == self.player1) & (self.selected_Model in SM_ModellList)):
-                match(self.selected_Model.face):
-                    case (1,0):
-                        if(self.selected_tile.x + 1 == self.clicked_tile.x):
-                            if((self.selected_Model.AP != 0) | (self.CP != 0)):
-                                self.redAP(self.selected_Model, 1,) 
-                                b = True
-                        elif(self.selected_tile.x - 1 == self.clicked_tile.x):
-                            if(self.selected_Model.AP + self.CP >= 2):
-                                self.redAP(self.selected_Model, 2)
-                                b = True
-                        elif((self.selected_tile.y != self.clicked_tile.y)):
-                            b = False
-                        if(self.clicked_tile.is_wall == True):
-                            b = False
+                if((self.selected_tile.x + ofs[0] == self.clicked_tile.x) or (self.selected_tile.y + ofs[1] == self.clicked_tile.y)):
+                    if((self.selected_Model.AP != 0) | (self.CP != 0)):
+                        self.redAP(self.selected_Model, 1,) 
+                        b = True
+                elif((self.selected_tile.x - ofs[0] == self.clicked_tile.x) or (self.selected_tile.y - ofs[1] == self.clicked_tile.y)):
+                    if(self.selected_Model.AP + self.CP >= 2):
+                        self.redAP(self.selected_Model, 2)
+                        b = True
+                if(self.clicked_tile.is_wall == True):
+                    b = False
             if((self.is_playing == self.player2) & (self.selected_Model in GS_ModellList)):
-                match(self.selected_Model.face):
-                    case (1,0):
-                        if((self.selected_tile.x + 1 == self.clicked_tile.x) | (self.selected_tile.y != self.clicked_tile.y)):
-                            if(self.selected_Model.AP != 0):
-                                self.redAP(self.selected_Model, 1,) 
-                                b = True
-                        elif(self.selected_tile.x - 1 == self.clicked_tile.x):
-                            if(self.selected_Model.AP >= 2):
-                                self.redAP(self.selected_Model, 2)
-                                b = True
-                        if(self.clicked_tile.is_wall == True):
-                            b = False
+                if((self.selected_tile.x + 1 == self.clicked_tile.x) | (self.selected_tile.y != self.clicked_tile.y)):
+                    if(self.selected_Model.AP != 0):
+                        self.redAP(self.selected_Model, 1,) 
+                        b = True
+                elif(self.selected_tile.x - 1 == self.clicked_tile.x):
+                    if(self.selected_Model.AP >= 2):
+                        self.redAP(self.selected_Model, 2)
+                        b = True
+                if(self.clicked_tile.is_wall == True):
+                    b = False
         if(a & b):
             game.clicked_tile.occupand = game.selected_tile.occupand
             game.selected_tile.is_occupied = False
@@ -449,7 +466,7 @@ class gamestateNewGame:
                 text_surface = font.render(game.player1, True, (0, 0, 0))
             else:
                 text_surface = font.render(game.player2, True, (0,0,0))
-            screen.blit(text_surface, (10, 10))
+            screen.blit(text_surface, (50, 50))
             pygame.display.update()
 
 class Player1Turn:
@@ -693,8 +710,6 @@ map = [[Tile(x, y, tile_size, ) for x in range(map_width)] for y in range(map_he
 class Sidebar():
     def __init__(self):
         self.SM_Modelcount = len(SM_ModellList)
-        self.Assault_cannon_Ammo = int
-        self.Heavy_flamer_ammo = int
         self.timer = int
         self.pos = (500,0)
 
