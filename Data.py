@@ -349,8 +349,8 @@ class Game:                                         #can variables be exported t
                         b = True
                 if(self.clicked_tile.is_wall == True):
                     b = False
-            if((self.is_playing == self.player2) & (self.selected_Model in GS_ModellList)):
-                if((self.selected_tile.x + 1 == self.clicked_tile.x) | (self.selected_tile.y != self.clicked_tile.y)):
+            if((self.is_playing == self.player2) & (self.selected_Model in GS_ModellList) & (self.selected_Model == Genestealer)):
+                if((self.selected_tile.x + ofs[0] == self.clicked_tile.x) or (self.selected_tile.y + ofs[1] == self.clicked_tile.y)):
                     if(self.selected_Model.AP != 0):
                         self.redAP(self.selected_Model, 1,) 
                         b = True

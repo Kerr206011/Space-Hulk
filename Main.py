@@ -4,12 +4,17 @@ from sys import exit
 game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_Main(), 'start':gamestateNewGame(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot()}
 
 gs = Blip()
+bl = Genestealer()
 cp = SpaceMarine('bolter', 'None')
 SM_ModellList.append(cp)
+GS_ModellList.append(bl)
 GS_ModellList.append(gs)
 
 map[5][1].occupand = cp
 map[5][1].is_occupied = True
+
+map[8][8].occupand = bl
+map[8][8].is_occupied = True
 
 map[6][1].is_wall = True
 map[4][1].is_wall = True
