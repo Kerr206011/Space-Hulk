@@ -8,7 +8,7 @@ bl = Genestealer()
 cp = SpaceMarine('bolter', 'None')
 SM_ModellList.append(cp)
 GS_ModellList.append(bl)
-GS_ModellList.append(gs)
+BL_ModellList.append(gs)
 
 map[5][1].occupand = cp
 map[5][1].is_occupied = True

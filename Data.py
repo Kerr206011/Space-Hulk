@@ -4,6 +4,7 @@ import sys
 
 SM_ModellList = []                     #a list of Space Marine models
 GS_ModellList = []                     #a list of Genstealer models
+BL_ModellList = []
 
 pygame.init()
 screen = pygame.display.set_mode((700,600))
@@ -89,6 +90,8 @@ class Game:                                         #can variables be exported t
     def GS_prep(self):
         for Model in GS_ModellList:
             Model.AP = 6
+        for Model in BL_ModellList:
+            Model.AP = 6
 
     def redAP(self,Model,amount):
         if(Model in SM_ModellList):
@@ -96,7 +99,7 @@ class Game:                                         #can variables be exported t
                 Model.AP = 0
                 self.CP -= (amount - Model.AP)
             else: Model.AP -= amount
-        if(Model in GS_ModellList):
+        if((Model in GS_ModellList) or (Model in BL_ModellList)):
             Model.AP -= amount
 
     def vision(self,model,tile):
@@ -339,7 +342,7 @@ class Game:                                         #can variables be exported t
         if((self.clicked_tile != None) & (self.selected_tile != None) & (self.selected_Model != None)): 
             a = True
             if((self.is_playing == self.player1) & (self.selected_Model in SM_ModellList)):
-                if((self.selected_tile.x + ofs[0] == self.clicked_tile.x) or (self.selected_tile.y + ofs[1] == self.clicked_tile.y)):
+                if(((self.selected_tile.x + ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y + ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
                     if((self.selected_Model.AP != 0) | (self.CP != 0)):
                         self.redAP(self.selected_Model, 1,) 
                         b = True
@@ -349,15 +352,23 @@ class Game:                                         #can variables be exported t
                         b = True
                 if(self.clicked_tile.is_wall == True):
                     b = False
-            if((self.is_playing == self.player2) & (self.selected_Model in GS_ModellList) & (self.selected_Model == Genestealer)):
-                if((self.selected_tile.x + ofs[0] == self.clicked_tile.x) or (self.selected_tile.y + ofs[1] == self.clicked_tile.y)):
+            if((self.is_playing == self.player2) & ((self.selected_Model in GS_ModellList) or (self.selected_Model in BL_ModellList))):
+                if(((self.selected_tile.x + ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y + ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
                     if(self.selected_Model.AP != 0):
                         self.redAP(self.selected_Model, 1,) 
                         b = True
-                elif(self.selected_tile.x - 1 == self.clicked_tile.x):
-                    if(self.selected_Model.AP >= 2):
-                        self.redAP(self.selected_Model, 2)
-                        b = True
+                elif(((self.selected_tile.x - ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y - ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
+                    if(self.selected_Model in GS_ModellList):
+                        if(self.selected_Model.AP >= 2):
+                            self.redAP(self.selected_Model, 2)
+                            b = True
+                    if(self.selected_Model in BL_ModellList):
+                        if(self.selected_Model.AP != 0):
+                            self.redAP(self.selected_Model, 1)
+                            b = True
+                elif((self.selected_tile.x + ofset_x == self.clicked_tile.y) or (self.selected_tile.x - ofset_x == self.clicked_tile.x) or (self.selected_tile.y + ofset_y == self.clicked_tile.y) or (self.clicked_tile.y - ofset_y == self.clicked_tile.y)):
+                    self.redAP(self.selected_Model, 1)
+                    b = True
                 if(self.clicked_tile.is_wall == True):
                     b = False
         if(a & b):
@@ -493,10 +504,11 @@ class Player1Turn:
             BB.display(screen)
             
             if(self.move_button.draw(screen)):
-                game.moveModel()
+                if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
+                    game.moveModel()
 
             if(self.turn_button.draw(screen)):
-                if(((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)) or ((game.is_playing == game.player2) and (game.selected_Model in GS_ModellList))):
+                if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
                     if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
                         self.Manager.changestate('turn')
                         game.run()
@@ -540,10 +552,11 @@ class Player2Turn:
             SB.display(screen)
             BB.display(screen)
             if(self.move_button.draw(screen)):
-                game.moveModel()
+                if((game.is_playing == game.player2) and ((game.selected_Model in GS_ModellList) or (game.selected_Model in BL_ModellList))):
+                    game.moveModel()
 
             if(self.turn_button.draw(screen)):
-                if(((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)) or ((game.is_playing == game.player2) and (game.selected_Model in GS_ModellList))):
+                if((game.is_playing == game.player2) and (game.selected_Model in GS_ModellList)):
                     if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
                         self.Manager.changestate('turn')
                         game.run()
@@ -664,7 +677,7 @@ class Tile:
         if(self.rect.collidepoint(pos)) and (pygame.mouse.get_pressed()[0] == 1):
             self.clicked = True
         if(pygame.mouse.get_pressed()[0] == 0 and self.clicked):
-            if(((self.is_occupied) and (self.occupand in SM_ModellList) and (game.is_playing == game.player1)) or ((self.is_occupied) and (self.occupand in GS_ModellList) and (game.is_playing == game.player2))):
+            if(((self.is_occupied) and (self.occupand in SM_ModellList) and (game.is_playing == game.player1)) or ((self.is_occupied) and ((self.occupand in GS_ModellList) or (self.occupand in BL_ModellList)) and (game.is_playing == game.player2))):
                 game.selected_Model = self.occupand
                 game.selected_tile = self
             elif(self.is_occupied):
@@ -722,7 +735,7 @@ class Sidebar():
         round_Text = my_font.render('Round: '+str(game.round), False, (0, 0, 0))
         player1_Text = my_font.render('SM: '+game.player1,False,(0,0,0))
         player2_Text = my_font.render('GS: '+game.player2, False, (0,0,0))
-        GS_count_Text = my_font.render('GS Models: '+str(len(GS_ModellList)),False,(0,0,0))
+        GS_count_Text = my_font.render('GS Models: '+str((len(GS_ModellList)+len(BL_ModellList))),False,(0,0,0))
         SM_count_Text = my_font.render('SM Models: '+str(len(SM_ModellList)),False,(0,0,0))
         screen.blit(CP_Text, (500,90))
         screen.blit(round_Text, (500,60))
