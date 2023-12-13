@@ -54,6 +54,7 @@ class Button():
 class GameStateManager:
     def __init__(self, state) -> None:
         self.state = state
+        self.seen_models = []
     def changestate(self,newstate):
         self.state = newstate
     def givestate(self):
@@ -286,6 +287,9 @@ class Game:                                         #can variables be exported t
                 y += ofs[1]
             if(is_looking_at_object):
                 runR2 = False
+        for model in seenModels:
+            if(model in SM_ModellList):
+                seenModels.remove(model)
         return(seenModels)
 
     def shoot(self):
@@ -381,7 +385,7 @@ class Game:                                         #can variables be exported t
             lis = game.vision(self.selected_Model, self.selected_tile)
             if(self.is_playing == self.player1):
                 self.selected_Model.susf = False
-                if(lis != []):
+                if(lis.contains(Genestealer)):
                     self.Manager.changestate('shoot')
                     game.run()
         elif(not a):
@@ -632,6 +636,10 @@ class gamestate_Main:
                 sys.exit()
             
             pygame.display.update()
+
+class gamestate_reveal:
+    def __init__(self) -> None:
+        self.Manager = gameStateManager
 
 class Tile:
     def __init__(self, x, y, size):
