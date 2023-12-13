@@ -287,8 +287,8 @@ class Game:                                         #can variables be exported t
                 y += ofs[1]
             if(is_looking_at_object):
                 runR2 = False
-        for model in seenModels:
-            if(model in SM_ModellList):
+        for tile in seenModels:
+            if(tile.occupand in SM_ModellList):
                 seenModels.remove(model)
         return(seenModels)
 
@@ -383,9 +383,12 @@ class Game:                                         #can variables be exported t
             game.selected_tile = game.clicked_tile
             game.clicked_tile = None
             lis = game.vision(self.selected_Model, self.selected_tile)
+            for tile in lis:
+                if(tile.occupand in BL_ModellList):
+                    self.Manager.seen_models.append(tile)
             if(self.is_playing == self.player1):
                 self.selected_Model.susf = False
-                if(lis.contains(Genestealer)):
+                if(lis != []):
                     self.Manager.changestate('shoot')
                     game.run()
         elif(not a):
