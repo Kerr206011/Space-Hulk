@@ -708,11 +708,12 @@ class gamestate_reveal:
 
             if(self.reveal_button.draw(screen)):
                 if(game.clicked_tile != None):
-                    if(game.clicked_tile.is_occupied == False):
-                        game.clicked_tile.occupand = Genestealer()
-                        GS_ModellList.append(game.clicked_tile.occupand)
-                        game.clicked_tile.is_occupied = True
-                        self.amount -= 1
+                    if(((game.clicked_tile.x == game.selected_tile.x) or (game.clicked_tile.x == (game.selected_tile.x -1)) or (game.clicked_tile.x == (game.selected_tile.x +1))) and ((game.clicked_tile.y == game.selected_tile.y) or (game.clicked_tile.y == (game.selected_tile.y -1)) or (game.clicked_tile.y == (game.selected_tile.y +1)))):
+                        if(game.clicked_tile.is_occupied == False):
+                            game.clicked_tile.occupand = Genestealer()
+                            GS_ModellList.append(game.clicked_tile.occupand)
+                            game.clicked_tile.is_occupied = True
+                            self.amount -= 1
 
             if(self.amount == 0):
                 if(self.Manager.rev_models == []):
