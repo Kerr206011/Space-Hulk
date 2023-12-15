@@ -54,7 +54,9 @@ class Button():
 class GameStateManager:
     def __init__(self, state) -> None:
         self.state = state
-        self.seen_models = []
+        self.rev_models = []
+        self.save_model = None
+        self.save_tile = None
     def changestate(self,newstate):
         self.state = newstate
     def givestate(self):
@@ -305,11 +307,12 @@ class Game:                                         #can variables be exported t
                         c = 0
                         print(a,b,c)
                     case('AssaultCanon'):
-                        a = random.randint(1,6)
-                        b = random.randint(1,6)
-                        c = random.randint(1,6)
-                        game.Assault_cannon_Ammo -= 1
-                        print(a,b,c)
+                        if(game.Assault_cannon_Ammo != 0):
+                            a = random.randint(1,6)
+                            b = random.randint(1,6)
+                            c = random.randint(1,6)
+                            game.Assault_cannon_Ammo -= 1
+                            print(a,b,c)
                 if((c == 0) and (((a == 6) or (b == 6)) or ((self.selected_Model.susf) and ((a >= 5) or (b >= 5))))):
                     hit = True
                 elif((c != 0) and (((a >= 5) or (b >= 5) or (c >=5)) or ((self.selected_Model.susf) and ((a >= 4) or (b >= 4) (c >= 4))))):
@@ -326,6 +329,12 @@ class Game:                                         #can variables be exported t
                 game.clicked_tile.occupand = None
                 game.clicked_tile = None
 
+    def reveal(self, tile):
+        self.selected_Model = tile.occupand
+        self.selected_tile = tile
+        self.Manager.changestate('reveal')
+        self.run()
+                
     def moveModel(self):
         a = False
         b = False
@@ -382,15 +391,35 @@ class Game:                                         #can variables be exported t
             game.selected_tile.occupand = None
             game.selected_tile = game.clicked_tile
             game.clicked_tile = None
-            lis = game.vision(self.selected_Model, self.selected_tile)
-            for tile in lis:
-                if(tile.occupand in BL_ModellList):
-                    self.Manager.seen_models.append(tile)
             if(self.is_playing == self.player1):
+                lis = game.vision(self.selected_Model, self.selected_tile)
+                for tile in lis:
+                    if(tile.occupand in SM_ModellList):
+                        lis.remove(tile)
+                    if(tile.occupand in BL_ModellList):
+                        self.Manager.rev_models.append(tile)
+                        lis.remove(tile)
                 self.selected_Model.susf = False
-                if(lis != []):
+                if(self.Manager.rev_models.__len__() != 0):
+                    self.Manager.save_model = self.selected_Model
+                    self.Manager.save_tile = self.selected_tile
+                    self.reveal(self.Manager.rev_models[0])
+                elif(lis != []):
                     self.Manager.changestate('shoot')
                     game.run()
+            elif(self.is_playing == self.player2):
+                for row in map:
+                    for tile in row:
+                        if(tile.occupand in SM_ModellList):
+                            seen = self.vision(tile.occupand, tile)
+                            for model in seen:
+                                if(model.occupand in BL_ModellList):
+                                    self.Manager.rev_models.append(model)
+                                    seen.remove(model)
+                if(self.Manager.rev_models[0] != None):
+                    self.Manager.save_model = self.selected_Model
+                    self.Manager.save_tile = self.selected_tile
+                    self.reveal(self.Manager.rev_models[0])
         elif(not a):
             print('Bitte wähle ein Model und ein Tile aus!')
         elif(not b):
@@ -532,8 +561,11 @@ class Player1Turn:
                 game.run()
             
             if(self.shoot_button.draw(screen)):
-                self.Manager.changestate('shoot')
-                game.run()
+                if((game.selected_Model.AP + game.CP) != 0):
+                    game.redAP(game.selected_Model, 1)
+                    self.Manager.changestate('shoot')
+                    game.run()
+                else: print('nicht genug AP')
 
             pygame.display.update()
 
@@ -644,6 +676,59 @@ class gamestate_reveal:
     def __init__(self) -> None:
         self.Manager = gameStateManager
 
+    def run(self):
+        self.move_image = pygame.image.load('Pictures/Wall.png')
+        self.reveal_button = Button(60, 500, self.move_image, 1)
+
+        self.revModel = game.selected_Model
+        self.amount = self.revModel.count
+        self.tile = game.selected_tile
+
+        self.tile.is_occupied = False
+        BL_ModellList.remove(self.tile.occupand)
+        self.tile.occupand = Genestealer()
+        self.tile.is_occupied = True
+        GS_ModellList.append(self.tile.occupand)
+        self.amount -= 1
+        print(self.amount)
+        self.Manager.rev_models.remove(self.tile)
+
+        while(True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            for row in map:
+                for tile in row: 
+                    tile.render(screen)
+                    tile.interact()
+            
+            SB.display(screen)
+            BB.display(screen)
+
+            if(self.reveal_button.draw(screen)):
+                if(game.clicked_tile != None):
+                    if(game.clicked_tile.is_occupied == False):
+                        game.clicked_tile.occupand = Genestealer()
+                        GS_ModellList.append(game.clicked_tile.occupand)
+                        game.clicked_tile.is_occupied = True
+                        self.amount -= 1
+
+            if(self.amount == 0):
+                if(self.Manager.rev_models == []):
+                    if(game.is_playing == game.player1):
+                        game.selected_tile = self.Manager.save_tile
+                        game.selected_Model = self.Manager.save_model
+                        self.Manager.changestate('shoot')
+                        game.run()
+                    else: 
+                        self.Manager.changestate('runP2')
+                        game.run()
+                else:
+                    game.reveal(self.Manager.rev_models[1])
+
+            pygame.display.update()
+        
 class Tile:
     def __init__(self, x, y, size):
         self.x = x                      # x position on the grid
