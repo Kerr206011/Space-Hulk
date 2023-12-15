@@ -1,7 +1,15 @@
-Game braucht eine Vision methode
-Game breucht eine Turn methode zum drehen der Modelle
-
-seperate run methoden für verschiedene Gamestates?
 Save/Load in/aus speicherfile
-Siegesbedingungen für verschiedene Level
 Musik und Optionen
+
+
+Speicherfile:
+    Optionen:
+        lauststärke 
+    Gameeinstellungen:
+        anzahl neuer blips
+        anzahl + Art der SM
+        Map layout
+        Siegesbedingungen
+    Higscore/ liste(kann scrollen usw)
+
+später neue Steuerung
