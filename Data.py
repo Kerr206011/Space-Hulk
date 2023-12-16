@@ -353,7 +353,8 @@ class Game:                                         #can variables be exported t
                 ofset_y = 0
         ofs = game.selected_Model.face
         if((self.clicked_tile != None) & (self.selected_tile != None) & (self.selected_Model != None)): 
-            a = True
+            if(self.clicked_tile.is_occupied == False):
+                a = True
             if((self.is_playing == self.player1) & (self.selected_Model in SM_ModellList)):
                 if(((self.selected_tile.x + ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y + ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
                     if((self.selected_Model.AP != 0) | (self.CP != 0)):
@@ -385,13 +386,19 @@ class Game:                                         #can variables be exported t
                 if(self.clicked_tile.is_wall == True):
                     b = False
         if(a & b):
+            self.Manager.save_model = self.selected_Model
+            self.Manager.save_tile = self.selected_tile
+
             game.clicked_tile.occupand = game.selected_tile.occupand
             game.selected_tile.is_occupied = False
             game.clicked_tile.is_occupied = True
             game.selected_tile.occupand = None
             game.selected_tile = game.clicked_tile
             game.clicked_tile = None
+
             if(self.is_playing == self.player1):
+                self.Manager.save_model = None
+                self.Manager.save_tile = None
                 lis = game.vision(self.selected_Model, self.selected_tile)
                 for tile in lis:
                     if(tile.occupand in SM_ModellList):
@@ -408,18 +415,28 @@ class Game:                                         #can variables be exported t
                     self.Manager.changestate('shoot')
                     game.run()
             elif(self.is_playing == self.player2):
-                for row in map:
-                    for tile in row:
-                        if(tile.occupand in SM_ModellList):
-                            seen = self.vision(tile.occupand, tile)
-                            for model in seen:
-                                if(model.occupand in BL_ModellList):
-                                    self.Manager.rev_models.append(model)
-                                    seen.remove(model)
-                if(self.Manager.rev_models[0] != None):
-                    self.Manager.save_model = self.selected_Model
-                    self.Manager.save_tile = self.selected_tile
-                    self.reveal(self.Manager.rev_models[0])
+                if(self.selected_Model in GS_ModellList):
+                    pass
+                if(self.selected_Model in BL_ModellList):
+                    c = False
+                    for row in map:
+                        for tile in row:
+                            if(tile.occupand in SM_ModellList):
+                                seen = self.vision(tile.occupand, tile)
+                                for model in seen:
+                                    if(model == self.selected_tile):
+                                        c = True
+                    if(c):
+                        self.selected_tile.is_occupied = False
+                        self.Manager.save_tile.occupand = self.Manager.save_model
+                        self.selected_tile.occupand = None
+                        self.Manager.save_tile.is_occupied = True
+                        self.selected_tile = self.Manager.save_tile
+                        self.selected_Model = self.Manager.save_model
+                        self.Manager.save_model = None
+                        self.Manager.save_tile = None
+                        c = False
+
         elif(not a):
             print('Bitte wähle ein Model und ein Tile aus!')
         elif(not b):
