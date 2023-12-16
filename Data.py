@@ -578,6 +578,7 @@ class Player2Turn:
         self.turn_button = Button(60, 500, self.move_image, 1)
         self.move_button = Button(0, 500, self.move_image, 1)
         self.changeturn_button = Button(120, 500, self.move_image, 1)
+        self.reveal_button = Button(180, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -610,6 +611,11 @@ class Player2Turn:
                 print('1')
                 self.Manager.changestate('runP1')
                 game.run()
+
+            if(self.reveal_button.draw(screen)):
+                if(game.selected_Model in BL_ModellList):
+                    self.Manager.rev_models.append(game.selected_tile)
+                    game.reveal(game.selected_tile)
 
             pygame.display.update()
 
