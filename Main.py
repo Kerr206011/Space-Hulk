@@ -5,11 +5,10 @@ game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_M
 
 gs = Blip()
 bl = Genestealer()
-cp = SpaceMarine('bolter', 'None')
+cp = SpaceMarine('fist', 'None')
 SM_ModellList.append(cp)
 GS_ModellList.append(bl)
 BL_ModellList.append(gs)
-cp.overwatch = True
 
 map[5][1].occupand = cp
 map[5][1].is_occupied = True
@@ -23,6 +22,11 @@ map[6][2].is_wall = True
 map[4][2].is_wall = True
 map[6][3].is_wall = True
 map[4][3].is_wall = True
+map[5][3].is_door = True
+
+map[17][17].is_door = True
+map[17][16].is_wall = True
+map[17][18].is_wall = True
 
 map[9][9].occupand = gs
 map[9][9].is_occupied = True
