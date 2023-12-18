@@ -57,6 +57,7 @@ class GameStateManager:
         self.rev_models = []
         self.save_model = None
         self.save_tile = None
+        self.turn = False
     def changestate(self,newstate):
         self.state = newstate
     def givestate(self):
@@ -338,6 +339,47 @@ class Game:                                         #can variables be exported t
                 game.clicked_tile.occupand = None
                 game.clicked_tile = None
 
+    def melee(self):
+        facing = False
+        SM1 = 0
+        SM2 = 0
+        GS1 = random.randint(1,6)
+        GS2 = random.randint(1,6)
+        GS3 = random.randint(1,6)
+        if((self.selected_tile != None) & (self.clicked_tile != None)):
+            if(((self.selected_tile.x + self.selected_Model.face[0]) == self.clicked_tile.x) & ((self.selected_tile.y + self.selected_Model.face[1]) == self.clicked_tile.y)):
+                if(self.selected_tile.is_occupied == True):
+                    match(self.selected_Model.face):
+                        case((1,0)):
+                            if(self.clicked_model.face == (-1,0)):
+                                facing = True
+                        case((-1,0)):
+                            if(self.clicked_model.face == (1,0)):
+                                facing = True
+                        case((0,1)):
+                            if(self.clicked_model.face == (0,-1)):
+                                facing = True
+                        case((0,-1)):
+                            if(self.clicked_model.face == (0,1)):
+                                facing = True
+                    if(self.is_playing == self.player1):
+                        match(self.selected_Model.weapon):
+                            case('bolter'):
+                                SM1 = random.randint(1,6)
+                                if(self.selected_Model.rank == 'sergeant'):
+                                    SM1 += 1
+                        if(((SM1 > GS1) & (SM1 > GS2) & (SM1 > GS3)) or ((SM2 > GS1) & (SM2 > GS2) & (SM2 > GS3))):
+                            self.clicked_tile.is_occupied = False
+                            self.clicked_tile.occupand = None
+                            GS_ModellList.remove(self.clicked_model)
+                            self.clicked_model = None
+                        elif((facing == True) & (((GS1 > SM1) & (GS1 > SM2)) or ((GS2 > SM1) & (GS2 > SM2)) or ((GS3 > SM1) & (GS3 > SM2)))):
+                            self.selected_tile.is_occupied = False
+                            self.selected_tile.occupand = None
+                            SM_ModellList.remove(self.selected_Model)
+                            self.selected_Model = None
+                    print(GS1,GS2,GS3,SM1,SM2)
+
     def reveal(self, tile):
         self.selected_Model = tile.occupand
         self.selected_tile = tile
@@ -572,6 +614,7 @@ class Player1Turn:
         self.move_button = Button(0, 500, self.move_image, 1)
         self.changeturn_button = Button(120, 500, self.move_image, 1)
         self.shoot_button = Button(180, 500, self.move_image, 1)
+        self.melee_button = Button(240, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -611,6 +654,12 @@ class Player1Turn:
                     game.redAP(game.selected_Model, 1)
                     self.Manager.changestate('shoot')
                     game.run()
+                else: print('nicht genug AP')
+
+            if(self.melee_button.draw(screen)):
+                if((game.selected_Model.AP + game.CP) != 0):
+                    game.redAP(game.selected_Model, 1)
+                    game.melee()
                 else: print('nicht genug AP')
 
             pygame.display.update()
@@ -671,7 +720,7 @@ class gamestate_shoot:
     
     def run(self):
         self.move_image = pygame.image.load('Pictures/Wall.png')
-        self.turn_button = Button(60, 500, self.move_image, 1)
+        self.shoot_button = Button(60, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -685,7 +734,7 @@ class gamestate_shoot:
             SB.display(screen)
             BB.display(screen)
 
-            if(self.turn_button.draw(screen)):
+            if(self.shoot_button.draw(screen)):
                 game.shoot()
                 if(game.is_playing == game.player1):
                    self.manager.changestate('runP1')
