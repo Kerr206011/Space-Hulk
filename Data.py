@@ -109,7 +109,7 @@ class Game:                                         #can variables be exported t
         ofset_x = 0
         ofset_y = 0
         b = False
-        ofs = model.face
+        ofs = None
         x = tile.x
         y = tile.y
         is_looking_at_object = False
@@ -119,15 +119,19 @@ class Game:                                         #can variables be exported t
             case(1,0):
                 ofset_x = 0
                 ofset_y = 1
+                ofs = (1,0)
             case(0,1):
                 ofset_x = 1
                 ofset_y = 0
+                ofs = (0, -1)
             case(-1,0):
                 ofset_x = 0
                 ofset_y = 1
+                ofs = (-1,0)
             case(0,-1):
                 ofset_x = 1
                 ofset_y = 0
+                ofs = (0,1)
         runS = True
         runL1 = True
         runL2 = True
@@ -190,11 +194,13 @@ class Game:                                         #can variables be exported t
                 seenModels.append(checked_tile)
                 if(i == 1):
                     b = True
+                    runL2 = False
             elif(checked_tile.is_wall):
                 runL1 = False
                 if((i == 1) or (b)):
-                    x = ((tile.x) + (2 * ofset_x) + (3 * ofs[0]))
-                    y = ((tile.y) + (2 * ofset_y) + (3 * ofs[1]))
+                    runL2 = False
+                    x = ((tile.x) - (ofset_x) + (ofs[0]))
+                    y = ((tile.y) - (ofset_y) + (ofs[1]))
                 else:
                     x = tile.x + (2 * ofset_x) + (2 * ofs[0])
                     y = tile.y + (2 * ofset_y) + (2 * ofs[1])
@@ -203,8 +209,9 @@ class Game:                                         #can variables be exported t
             if((map[(checked_tile.y)+(ofset_y)][(checked_tile.x)+(ofset_x)].is_wall) and (map[(checked_tile.y)-(ofset_y)][(checked_tile.x)-(ofset_x)].is_wall)):
                 runL1 = False
                 if((i == 1) or (b)):
-                    x = ((tile.x) + (2 * ofset_x) + (3 * ofs[0]))
-                    y = ((tile.y) + (2 * ofset_y) + (3 * ofs[1]))
+                    runL2 = False
+                    x = ((tile.x) - (ofset_x) + (ofs[0]))
+                    y = ((tile.y) - (ofset_y) + (ofs[1]))
                 else:
                     x = tile.x + (2 * ofset_x) + (2 * ofs[0])
                     y = tile.y + (2 * ofset_y) + (2 * ofs[1])
@@ -220,8 +227,12 @@ class Game:                                         #can variables be exported t
                 y = ((tile.y) + (2 * ofset_y) + (2 * ofs[1]))
                 if(checked_tile.is_occupied):
                     runL2 = False
+                    x = ((tile.x) - (ofset_x) + (ofs[0]))
+                    y = ((tile.y) - (ofset_y) + (ofs[1]))
                 if(checked_tile.is_wall):
                     runL2 = False
+                    x = ((tile.x) - (ofset_x) + (ofs[0]))
+                    y = ((tile.y) - (ofset_y) + (ofs[1]))
                 i = 1
         while(runL2):
             checked_tile = map[y][x]
@@ -251,16 +262,14 @@ class Game:                                         #can variables be exported t
             elif(checked_tile.is_wall):
                 runR1 = False
                 if((i == 1) or (b)):
-                    x = ((tile.x) - (2 * ofset_x) + (3 * ofs[0]))
-                    y = ((tile.y) - (2 * ofset_y) + (3 * ofs[1]))
+                    runR2 = False
                 else:
                     x = ((tile.x) - (2 * ofset_x) + (2 * ofs[0]))
                     y = ((tile.y) - (2 * ofset_y) + (2 * ofs[1]))
             if((map[(checked_tile.y)+(ofset_y)][(checked_tile.x)+(ofset_x)].is_wall) and (map[(checked_tile.y)-(ofset_y)][(checked_tile.x)-(ofset_x)].is_wall)):
                 runR1 = False
                 if((i == 1) or (b)):
-                    x = ((tile.x) - (2 * ofset_x) + (3 * ofs[0]))
-                    y = ((tile.y) - (2 * ofset_y) + (3 * ofs[1]))
+                    runR2 = False
                 else:
                     x = ((tile.x) - (2 * ofset_x) + (2 * ofs[0]))
                     y = ((tile.y) - (2 * ofset_y) + (2 * ofs[1]))
@@ -380,9 +389,10 @@ class Game:                                         #can variables be exported t
                         if(self.selected_Model.AP != 0):
                             self.redAP(self.selected_Model, 1)
                             b = True
-                elif((self.selected_tile.x + ofset_x == self.clicked_tile.y) or (self.selected_tile.x - ofset_x == self.clicked_tile.x) or (self.selected_tile.y + ofset_y == self.clicked_tile.y) or (self.clicked_tile.y - ofset_y == self.clicked_tile.y)):
-                    self.redAP(self.selected_Model, 1)
-                    b = True
+                elif((self.selected_tile.x + ofset_x == self.clicked_tile.x) or (self.selected_tile.x - ofset_x == self.clicked_tile.x) or (self.selected_tile.y + ofset_y == self.clicked_tile.y) or (self.clicked_tile.y - ofset_y == self.clicked_tile.y)):
+                    if(self.selected_Model.AP != 0):
+                        self.redAP(self.selected_Model, 1)
+                        b = True
                 if(self.clicked_tile.is_wall == True):
                     b = False
         if(a & b):
@@ -416,7 +426,26 @@ class Game:                                         #can variables be exported t
                     game.run()
             elif(self.is_playing == self.player2):
                 if(self.selected_Model in GS_ModellList):
-                    pass
+                    self.clicked_model = self.selected_Model
+                    self.clicked_tile = self.selected_tile
+                    e = True
+                    for row in map: 
+                        for tile in row:
+                            if(tile.occupand in SM_ModellList):
+                                if(tile.occupand.overwatch == True):
+                                    checked = self.vision(tile.occupand, tile)
+                                    if((tile.occupand.jam == False) & (self.clicked_tile in checked)):
+                                        self.selected_Model = tile.occupand
+                                        self.selected_tile = tile
+                                        self.shoot()
+                    # if(e):
+                    #     self.clicked_model = None
+                    #     self.clicked_tile = None
+                    #     self.selected_Model = self.Manager.save_model
+                    #     self.Manager.save_model = None
+                    #     self.selected_tile = self.Manager.save_tile
+                    #     self.Manager.save_tile = None
+                                
                 if(self.selected_Model in BL_ModellList):
                     c = False
                     for row in map:
@@ -570,7 +599,7 @@ class Player1Turn:
             
             if(self.changeturn_button.draw(screen)):
                 game.is_playing = game.player2
-                game.GS_prep
+                game.GS_prep()
                 print(self.Manager.givestate())
                 print(game.is_playing)
                 print('0')
