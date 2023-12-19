@@ -50,15 +50,18 @@ class Button():
 
         return action
 
-#ok bro bor
 class GameStateManager:
     def __init__(self, state) -> None:
         self.state = state
         self.rev_models = []
         self.save_model = None
         self.save_tile = None
+        self.rev_count = 0
         self.turn = False
-    def changestate(self,newstate):
+        self.melee_turn = False
+        self.gs_moveturn = False
+        self.gs_turnaftermove = None
+    def changestate(self, newstate):
         self.state = newstate
     def givestate(self):
         return self.state
@@ -83,6 +86,10 @@ class Game:                                         #can variables be exported t
         self.CP = random.randint(1,6)               #a random number of CP for the sm player to use
 
     def SM_prep(self):
+        self.selected_Model = None
+        self.selected_tile = None
+        self.clicked_model = None
+        self.clicked_tile = None
         self.round += 1
         for Model in SM_ModellList:
             Model.AP = 4
@@ -92,6 +99,10 @@ class Game:                                         #can variables be exported t
         self.CP = random.randint(1,6)
 
     def GS_prep(self):
+        self.selected_Model = None
+        self.selected_tile = None
+        self.clicked_model = None
+        self.clicked_tile = None
         for Model in GS_ModellList:
             Model.AP = 6
         for Model in BL_ModellList:
@@ -150,7 +161,7 @@ class Game:                                         #can variables be exported t
                 if(i == 1):
                     is_looking_at_object = True 
                 i = 1
-            elif(checked_tile.is_wall == True):
+            elif((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False))):
                 x = ((tile.x) + (ofset_x) + (ofs[0]))
                 y = ((tile.y) + (ofset_y) + (ofs[1]))
                 runS = False
@@ -196,7 +207,7 @@ class Game:                                         #can variables be exported t
                 if(i == 1):
                     b = True
                     runL2 = False
-            elif(checked_tile.is_wall):
+            elif((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False))):
                 runL1 = False
                 if((i == 1) or (b)):
                     runL2 = False
@@ -230,7 +241,7 @@ class Game:                                         #can variables be exported t
                     runL2 = False
                     x = ((tile.x) - (ofset_x) + (ofs[0]))
                     y = ((tile.y) - (ofset_y) + (ofs[1]))
-                if(checked_tile.is_wall):
+                if((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False))):
                     runL2 = False
                     x = ((tile.x) - (ofset_x) + (ofs[0]))
                     y = ((tile.y) - (ofset_y) + (ofs[1]))
@@ -239,7 +250,7 @@ class Game:                                         #can variables be exported t
             checked_tile = map[y][x]
             if(checked_tile.is_occupied):
                 seenModels.append(checked_tile)
-            elif(checked_tile.is_wall):
+            elif((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False))):
                 runL2 = False
                 x = ((tile.x) - (ofset_x) + (ofs[0]))
                 y = ((tile.y) - (ofset_y) + (ofs[1]))
@@ -260,7 +271,7 @@ class Game:                                         #can variables be exported t
                 seenModels.append(checked_tile)
                 if(i == 1):
                     b = True
-            elif(checked_tile.is_wall):
+            elif((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False))):
                 runR1 = False
                 if((i == 1) or (b)):
                     runR2 = False
@@ -284,13 +295,13 @@ class Game:                                         #can variables be exported t
                 y = ((tile.y) - (2 * ofset_y) + (2 * ofs[1]))
                 if(checked_tile.is_occupied):
                     runR2 = False
-                if(checked_tile.is_wall):
+                if((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False))):
                     runR2 = False
         while(runR2):
             checked_tile = map[y][x]
             if(checked_tile.is_occupied):
                 seenModels.append(checked_tile)
-            elif(checked_tile.is_wall):
+            elif((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False))):
                 runR2 = False
             if((map[(checked_tile.y)+(ofset_y)][(checked_tile.x)+(ofset_x)].is_wall) and (map[(checked_tile.y)-(ofset_y)][(checked_tile.x)-(ofset_x)].is_wall)):
                 runR2 = False
@@ -305,40 +316,108 @@ class Game:                                         #can variables be exported t
         return(seenModels)
 
     def shoot(self):
-        liste = game.vision(self.selected_Model,self.selected_tile)
-        print(liste)
-        hit = False
-        if(self.clicked_model != None):
-            if((self.clicked_tile in liste) and (self.clicked_model in GS_ModellList)):
-                match(self.selected_Model.weapon):
-                    case('fist'):
+        if(self.selected_Model in SM_ModellList):
+            liste = game.vision(self.selected_Model,self.selected_tile)
+            print(liste)
+            hit = False
+            match(self.selected_Model.weapon):
+                case('fist'):
+                    a = random.randint(1,6)
+                    b = random.randint(1,6)
+                    c = 0
+                    print(a,b,c)
+                case('powerSword'):
+                    a = random.randint(1,6)
+                    b = random.randint(1,6)
+                    c = 0
+                case('chainFist'):
+                    a = random.randint(1,6)
+                    b = random.randint(1,6)
+                    c = 0
+                case('AssaultCanon'):
+                    if(game.Assault_cannon_Ammo != 0):
                         a = random.randint(1,6)
                         b = random.randint(1,6)
-                        c = 0
+                        c = random.randint(1,6)
+                        game.Assault_cannon_Ammo -= 1
                         print(a,b,c)
-                    case('AssaultCanon'):
-                        if(game.Assault_cannon_Ammo != 0):
-                            a = random.randint(1,6)
-                            b = random.randint(1,6)
-                            c = random.randint(1,6)
-                            game.Assault_cannon_Ammo -= 1
-                            print(a,b,c)
-                if((c == 0) and (((a == 6) or (b == 6)) or ((self.selected_Model.susf) and ((a >= 5) or (b >= 5))))):
-                    hit = True
-                elif((c != 0) and (((a >= 5) or (b >= 5) or (c >=5)) or ((self.selected_Model.susf) and ((a >= 4) or (b >= 4) (c >= 4))))):
-                    hit = True
-                elif(((a == b) or (a == c) or (c == b)) and (self.is_playing == self.player2)):
+            if(self.selected_Model.overwatch == True):
+                if(((a == b) and not (c != 0)) and (self.is_playing == self.player2)):
                     game.selected_Model.jam = True
-                else:
-                    game.selected_Model.susf = True
+            if(self.clicked_model != None) :
+                if((self.clicked_tile in liste) and (self.clicked_model in GS_ModellList)):
+                    if((c == 0) and (((a == 6) or (b == 6)) or ((self.selected_Model.susf) and ((a >= 5) or (b >= 5))))):
+                        hit = True
+                    elif((c != 0) and (((a >= 5) or (b >= 5) or (c >=5)) or ((self.selected_Model.susf) and ((a >= 4) or (b >= 4) or (c >= 4))))):
+                        hit = True
+                    elif(((a == b) and not (c != 0)) and (self.is_playing == self.player2)):
+                        game.selected_Model.jam = True
+                    else:
+                        game.selected_Model.susf = True
 
-            if(hit):
-                GS_ModellList.remove(game.clicked_model)
-                game.clicked_model = None
-                game.clicked_tile.is_occupied = False
-                game.clicked_tile.occupand = None
-                game.clicked_tile = None
+                if(hit):
+                    GS_ModellList.remove(game.clicked_model)
+                    game.clicked_model = None
+                    game.clicked_tile.is_occupied = False
+                    game.clicked_tile.occupand = None
+                    game.clicked_tile = None
+            if(self.clicked_tile != None):
+                if((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False)):
+                    if((self.selected_Model.weapon == 'fist') or (self.selected_Model.weapon == 'powerSword') or (self.selected_Model.weapon == 'chainFist')):
+                        if((a == 6) or (b == 6) or (c == 6)):
+                            self.clicked_tile.is_door = False
 
+        for row in map: 
+            for tile in row:
+                if(tile.occupand in SM_ModellList):
+                    checked = self.vision(tile.occupand, tile)
+                    for tile in checked:
+                        if(tile.occupand in BL_ModellList):
+                            self.Manager.rev_models.append(tile)
+                            checked.remove(tile)
+                    if(self.Manager.rev_models.__len__() != 0):
+                        self.Manager.save_model = self.selected_Model
+                        self.Manager.save_tile = self.selected_tile
+                        self.reveal(self.Manager.rev_models[0])
+
+    def ocDoor(self):
+        a = False
+        if(self.clicked_tile != None):
+            if(self.clicked_tile.is_door == True):
+                if(self.selected_Model != None):
+                    ofs = game.selected_Model.face
+                    if(((self.selected_tile.x + ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y + ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
+                        if(self.is_playing == self.player1):
+                            if((self.selected_Model.AP != 0) | (self.CP != 0)):
+                                self.redAP(self.selected_Model, 1)
+                                a = True
+                        if(self.is_playing == self.player2):
+                            if(self.selected_Model.AP != 0):
+                                self.redAP(self.selected_Model, 1)
+                                a = True
+        if(a):
+            if(self.clicked_tile.is_open == True):
+                self.clicked_tile.is_open = False
+            else:
+                self.clicked_tile.is_open = True
+        for row in map: 
+            for tile in row:
+                if(tile.occupand in SM_ModellList):
+                    checked = self.vision(tile.occupand, tile)
+                    if(tile.occupand.overwatch == True):
+                        if((tile.occupand.jam == False) & (self.clicked_tile in checked)):
+                            self.selected_Model = tile.occupand
+                            self.selected_tile = tile
+                            self.shoot()
+                    for tile in checked:
+                        if(tile.occupand in BL_ModellList):
+                            self.Manager.rev_models.append(tile)
+                            checked.remove(tile)
+                    if(self.Manager.rev_models.__len__() != 0):
+                        self.Manager.save_model = self.selected_Model
+                        self.Manager.save_tile = self.selected_tile
+                        self.reveal(self.Manager.rev_models[0])
+                
     def melee(self):
         facing = False
         SM1 = 0
@@ -347,55 +426,145 @@ class Game:                                         #can variables be exported t
         GS2 = random.randint(1,6)
         GS3 = random.randint(1,6)
         if((self.selected_tile != None) & (self.clicked_tile != None)):
-            if(((self.selected_tile.x + self.selected_Model.face[0]) == self.clicked_tile.x) & ((self.selected_tile.y + self.selected_Model.face[1]) == self.clicked_tile.y)):
-                if(self.selected_tile.is_occupied == True):
-                    match(self.selected_Model.face):
-                        case((1,0)):
-                            if(self.clicked_model.face == (-1,0)):
-                                facing = True
-                        case((-1,0)):
-                            if(self.clicked_model.face == (1,0)):
-                                facing = True
-                        case((0,1)):
-                            if(self.clicked_model.face == (0,-1)):
-                                facing = True
-                        case((0,-1)):
-                            if(self.clicked_model.face == (0,1)):
-                                facing = True
+            if(self.clicked_tile.is_door == True):
+                if(self.clicked_tile.is_open == False):
+                    self.redAP(self.selected_Model, 1)
                     if(self.is_playing == self.player1):
-                        game.redAP(game.selected_Model, 1)
                         match(self.selected_Model.weapon):
                             case('fist'):
                                 SM1 = random.randint(1,6)
+                            case('powerSword'):
+                                SM1 = random.randint(1,6)
+                            case('chainFist'):
+                                SM1 = 6
                         if(self.selected_Model.rank == 'sergeant'):
                             SM1 += 1
-                        if(((SM1 > GS1) & (SM1 > GS2) & (SM1 > GS3)) or ((SM2 > GS1) & (SM2 > GS2) & (SM2 > GS3))):
-                            self.clicked_tile.is_occupied = False
-                            self.clicked_tile.occupand = None
-                            GS_ModellList.remove(self.clicked_model)
-                            self.clicked_model = None
-                        elif((facing == True) & (((GS1 > SM1) & (GS1 > SM2)) or ((GS2 > SM1) & (GS2 > SM2)) or ((GS3 > SM1) & (GS3 > SM2)))):
-                            self.selected_tile.is_occupied = False
-                            self.selected_tile.occupand = None
-                            SM_ModellList.remove(self.selected_Model)
-                            self.selected_Model = None
+                            if(SM2 != 0):
+                                SM2 += 1
+                        if((SM1 >= 6) or (SM2 >= 6)):
+                            self.clicked_tile.is_door = False
                     if(self.is_playing == self.player2):
-                        game.redAP(game.selected_Model, 1)
-                        match(self.clicked_model.weapon):
-                            case('fist'):
-                                SM1 = random.randint(1,6)
-                        if(self.clicked_model.rank == 'sergeant'):
-                            SM1 += 1
-                        if(((GS1 > SM1) & (GS1 > SM2)) or ((GS2 > SM1) & (GS2 > SM2)) or ((GS3 > SM1) & (GS3 > SM2))):
-                            self.clicked_tile.is_occupied = False
-                            self.clicked_tile.occupand = None
-                            SM_ModellList.remove(self.clicked_model)
-                            self.cicked_model = None
-                        elif((facing == True) & (((SM1 > GS1) & (SM1 > GS2) & (SM1 > GS3)) or ((SM2 > GS1) & (SM2 > GS2) & (SM2 > GS3)))):
-                            self.selected_tile.is_occupied = False
-                            self.selected_tile.occupand = None
-                            GS_ModellList.remove(self.selected_Model)
-                            self.selected_Model = None
+                        if((GS1 == 6) or (GS2 == 6) or (GS3 == 6)):
+                            self.clicked_tile.is_door = False
+                    print(GS1,GS2,GS3,SM1,SM2)
+            elif(self.clicked_model != None):
+                if(((self.selected_tile.x + self.selected_Model.face[0]) == self.clicked_tile.x) & ((self.selected_tile.y + self.selected_Model.face[1]) == self.clicked_tile.y)):
+                    if(self.selected_tile.is_occupied == True):
+                        match(self.selected_Model.face):
+                            case((1,0)):
+                                if(self.clicked_model.face == (-1,0)):
+                                    facing = True
+                            case((-1,0)):
+                                if(self.clicked_model.face == (1,0)):
+                                    facing = True
+                            case((0,1)):
+                                if(self.clicked_model.face == (0,-1)):
+                                    facing = True
+                            case((0,-1)):
+                                if(self.clicked_model.face == (0,1)):
+                                    facing = True
+                        if(self.is_playing == self.player1):
+                            if(self.clicked_model in GS_ModellList):
+                                game.redAP(game.selected_Model, 1)
+                                match(self.selected_Model.weapon):
+                                    case('fist'):
+                                        SM1 = random.randint(1,6)
+                                    case('chainFist'):
+                                        SM1 = random.randint(1,6)
+                                    case('AssaultCanon'):
+                                        SM1 = random.randint(1,6)
+                                    case('flamer'):
+                                        SM1 = random.randint(1,6)
+                                    case('powerSword'):
+                                        SM1 = random.randint(1,6)
+                                        print(GS1,GS2,GS3,SM1,SM2)  
+                                        if(((SM1 < GS1) or (SM1 < GS2) or (SM1 < GS3)) or ((SM2 > SM1) and ((SM2 < GS1) or (SM2 < GS2) or (SM2 < GS3)))):
+                                            if((GS1 > GS2) and (GS1 > GS3)):
+                                                GS1 = random.randint(1,6)
+                                            elif((GS2 > GS1) and (GS2 > GS3)):
+                                                GS2 = random.randint(1,6)
+                                            else:
+                                                GS3 = random.randint(1,6)
+                                if(self.selected_Model.rank == 'sergeant'):
+                                    SM1 += 1
+                                    if(SM2 != 0):
+                                        SM2 += 1
+                                if(((SM1 > GS1) & (SM1 > GS2) & (SM1 > GS3)) or ((SM2 > GS1) & (SM2 > GS2) & (SM2 > GS3))):
+                                    self.clicked_tile.is_occupied = False
+                                    self.clicked_tile.occupand = None
+                                    GS_ModellList.remove(self.clicked_model)
+                                    self.clicked_model = None
+                                elif((facing == True) & (((GS1 > SM1) & (GS1 > SM2)) or ((GS2 > SM1) & (GS2 > SM2)) or ((GS3 > SM1) & (GS3 > SM2)))):
+                                    self.selected_tile.is_occupied = False
+                                    self.selected_tile.occupand = None
+                                    SM_ModellList.remove(self.selected_Model)
+                                    self.selected_Model = None
+                                else:
+                                    print(GS1,GS2,GS3,'|',SM1,SM2)  
+                                    self.Manager.melee_turn = True
+                                    self.Manager.changestate('turn')
+                                    self.run()
+
+                        if(self.is_playing == self.player2):
+                            if(self.clicked_model in SM_ModellList):
+                                game.redAP(game.selected_Model, 1)
+                                match(self.clicked_model.weapon):
+                                    case('fist'):
+                                        SM1 = random.randint(1,6)
+                                    case('chainFist'):
+                                        SM1 = random.randint(1,6)
+                                    case('AssaultCanon'):
+                                        SM1 = random.randint(1,6)
+                                    case('flamer'):
+                                        SM1 = random.randint(1,6)
+                                    case('powerSword'):
+                                        SM1 = random.randint(1,6)
+                                        print(GS1,GS2,GS3,SM1,SM2)  
+                                        if(((SM1 < GS1) or (SM1 < GS2) or (SM1 < GS3)) or ((SM2 > SM1) and ((SM2 < GS1) or (SM2 < GS2) or (SM2 < GS3)))):
+                                            if((GS1 > GS2) and (GS1 > GS3)):
+                                                GS1 = random.randint(1,6)
+                                            elif((GS2 > GS1) and (GS2 > GS3)):
+                                                GS2 = random.randint(1,6)
+                                            else:
+                                                GS3 = random.randint(1,6)
+                                if(self.clicked_model.rank == 'sergeant'):
+                                    SM1 += 1
+                                    if(SM2 != 0):
+                                        SM2 += 1
+                                if(self.clicked_model.guard == True):
+                                    if((SM1 < GS1) or (SM1 < GS2) or (SM1 < GS3)):
+                                        SM1 = random.randint(1,6)
+                                        if(self.clicked_model.rank == 'sergeant'):
+                                            SM1 += 1
+                                if(((GS1 > SM1) & (GS1 > SM2)) or ((GS2 > SM1) & (GS2 > SM2)) or ((GS3 > SM1) & (GS3 > SM2))):
+                                    self.clicked_tile.is_occupied = False
+                                    self.clicked_tile.occupand = None
+                                    SM_ModellList.remove(self.clicked_model)
+                                    self.cicked_model = None
+                                elif((facing == True) & (((SM1 > GS1) & (SM1 > GS2) & (SM1 > GS3)) or ((SM2 > GS1) & (SM2 > GS2) & (SM2 > GS3)))):
+                                    self.selected_tile.is_occupied = False
+                                    self.selected_tile.occupand = None
+                                    GS_ModellList.remove(self.selected_Model)
+                                    self.selected_Model = None
+                                else:
+                                    print(GS1,GS2,GS3,SM1,SM2)  
+                                    self.Manager.melee_turn = True
+                                    self.Manager.changestate('turn')
+                                    self.run()
+
+            print(GS1,GS2,GS3,SM1,SM2)                
+        for row in map: 
+            for tile in row:
+                if(tile.occupand in SM_ModellList):
+                    checked = self.vision(tile.occupand, tile)
+                    for tile in checked:
+                        if(tile.occupand in BL_ModellList):
+                            self.Manager.rev_models.append(tile)
+                            checked.remove(tile)
+                    if(self.Manager.rev_models.__len__() != 0):
+                        self.Manager.save_model = self.selected_Model
+                        self.Manager.save_tile = self.selected_tile
+                        self.reveal(self.Manager.rev_models[0])
                     print(GS1,GS2,GS3,SM1,SM2)
 
     def reveal(self, tile):
@@ -407,6 +576,7 @@ class Game:                                         #can variables be exported t
     def moveModel(self):
         a = False
         b = False
+        c = 0
         match(game.selected_Model.face):
             case(1,0):
                 ofset_x = 0
@@ -427,35 +597,56 @@ class Game:                                         #can variables be exported t
             if((self.is_playing == self.player1) & (self.selected_Model in SM_ModellList)):
                 if(((self.selected_tile.x + ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y + ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
                     if((self.selected_Model.AP != 0) | (self.CP != 0)):
-                        self.redAP(self.selected_Model, 1,) 
+                        c = 1
                         b = True
                 elif((self.selected_tile.x - ofs[0] == self.clicked_tile.x) or (self.selected_tile.y - ofs[1] == self.clicked_tile.y)):
                     if(self.selected_Model.AP + self.CP >= 2):
-                        self.redAP(self.selected_Model, 2)
+                        c = 2
                         b = True
-                if(self.clicked_tile.is_wall == True):
+                if((self.clicked_tile.is_wall == True) or ((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False))):
                     b = False
+                if(((map[self.selected_tile.y+1][self.selected_tile.x].is_wall) and (map[self.selected_tile.y-1][self.selected_tile.x].is_wall)) or ((map[self.selected_tile.y][self.selected_tile.x+1].is_wall) and (map[self.selected_tile.y][self.selected_tile.x-1].is_wall))):
+                    print('ja')
+                    if(map[self.selected_tile.y + self.selected_Model.face[1]][self.selected_tile.x + self.selected_Model.face[0]].is_occupied == True):
+                        if((self.clicked_tile == map[self.selected_tile.y + ofset_y + ofs[1]][self.selected_tile.x + ofset_x + ofs[0]]) or (self.clicked_tile == map[self.selected_tile.y - ofset_y + ofs[1]][self.selected_tile.x - ofset_x + ofs[0]])):
+                            print('ne')
+                            b = False
+                    elif(map[self.selected_tile.y - self.selected_Model.face[1]][self.selected_tile.x - self.selected_Model.face[0]].is_occupied == True):
+                        if((self.clicked_tile == map[self.selected_tile.y + ofset_y - ofs[1]][self.selected_tile.x + ofset_x - ofs[0]]) or (self.clicked_tile == map[self.selected_tile.y - ofset_y - ofs[1]][self.selected_tile.x - ofset_x - ofs[0]])):
+                            print('ne')
+                            b = False
             if((self.is_playing == self.player2) & ((self.selected_Model in GS_ModellList) or (self.selected_Model in BL_ModellList))):
                 if(((self.selected_tile.x + ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y + ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
                     if(self.selected_Model.AP != 0):
-                        self.redAP(self.selected_Model, 1,) 
+                        c = 1
                         b = True
                 elif(((self.selected_tile.x - ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y - ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
                     if(self.selected_Model in GS_ModellList):
                         if(self.selected_Model.AP >= 2):
-                            self.redAP(self.selected_Model, 2)
+                            c = 2
                             b = True
                     if(self.selected_Model in BL_ModellList):
                         if(self.selected_Model.AP != 0):
-                            self.redAP(self.selected_Model, 1)
+                            c = 1
                             b = True
                 elif((self.selected_tile.x + ofset_x == self.clicked_tile.x) or (self.selected_tile.x - ofset_x == self.clicked_tile.x) or (self.selected_tile.y + ofset_y == self.clicked_tile.y) or (self.clicked_tile.y - ofset_y == self.clicked_tile.y)):
                     if(self.selected_Model.AP != 0):
-                        self.redAP(self.selected_Model, 1)
+                        c = 1
                         b = True
-                if(self.clicked_tile.is_wall == True):
+                if((self.clicked_tile.is_wall == True) or ((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False))):
                     b = False
+                if(((map[self.selected_tile.y+1][self.selected_tile.x].is_wall) and (map[self.selected_tile.y-1][self.selected_tile.x].is_wall)) or ((map[self.selected_tile.y][self.selected_tile.x+1].is_wall) and (map[self.selected_tile.y][self.selected_tile.x-1].is_wall))):
+                    print('ja')
+                    if(map[self.selected_tile.y + self.selected_Model.face[1]][self.selected_tile.x + self.selected_Model.face[0]].is_occupied == True):
+                        if((self.clicked_tile == map[self.selected_tile.y + ofset_y + ofs[1]][self.selected_tile.x + ofset_x + ofs[0]]) or (self.clicked_tile == map[self.selected_tile.y - ofset_y + ofs[1]][self.selected_tile.x - ofset_x + ofs[0]])):
+                            print('ne')
+                            b = False
+                    elif(map[self.selected_tile.y - self.selected_Model.face[1]][self.selected_tile.x - self.selected_Model.face[0]].is_occupied == True):
+                        if((self.clicked_tile == map[self.selected_tile.y + ofset_y - ofs[1]][self.selected_tile.x + ofset_x - ofs[0]]) or (self.clicked_tile == map[self.selected_tile.y - ofset_y - ofs[1]][self.selected_tile.x - ofset_x - ofs[0]])):
+                            print('ne')
+                            b = False
         if(a & b):
+            self.redAP(self.selected_Model, c)
             self.Manager.save_model = self.selected_Model
             self.Manager.save_tile = self.selected_tile
 
@@ -486,25 +677,26 @@ class Game:                                         #can variables be exported t
                     game.run()
             elif(self.is_playing == self.player2):
                 if(self.selected_Model in GS_ModellList):
+                    self.Manager.gs_turnaftermove = self.selected_Model
                     self.clicked_model = self.selected_Model
                     self.clicked_tile = self.selected_tile
-                    e = True
                     for row in map: 
                         for tile in row:
                             if(tile.occupand in SM_ModellList):
+                                checked = self.vision(tile.occupand, tile)
                                 if(tile.occupand.overwatch == True):
-                                    checked = self.vision(tile.occupand, tile)
                                     if((tile.occupand.jam == False) & (self.clicked_tile in checked)):
                                         self.selected_Model = tile.occupand
                                         self.selected_tile = tile
                                         self.shoot()
-                    # if(e):
-                    #     self.clicked_model = None
-                    #     self.clicked_tile = None
-                    #     self.selected_Model = self.Manager.save_model
-                    #     self.Manager.save_model = None
-                    #     self.selected_tile = self.Manager.save_tile
-                    #     self.Manager.save_tile = None
+                                for tile in checked:
+                                    if(tile.occupand in BL_ModellList):
+                                        self.Manager.rev_models.append(tile)
+                                        checked.remove(tile)
+                                if(self.Manager.rev_models.__len__() != 0):
+                                    self.Manager.save_model = self.selected_Model
+                                    self.Manager.save_tile = self.selected_tile
+                                    self.reveal(self.Manager.rev_models[0])
                                 
                 if(self.selected_Model in BL_ModellList):
                     c = False
@@ -545,34 +737,110 @@ class gamestateTurn:
         self.turnright_button = Button(320, 200, self.move_image, 1)
         self.turnleft_button = Button(160, 200, self.move_image, 1)
         self.noturn_button = Button(240, 200, self.move_image, 1)
+        self.fullturn_button = Button(400, 200, self.move_image, 1)
+        self.face_button = Button(320, 200, self.move_image, 1)
+        self.move_button = Button(320, 200, self.move_image, 1)
         while(True):
             pressed = False
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit
                     sys.exit
-            if(self.turnleft_button.draw(screen)):
-                match(game.selected_Model.face):
-                    case(1,0): game.selected_Model.face = (0,1)
-                    case(0,1): game.selected_Model.face = (-1,0)
-                    case(-1,0): game.selected_Model.face = (0,-1)
-                    case(0,-1): game.selected_Model.face = (1,0)
-                game.redAP(game.selected_Model,1)
-                pressed = True
+            for row in map:
+                for tile in row: 
+                    tile.render(screen)
+            SB.display(screen)
+            BB.display(screen)
+            
+            if(self.gameStateManager.melee_turn == True):
+                if(self.face_button.draw(screen)):
+                    match(game.selected_Model.face):
+                        case(1,0): game.clicked_model.face = (-1,0)
+                        case(0,1): game.clicked_model.face = (0,-1)
+                        case(-1,0): game.clicked_model.face = (1,0)
+                        case(0,-1): game.clicked_model.face = (0,1)
+                    pressed = True
+                    self.gameStateManager.melee_turn = False
 
-            if(self.turnright_button.draw(screen)):
-                match(game.selected_Model.face):
-                    case(1,0): game.selected_Model.face = (0,-1)
-                    case(0,1): game.selected_Model.face = (1,0)
-                    case(-1,0): game.selected_Model.face = (0,1)
-                    case(0,-1): game.selected_Model.face = (-1,0)
-                game.redAP(game.selected_Model,1)
-                pressed = True
+            elif(self.gameStateManager.gs_moveturn == False):
+                if(self.turnleft_button.draw(screen)):
+                    if((game.is_playing == game.player1) and (game.selected_Model.AP + game.CP != 0)):
+                        a = True
+                    if((game.is_playing == game.player2) and (game.selected_Model.AP != 0) and (self.gameStateManager.gs_turnaftermove == None)):
+                        self.gameStateManager.gs_moveturn = True
+                        a = True
+                    if(self.gameStateManager.turn == True):
+                        a = True
+                    if(self.gameStateManager.gs_turnaftermove != None):
+                        a = True
+                        pressed = True
+                    if(a):
+                        match(game.selected_Model.face):
+                            case(1,0): game.selected_Model.face = (0,-1)
+                            case(0,1): game.selected_Model.face = (1,0)
+                            case(-1,0): game.selected_Model.face = (0,1)
+                            case(0,-1): game.selected_Model.face = (-1,0)
+                        if((self.gameStateManager.turn == False) and (self.gameStateManager.gs_turnaftermove != game.selected_Model)):
+                            game.redAP(game.selected_Model,1)
+                        else:
+                            self.gameStateManager.gs_turnaftermove = None
+                        a = False
+
+                if(self.turnright_button.draw(screen)):
+                    if((game.is_playing == game.player1) and (game.selected_Model.AP + game.CP != 0)):
+                        a = True
+                    if((game.is_playing == game.player2) and (game.selected_Model.AP != 0) and (self.gameStateManager.gs_turnaftermove == None)):
+                        self.gameStateManager.gs_moveturn = True
+                        a = True
+                    if(self.gameStateManager.turn == True):
+                        a = True
+                    if(self.gameStateManager.gs_turnaftermove != None):
+                        a = True
+                        pressed = True
+                    if(a):
+                        match(game.selected_Model.face):
+                            case(1,0): game.selected_Model.face = (0,1)
+                            case(0,1): game.selected_Model.face = (-1,0)
+                            case(-1,0): game.selected_Model.face = (0,-1)
+                            case(0,-1): game.selected_Model.face = (1,0)
+                        if((self.gameStateManager.turn == False) and (self.gameStateManager.gs_turnaftermove != game.selected_Model)):
+                            game.redAP(game.selected_Model,1)
+                        else:
+                            self.gameStateManager.gs_turnaftermove = None
+                        a = False
+
+                if(((game.is_playing == game.player2) or (self.gameStateManager.turn == True)) and (self.gameStateManager.gs_turnaftermove == None)):
+                    if(self.fullturn_button.draw(screen)):
+                        if(game.selected_Model.AP != 0):
+                            match(game.selected_Model.face):
+                                case(1,0): game.selected_Model.face = (-1,0)
+                                case(0,1): game.selected_Model.face = (0,-1)
+                                case(-1,0): game.selected_Model.face = (1,0)
+                                case(0,-1): game.selected_Model.face = (0,1)
+                            if(self.gameStateManager.turn == False):
+                                game.redAP(game.selected_Model,1)
+                                print(game.selected_Model.AP)
+
+            if(self.gameStateManager.gs_moveturn == True):
+                if(self.move_button.draw(screen)):
+                    game.clicked_tile = map[game.selected_tile.y + game.selected_Model.face[1]][game.selected_tile.x + game.selected_Model.face[0]]
+                    game.moveModel()
+                    self.gameStateManager.gs_turnaftermove = None
+                    pressed = True
+                    self.gameStateManager.gs_moveturn = False
 
             if(self.noturn_button.draw(screen)):
                 pressed = True
+                self.gameStateManager.turn = False
+                self.gameStateManager.melee_turn = False
+                self.gameStateManager.gs_moveturn = False
+                self.gameStateManager.gs_turnaftermove = None
+                   
             if(pressed):
-                if(game.is_playing == game.player1):
+                if(self.gameStateManager.rev_count != 0):
+                    self.gameStateManager.changestate('reveal')
+                    game.run()
+                elif(game.is_playing == game.player1):
                     self.gameStateManager.changestate('runP1')
                     game.run()
                 else:
@@ -633,6 +901,7 @@ class Player1Turn:
         self.changeturn_button = Button(120, 500, self.move_image, 1)
         self.shoot_button = Button(180, 500, self.move_image, 1)
         self.melee_button = Button(240, 500, self.move_image, 1)
+        self.ocDoor_button = Button(300, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -668,16 +937,21 @@ class Player1Turn:
                 game.run()
             
             if(self.shoot_button.draw(screen)):
-                if((game.selected_Model.AP + game.CP) != 0):
-                    game.redAP(game.selected_Model, 1)
-                    self.Manager.changestate('shoot')
-                    game.run()
-                else: print('nicht genug AP')
+                if(game.selected_Model != None):
+                    if((game.selected_Model.AP + game.CP) != 0):
+                        game.redAP(game.selected_Model, 1)
+                        self.Manager.changestate('shoot')
+                        game.run()
+                    else: print('nicht genug AP')
 
             if(self.melee_button.draw(screen)):
-                if((game.selected_Model.AP + game.CP) != 0):
-                    game.melee()
-                else: print('nicht genug AP')
+                if(game.selected_Model != None):
+                    if((game.selected_Model.AP + game.CP) != 0):
+                        game.melee()
+                    else: print('nicht genug AP')
+            
+            if(self.ocDoor_button.draw(screen)):
+                game.ocDoor()
 
             pygame.display.update()
 
@@ -692,6 +966,7 @@ class Player2Turn:
         self.changeturn_button = Button(120, 500, self.move_image, 1)
         self.reveal_button = Button(180, 500, self.move_image, 1)
         self.melee_button = Button(240, 500, self.move_image, 1)
+        self.ocDoor_button = Button(300, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -704,17 +979,23 @@ class Player2Turn:
             
             SB.display(screen)
             BB.display(screen)
+            if(self.Manager.gs_turnaftermove != None):
+                game.selected_Model = self.Manager.gs_turnaftermove
+                self.Manager.changestate('turn')
+                game.run()
+
             if(self.move_button.draw(screen)):
                 if((game.is_playing == game.player2) and ((game.selected_Model in GS_ModellList) or (game.selected_Model in BL_ModellList))):
                     game.moveModel()
 
             if(self.turn_button.draw(screen)):
-                if((game.is_playing == game.player2) and (game.selected_Model in GS_ModellList)):
-                    if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
-                        self.Manager.changestate('turn')
-                        game.run()
-                    else: print('no AP/CP')
-                else:print('anderes model wählen')
+                if(game.selected_Model != None):
+                    if((game.is_playing == game.player2) and (game.selected_Model in GS_ModellList)):
+                        if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
+                            self.Manager.changestate('turn')
+                            game.run()
+                        else: print('no AP/CP')
+                    else:print('anderes model wählen')
 
             if(self.changeturn_button.draw(screen)):
                 game.is_playing = game.player1
@@ -734,6 +1015,9 @@ class Player2Turn:
                 if(game.selected_Model in GS_ModellList):
                     if(game.selected_Model.AP != 0):
                         game.melee()
+
+            if(self.ocDoor_button.draw(screen)):
+                game.ocDoor()
 
             pygame.display.update()
 
@@ -803,19 +1087,26 @@ class gamestate_reveal:
     def run(self):
         self.move_image = pygame.image.load('Pictures/Wall.png')
         self.reveal_button = Button(60, 500, self.move_image, 1)
+        lis = []
 
-        self.revModel = game.selected_Model
-        self.amount = self.revModel.count
-        self.tile = game.selected_tile
+        if(self.Manager.rev_count == 0):
 
-        self.tile.is_occupied = False
-        BL_ModellList.remove(self.tile.occupand)
-        self.tile.occupand = Genestealer()
-        self.tile.is_occupied = True
-        GS_ModellList.append(self.tile.occupand)
-        self.amount -= 1
-        print(self.amount)
-        self.Manager.rev_models.remove(self.tile)
+            self.revModel = game.selected_Model
+            self.Manager.rev_count = self.revModel.count
+            self.tile = game.selected_tile
+
+            self.tile.is_occupied = False
+            BL_ModellList.remove(self.tile.occupand)
+            self.tile.occupand = Genestealer()
+            self.tile.is_occupied = True
+            GS_ModellList.append(self.tile.occupand)
+            self.Manager.rev_count -= 1
+            print(self.Manager.rev_count)
+            self.Manager.rev_models.remove(self.tile)
+            self.Manager.turn = True
+            game.selected_Model = self.tile.occupand
+            self.Manager.changestate('turn')
+            game.run()
 
         while(True):
             for event in pygame.event.get():
@@ -837,9 +1128,19 @@ class gamestate_reveal:
                             game.clicked_tile.occupand = Genestealer()
                             GS_ModellList.append(game.clicked_tile.occupand)
                             game.clicked_tile.is_occupied = True
-                            self.amount -= 1
+                            self.Manager.rev_count -= 1
+                            self.Manager.turn = True
+                            game.selected_Model = game.clicked_tile.occupand
+                            self.Manager.changestate('turn')
+                            game.run()
+            
+            for row in map:
+                for tile in row:
+                    if(((tile.x == game.selected_tile.x) or (tile.x == (game.selected_tile.x -1)) or (tile.x == (game.selected_tile.x +1))) and ((tile.y == game.selected_tile.y) or (tile.y == (game.selected_tile.y -1)) or (tile.y == (game.selected_tile.y +1)))):
+                        if((tile.is_occupied == False) & ((tile.is_door == True) & (tile.is_open == True)) & (tile.is_door == False) & (tile.is_wall == False)):
+                            lis.append(tile)
 
-            if(self.amount == 0):
+            if(self.Manager.rev_count == 0):
                 if(self.Manager.rev_models == []):
                     if(game.is_playing == game.player1):
                         game.selected_tile = self.Manager.save_tile
@@ -850,7 +1151,7 @@ class gamestate_reveal:
                         self.Manager.changestate('runP2')
                         game.run()
                 else:
-                    game.reveal(self.Manager.rev_models[1])
+                    game.reveal(self.Manager.rev_models[0])
 
             pygame.display.update()
         
@@ -875,7 +1176,7 @@ class Tile:
         if(self.is_wall): 
             image = pygame.image.load('Pictures/Wall.png')
             self.image = pygame.transform.scale(image,(self.size,self.size))
-        if(self.is_door):
+        elif(self.is_door):
             if((map[self.y+1][self.x].is_wall == True) and (map[self.y-1][self.x].is_wall == True)):
                 if(self.is_open == False):
                     image = pygame.image.load('Pictures/Door.png')
@@ -892,6 +1193,10 @@ class Tile:
                     image = pygame.image.load('Pictures/Door_open.png')
                     imagen = pygame.transform.scale(image,(self.size,self.size))
                     self.image = pygame.transform.rotate(imagen,90)
+        else:
+            image = pygame.image.load('Pictures/Floor.png')
+            self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
+
         screen.blit(self.image, (self.x*self.size, self.y*self.size))
         if(self.is_occupied):
             match(self.occupand.face):
@@ -904,11 +1209,11 @@ class Tile:
                 
                 case((0,1)):
                     imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                    imaget = pygame.transform.rotate(imaget,90)
+                    imaget = pygame.transform.rotate(imaget,270)
 
                 case((0,-1)):
                     imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                    imaget = pygame.transform.rotate(imaget,270)
+                    imaget = pygame.transform.rotate(imaget,90)
     
             screen.blit(imaget, (self.x*self.size, self.y*self.size))
     
