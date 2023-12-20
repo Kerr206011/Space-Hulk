@@ -5,7 +5,7 @@ game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_M
 
 gs = Blip()
 bl = Genestealer()
-cp = SpaceMarine('claws', 'none')
+cp = SpaceMarine('fist', 'none')
 SM_ModellList.append(cp)
 GS_ModellList.append(bl)
 BL_ModellList.append(gs)
