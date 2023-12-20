@@ -353,6 +353,27 @@ class Game:                                         #can variables be exported t
                     a = 0
                     b = 0
                     c = 0
+                case('flamer'):
+                    burn = None
+                    if(self.Heavy_flamer_ammo != 0):
+                        if((self.clicked_tile in liste) and (self.distance(self.selected_tile, self.clicked_tile) < 13)):
+                            self.Heavy_flamer_ammo -= 1
+                            for section in self.Manager.sections:
+                                for tile in section:
+                                    if(tile == self.clicked_tile):
+                                        burn = section
+                            if(burn != None):
+                                for tile in burn:
+                                    roll = random.randint(1,6)
+                                    if((roll > 1) and (tile.is_occupied == True)):
+                                        tile.is_occupied = False
+                                        if(tile.occupand in SM_ModellList):
+                                            SM_ModellList.remove(tile.occupand)
+                                        elif(tile.occupand in GS_ModellList):
+                                            GS_ModellList.remove(tile.occupand)
+                                        elif(tile.occupand in BL_ModellList):
+                                            BL_ModellList.remove(tile.occupand)
+                                    tile.is_buring = True
             if(self.selected_Model.overwatch == True):
                 if(((a == b) and not (c != 0)) and (self.is_playing == self.player2)):
                     game.selected_Model.jam = True
