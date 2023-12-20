@@ -98,6 +98,21 @@ class Game:                                         #can variables be exported t
             self.guard = False
             self.jam = False
         self.CP = random.randint(1,6)
+        for row in map:
+            for tile in row:
+                tile.is_buring = False
+        for row in map: 
+            for tile in row:
+                if(tile.occupand in SM_ModellList):
+                    checked = self.vision(tile.occupand, tile)
+                    for tile in checked:
+                        if(tile.occupand in BL_ModellList):
+                            self.Manager.rev_models.append(tile)
+                            checked.remove(tile)
+                    if(self.Manager.rev_models.__len__() != 0):
+                        self.Manager.save_model = self.selected_Model
+                        self.Manager.save_tile = self.selected_tile
+                        self.reveal(self.Manager.rev_models[0])
 
     def GS_prep(self):
         self.selected_Model = None
@@ -162,7 +177,7 @@ class Game:                                         #can variables be exported t
                 if(i == 1):
                     is_looking_at_object = True 
                 i = 1
-            elif((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
                 x = ((tile.x) + (ofset_x) + (ofs[0]))
                 y = ((tile.y) + (ofset_y) + (ofs[1]))
                 runS = False
@@ -209,7 +224,7 @@ class Game:                                         #can variables be exported t
                 if((i == 1) and (checked_tile.is_occupied == True)):
                     b = True
                     runL2 = False
-            elif((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
                 runL1 = False
                 if((i == 1) or (b)):
                     runL2 = False
@@ -243,7 +258,7 @@ class Game:                                         #can variables be exported t
                     runL2 = False
                     x = ((tile.x) - (ofset_x) + (ofs[0]))
                     y = ((tile.y) - (ofset_y) + (ofs[1]))
-                if((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+                if((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
                     runL2 = False
                     x = ((tile.x) - (ofset_x) + (ofs[0]))
                     y = ((tile.y) - (ofset_y) + (ofs[1]))
@@ -252,7 +267,7 @@ class Game:                                         #can variables be exported t
             checked_tile = map[y][x]
             if((checked_tile.is_occupied == True) or ((checked_tile.is_entrypoint == False) and (checked_tile.is_wall == False) and (checked_tile.is_buring == False) and ((checked_tile.is_door == False) or (checked_tile.is_open == True)))):
                 seenModels.append(checked_tile)
-            elif((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
                 runL2 = False
                 x = ((tile.x) - (ofset_x) + (ofs[0]))
                 y = ((tile.y) - (ofset_y) + (ofs[1]))
@@ -274,7 +289,7 @@ class Game:                                         #can variables be exported t
                 if((i == 1) and (checked_tile.is_occupied == True)):
                     b = True
                     runR2 = False
-            elif((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
                 runR1 = False
                 if((i == 1) or (b)):
                     runR2 = False
@@ -298,13 +313,13 @@ class Game:                                         #can variables be exported t
                 y = ((tile.y) - (2 * ofset_y) + (2 * ofs[1]))
                 if(checked_tile.is_occupied):
                     runR2 = False
-                if((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+                if((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
                     runR2 = False
         while(runR2):
             checked_tile = map[y][x]
             if((checked_tile.is_occupied == True) or ((checked_tile.is_entrypoint == False) and (checked_tile.is_wall == False) and (checked_tile.is_buring == False) and ((checked_tile.is_door == False) or (checked_tile.is_open == True)))):
                 seenModels.append(checked_tile)
-            elif((checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
                 runR2 = False
             if((map[(checked_tile.y)+(ofset_y)][(checked_tile.x)+(ofset_x)].is_wall) and (map[(checked_tile.y)-(ofset_y)][(checked_tile.x)-(ofset_x)].is_wall)):
                 runR2 = False
@@ -433,7 +448,7 @@ class Game:                                         #can variables be exported t
         a = False
         if(self.clicked_tile != None):
             if(self.clicked_tile.is_door == True):
-                if(self.selected_Model != None):
+                if((self.selected_Model != None) and (self.clicked_tile.is_occupied == False)):
                     ofs = game.selected_Model.face
                     if(((self.selected_tile.x + ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y + ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
                         if(self.is_playing == self.player1):
@@ -444,6 +459,15 @@ class Game:                                         #can variables be exported t
                             if(self.selected_Model.AP != 0):
                                 self.redAP(self.selected_Model, 1)
                                 a = True
+                                
+                if(map[self.selected_tile.y +1][self.selected_tile.x].is_buring):
+                    a = False
+                elif(map[self.selected_tile.y - 1][self.selected_tile.x].is_buring):
+                    a = False
+                elif(map[self.selected_tile.y][self.selected_tile.x + 1].is_buring):
+                    a = False
+                elif(map[self.selected_tile.y][self.selected_tile.x - 1].is_buring):
+                    a = False
         if(a):
             if(self.clicked_tile.is_open == True):
                 self.clicked_tile.is_open = False
@@ -700,6 +724,15 @@ class Game:                                         #can variables be exported t
                         if((self.clicked_tile == map[self.selected_tile.y + ofset_y - ofs[1]][self.selected_tile.x + ofset_x - ofs[0]]) or (self.clicked_tile == map[self.selected_tile.y - ofset_y - ofs[1]][self.selected_tile.x - ofset_x - ofs[0]])):
                             print('ne')
                             b = False
+                if(self.clicked_tile.is_buring):
+                    if(self.selected_tile.is_buring):
+                        if((random.randint(1,6)) > 1):
+                            self.selected_tile.is_occupied = False
+                            SM_ModellList.remove(self.selected_Model)
+                            self.selected_tile.occupand = None
+                            b = False
+                    else:
+                        b = False
             if((self.is_playing == self.player2) & (self.selected_Model in BL_ModellList)):
                 if((self.selected_Model in BL_ModellList) and (self.selected_tile.is_lurkingpoint == True) and (self.clicked_tile.is_entrypoint == True)):
                     if((map[self.clicked_tile.y][self.clicked_tile.x - 1].is_wall == False) and (map[self.clicked_tile.y][self.clicked_tile.x - 1].is_lurkingpoint == False)):
@@ -719,6 +752,8 @@ class Game:                                         #can variables be exported t
                         if(self.clicked_tile.is_occupied):
                             a = False
                     b = True
+                    if(self.clicked_tile.is_buring):
+                        b = False
                     for row in map:
                         for tile in row:
                             if(tile.occupand in SM_ModellList):
@@ -758,6 +793,15 @@ class Game:                                         #can variables be exported t
                         if((self.clicked_tile == map[self.selected_tile.y + ofset_y - ofs[1]][self.selected_tile.x + ofset_x - ofs[0]]) or (self.clicked_tile == map[self.selected_tile.y - ofset_y - ofs[1]][self.selected_tile.x - ofset_x - ofs[0]])):
                             print('ne')
                             b = False
+                if(self.clicked_tile.is_buring):
+                    if(self.selected_tile.is_buring):
+                        if((random.randint(1,6)) > 1):
+                            self.selected_tile.is_occupied = False
+                            SM_ModellList.remove(self.selected_Model)
+                            self.selected_tile.occupand = None
+                            b = False
+                    else:
+                        b = False
         print(a,b)
         if(a & b):
             self.redAP(self.selected_Model, c)
