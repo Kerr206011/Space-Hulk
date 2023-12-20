@@ -341,6 +341,10 @@ class Game:                                         #can variables be exported t
                         c = random.randint(1,6)
                         game.Assault_cannon_Ammo -= 1
                         print(a,b,c)
+                case('claws'):
+                    a = 0
+                    b = 0
+                    c = 0
             if(self.selected_Model.overwatch == True):
                 if(((a == b) and not (c != 0)) and (self.is_playing == self.player2)):
                     game.selected_Model.jam = True
@@ -437,6 +441,17 @@ class Game:                                         #can variables be exported t
                                 SM1 = random.randint(1,6)
                             case('chainFist'):
                                 SM1 = 6
+                            case('AssaultCanon'):
+                                SM1 = random.randint(1,6)
+                            case('claws'):
+                                SM1 = random.randint(1,6)
+                                SM2 = random.randint(1,6)
+                                if(SM1 > SM2):
+                                    SM1 += 1
+                                else:
+                                    SM2 += 1
+                            case('flamer'):
+                                SM1 = random.randint(1,6)
                         if(self.selected_Model.rank == 'sergeant'):
                             SM1 += 1
                             if(SM2 != 0):
@@ -444,7 +459,7 @@ class Game:                                         #can variables be exported t
                         if((SM1 >= 6) or (SM2 >= 6)):
                             self.clicked_tile.is_door = False
                     if(self.is_playing == self.player2):
-                        if((GS1 == 6) or (GS2 == 6) or (GS3 == 6)):
+                        if((GS1 >= 6) or (GS2 >= 6) or (GS3 >= 6)):
                             self.clicked_tile.is_door = False
                     print(GS1,GS2,GS3,SM1,SM2)
             elif(self.clicked_model != None):
@@ -485,6 +500,13 @@ class Game:                                         #can variables be exported t
                                                 GS2 = random.randint(1,6)
                                             else:
                                                 GS3 = random.randint(1,6)
+                                    case('claws'):
+                                        SM1 = random.randint(1,6)
+                                        SM2 = random.randint(1,6)
+                                        if(SM1 > SM2):
+                                            SM1 += 1
+                                        else:
+                                            SM2 += 1
                                 if(self.selected_Model.rank == 'sergeant'):
                                     SM1 += 1
                                     if(SM2 != 0):
@@ -517,6 +539,14 @@ class Game:                                         #can variables be exported t
                                         SM1 = random.randint(1,6)
                                     case('flamer'):
                                         SM1 = random.randint(1,6)
+                                    case('claws'):
+                                        SM1 = random.randint(1,6)
+                                        if(facing):   
+                                            SM2 = random.randint(1,6)
+                                            if(SM1 > SM2):
+                                                SM1 += 1
+                                            else:
+                                                SM2 += 1
                                     case('powerSword'):
                                         SM1 = random.randint(1,6)
                                         print(GS1,GS2,GS3,SM1,SM2)  
@@ -532,10 +562,21 @@ class Game:                                         #can variables be exported t
                                     if(SM2 != 0):
                                         SM2 += 1
                                 if(self.clicked_model.guard == True):
-                                    if((SM1 < GS1) or (SM1 < GS2) or (SM1 < GS3)):
-                                        SM1 = random.randint(1,6)
+                                    if(((SM1 < GS1) or (SM1 < GS2) or (SM1 < GS3)) or ((SM2 != 0) and ((SM2 < GS1) or (SM2 < GS2) or (SM2 < GS3)))):
+                                        if((SM2 > SM1) or (SM2 == 0)):
+                                            SM1 = random.randint(1,6)
+                                        else:
+                                            SM2 = random.randint(1,6)
                                         if(self.clicked_model.rank == 'sergeant'):
-                                            SM1 += 1
+                                            if((SM1 > SM2) or (SM2 == 0)):
+                                                SM1 += 1
+                                            else:
+                                                SM2 += 1
+                                        if((self.clicked_model.weapon == 'claws') and (facing)):
+                                            if((SM1 > SM2) or (SM2 == 0)):
+                                                SM1 += 1
+                                            else:
+                                                SM2 += 1
                                 if(((GS1 > SM1) & (GS1 > SM2)) or ((GS2 > SM1) & (GS2 > SM2)) or ((GS3 > SM1) & (GS3 > SM2))):
                                     self.clicked_tile.is_occupied = False
                                     self.clicked_tile.occupand = None
@@ -673,8 +714,9 @@ class Game:                                         #can variables be exported t
                     self.Manager.save_tile = self.selected_tile
                     self.reveal(self.Manager.rev_models[0])
                 elif(lis != []):
-                    self.Manager.changestate('shoot')
-                    game.run()
+                    if(self.selected_Model.weapon != 'claws'):
+                        self.Manager.changestate('shoot')
+                        game.run()
             elif(self.is_playing == self.player2):
                 if(self.selected_Model in GS_ModellList):
                     self.Manager.gs_turnaftermove = self.selected_Model
@@ -938,11 +980,12 @@ class Player1Turn:
             
             if(self.shoot_button.draw(screen)):
                 if(game.selected_Model != None):
-                    if((game.selected_Model.AP + game.CP) != 0):
-                        game.redAP(game.selected_Model, 1)
-                        self.Manager.changestate('shoot')
-                        game.run()
-                    else: print('nicht genug AP')
+                    if(game.selected_Model.weapon != 'claws'):
+                        if((game.selected_Model.AP + game.CP) != 0):
+                            game.redAP(game.selected_Model, 1)
+                            self.Manager.changestate('shoot')
+                            game.run()
+                        else: print('nicht genug AP')
 
             if(self.melee_button.draw(screen)):
                 if(game.selected_Model != None):
@@ -1165,11 +1208,12 @@ class Tile:
         self.is_occupied = False # true if occupied by any miniature
         self.occupand = Model # equals the modell which occupies this tile
         self.rect = self.image.get_rect()
-        self.rect.topleft = (x*size,y*size)
-        self.clicked = False
-        self.is_wall = False
-        self.is_entrypoint = False
-        self.is_door = False
+        self.rect.topleft = (x*size,y*size) #positions the rect to th right coordinates
+        self.clicked = False    #if the tile has been clicked(importnt later)
+        self.is_wall = False    #if the tile is a wall-segment thus having a diffrent picture and function
+        self.is_entrypoint = False  #if the tile is an entrypoint for reinforcing blips
+        self.is_lurkingpoint = False    #if the tile is a lurkingpoint for blips
+        self.is_door = False    
         self.is_open = False
 
     def render(self, screen):
@@ -1178,6 +1222,7 @@ class Tile:
             self.image = pygame.transform.scale(image,(self.size,self.size))
         elif(self.is_door):
             if((map[self.y+1][self.x].is_wall == True) and (map[self.y-1][self.x].is_wall == True)):
+                #path = if self.is_open == False "" else ""
                 if(self.is_open == False):
                     image = pygame.image.load('Pictures/Door.png')
                     self.image = pygame.transform.scale(image,(self.size,self.size))
@@ -1193,6 +1238,20 @@ class Tile:
                     image = pygame.image.load('Pictures/Door_open.png')
                     imagen = pygame.transform.scale(image,(self.size,self.size))
                     self.image = pygame.transform.rotate(imagen,90)
+
+        elif(self.is_entrypoint):
+            image = pygame.image.load('Pictures/entrypoint.PNG')
+            if((map[self.y][self.x - 1].is_lurkingpoint == False) and (map[self.y][self.x - 1].is_wall == False)):
+                self.image = pygame.transform.scale(image,(self.size,self.size))
+            elif((map[self.y + 1][self.x].is_lurkingpoint == False) and (map[self.y + 1][self.x].is_wall == False)):
+                imager = pygame.transform.scale(image,(self.size,self.size))
+                self.image = pygame.transform.rotate(imager,90)
+            elif((map[self.y][self.x + 1].is_lurkingpoint == False) and (map[self.y][self.x + 1].is_wall == False)):
+                imager = pygame.transform.scale(image,(self.size,self.size))
+                self.image = pygame.transform.rotate(imager,180)
+            else:
+                imager = pygame.transform.scale(image,(self.size,self.size))
+                self.image = pygame.transform.rotate(imager,270)
         else:
             image = pygame.image.load('Pictures/Floor.png')
             self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
@@ -1255,7 +1314,7 @@ class Genestealer(Model):
 
 class Blip(Model):
     def __init__(self):
-        super().__init__(6, 'Pictures/Models/Blip.png')
+        super().__init__(6, 'Pictures/Models/Blip_new.PNG')
         self.count = random.randint(1,3)
 
 #generate a Map of tiles

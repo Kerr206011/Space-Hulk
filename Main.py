@@ -5,7 +5,7 @@ game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_M
 
 gs = Blip()
 bl = Genestealer()
-cp = SpaceMarine('AssaultCanon', 'none')
+cp = SpaceMarine('claws', 'none')
 SM_ModellList.append(cp)
 GS_ModellList.append(bl)
 BL_ModellList.append(gs)
@@ -23,6 +23,10 @@ map[4][2].is_wall = True
 map[6][3].is_wall = True
 map[4][3].is_wall = True
 map[5][3].is_door = True
+map[15][14].is_wall = True
+map[15][16].is_wall = True
+map[16][15].is_lurkingpoint = True
+map[15][15].is_entrypoint = True
 
 map[17][17].is_door = True
 map[17][17].is_open = True 
