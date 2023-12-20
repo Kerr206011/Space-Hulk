@@ -354,7 +354,11 @@ class Game:                                         #can variables be exported t
                     b = 0
                     c = 0
                 case('flamer'):
+                    a = 0
+                    b = 0
+                    c = 0
                     burn = None
+                    door = False
                     if(self.Heavy_flamer_ammo != 0):
                         if((self.clicked_tile in liste) and (self.distance(self.selected_tile, self.clicked_tile) < 13)):
                             self.Heavy_flamer_ammo -= 1
@@ -364,16 +368,28 @@ class Game:                                         #can variables be exported t
                                         burn = section
                             if(burn != None):
                                 for tile in burn:
-                                    roll = random.randint(1,6)
-                                    if((roll > 1) and (tile.is_occupied == True)):
-                                        tile.is_occupied = False
-                                        if(tile.occupand in SM_ModellList):
-                                            SM_ModellList.remove(tile.occupand)
-                                        elif(tile.occupand in GS_ModellList):
-                                            GS_ModellList.remove(tile.occupand)
-                                        elif(tile.occupand in BL_ModellList):
-                                            BL_ModellList.remove(tile.occupand)
-                                    tile.is_buring = True
+                                    if(isinstance(tile,Tile)):
+                                        if((tile.is_door) and (tile.is_open == False)):
+                                            door = True
+                            if(door):
+                                for obj in burn:
+                                    if(isinstance(obj, list)):
+                                        if(self.clicked_tile in obj):
+                                            burn = obj
+                                            break
+                            if(burn != None):
+                                for tile in burn:
+                                    if(isinstance(tile,Tile)):
+                                        roll = random.randint(1,6)
+                                        if((roll > 1) and (tile.is_occupied == True)):
+                                            tile.is_occupied = False
+                                            if(tile.occupand in SM_ModellList):
+                                                SM_ModellList.remove(tile.occupand)
+                                            elif(tile.occupand in GS_ModellList):
+                                                GS_ModellList.remove(tile.occupand)
+                                            elif(tile.occupand in BL_ModellList):
+                                                BL_ModellList.remove(tile.occupand)
+                                        tile.is_buring = True
             if(self.selected_Model.overwatch == True):
                 if(((a == b) and not (c != 0)) and (self.is_playing == self.player2)):
                     game.selected_Model.jam = True
@@ -668,7 +684,7 @@ class Game:                                         #can variables be exported t
                     if((self.selected_Model.AP != 0) | (self.CP != 0)):
                         c = 1
                         b = True
-                elif((self.selected_tile.x - ofs[0] == self.clicked_tile.x) or (self.selected_tile.y - ofs[1] == self.clicked_tile.y)):
+                elif(((self.selected_tile.x - ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y - ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
                     if(self.selected_Model.AP + self.CP >= 2):
                         c = 2
                         b = True
@@ -726,7 +742,7 @@ class Game:                                         #can variables be exported t
                         if(self.selected_Model.AP != 0):
                             c = 1
                             b = True
-                elif((self.selected_tile.x + ofset_x == self.clicked_tile.x) or (self.selected_tile.x - ofset_x == self.clicked_tile.x) or (self.selected_tile.y + ofset_y == self.clicked_tile.y) or (self.clicked_tile.y - ofset_y == self.clicked_tile.y)):
+                elif(((self.selected_tile.x + ofset_x == self.clicked_tile.x) and (ofset_x != 0)) or ((self.selected_tile.x - ofset_x == self.clicked_tile.x) and (ofset_x != 0)) or ((self.selected_tile.y + ofset_y == self.clicked_tile.y) and (ofset_y != 0)) or ((self.clicked_tile.y - ofset_y == self.clicked_tile.y) and (ofset_y != 0))):
                     if(self.selected_Model.AP != 0):
                         c = 1
                         b = True
@@ -1040,7 +1056,11 @@ class Player1Turn:
             if(self.shoot_button.draw(screen)):
                 if(game.selected_Model != None):
                     if(game.selected_Model.weapon != 'claws'):
-                        if((game.selected_Model.AP + game.CP) != 0):
+                        if(((game.selected_Model.AP + game.CP) > 1) and (game.selected_Model.weapon == 'flamer')):
+                            game.redAP(game.selected_Model, 1)
+                            self.Manager.changestate('shoot')
+                            game.run()
+                        elif(((game.selected_Model.AP + game.CP) != 0) and (game.selected_Model.weapon != 'flamer')):
                             game.redAP(game.selected_Model, 1)
                             self.Manager.changestate('shoot')
                             game.run()

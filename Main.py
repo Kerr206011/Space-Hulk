@@ -9,8 +9,9 @@ cp = SpaceMarine('flamer', 'none')
 SM_ModellList.append(cp)
 GS_ModellList.append(bl)
 BL_ModellList.append(gs)
-
-gameStateManager.sections = [[map[5][2],map[5][3],map[5][4]],[map[5][5], map[5][6], map[5][7],map[5][8]]]
+door1 = [map[5][2]]
+door2 = [map[5][4]]
+gameStateManager.sections = [[map[5][2],map[5][3],map[5][4],door1,door2],[map[5][5], map[5][6], map[5][7],map[5][8]]]
 
 # for section in gameStateManager.sections:
 #     if map[1][1] in section:
