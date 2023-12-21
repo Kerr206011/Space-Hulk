@@ -1,7 +1,7 @@
 from Data import *
 from sys import exit
 
-game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_Main(), 'start':gamestateNewGame(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot(), 'reveal':gamestate_reveal(), 'gsprep':gamestate_reinforcement(), 'actP1':Player1Activation(), 'actP2':Player2Activation(), 'ooc':OOC_Activation()}
+game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_Main(), 'start':gamestateNewGame(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot(), 'reveal':gamestate_reveal(), 'gsprep':gamestate_reinforcement(), 'actP1':Player1Activation(), 'actP2':Player2Activation(), 'ooc':OOC_Activation(), 'reroll':CP_reroll()}
 
 gs = Blip()
 bl = Genestealer()

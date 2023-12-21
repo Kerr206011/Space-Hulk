@@ -117,6 +117,9 @@ class Game:                                         #can variables be exported t
                         self.Manager.save_model = self.selected_Model
                         self.Manager.save_tile = self.selected_tile
                         self.reveal(self.Manager.rev_models[0])
+        if(self.CP != 6):
+            self.Manager.changestate('reroll')
+            self.run()
 
     def GS_prep(self):
         self.selected_Model = None
@@ -418,7 +421,7 @@ class Game:                                         #can variables be exported t
                     game.selected_Model.jam = True
             if(self.clicked_model != None) :
                 if((self.clicked_tile in liste) and (self.clicked_model in GS_ModellList)):
-                    if(self.selected_Model.weapon != 'flamer'):
+                    if((self.selected_Model.weapon != 'flamer') and (self.selected_Model.overwatch == False) and (self.selected_Model.weapon != 'claws')):
                         self.redAP(self.selected_Model, 1)
                         self.selected_Model.guard = False
                     if((c == 0) and (((a == 6) or (b == 6)) or ((self.selected_Model.susf) and ((a >= 5) or (b >= 5))))):
@@ -479,11 +482,6 @@ class Game:                                         #can variables be exported t
                                                 if(self.CP != 0):
                                                     self.Manager.ooc = True
                                                     self.Manager.ooc_models.append(tile.occupand)
-                                            # if(tile.occupand.overwatch == True):
-                                            #     if((tile.occupand.jam == False) & (self.clicked_tile in checked)):
-                                            #         self.selected_Model = tile.occupand
-                                            #         self.selected_tile = tile
-                                            #         self.shoot()
                                 
                 if(map[self.clicked_tile.y +1][self.clicked_tile.x].is_buring):
                     a = False
@@ -503,6 +501,19 @@ class Game:                                         #can variables be exported t
             for tile in row:
                 if(tile.occupand in SM_ModellList):
                     checked = self.vision(tile.occupand, tile)
+                    if(self.is_playing == self.player2):
+                        if(tile.occupand.overwatch == True):
+                            if((tile.occupand.jam == False) & (self.clicked_tile in checked)):
+                                if(self.clicked_tile.is_open == False):
+                                    self.selected_Model = tile.occupand
+                                    self.selected_tile = tile
+                                    self.shoot()
+                            elif((tile.occupand.jam == False) & (self.selected_tile in checked)):
+                                self.clicked_model = self.selected_Model
+                                self.clicked_tile = self.selected_tile
+                                self.selected_Model = tile.occupand
+                                self.selected_tile = tile
+                                self.shoot()
                     for tile in checked:
                         if(tile.occupand in BL_ModellList):
                             self.Manager.rev_models.append(tile)
@@ -1086,6 +1097,39 @@ class gamestateNewGame:
             screen.blit(text_surface, (50, 50))
             pygame.display.update()
 
+class CP_reroll:
+    def __init__(self) -> None:
+        self.Manager = gameStateManager
+
+    def run(self):
+        self.move_image = pygame.image.load('Pictures/Wall.png')
+        self.changeturn_button = Button(120, 500, self.move_image, 1)
+        self.reroll_button = Button(60, 500, self.move_image, 1)
+        while(True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            for row in map:
+                for tile in row:
+                    tile.render(screen)
+                    tile.interact()
+            
+            SB.display(screen)
+            BB.display(screen)
+
+            if(self.changeturn_button.draw(screen)):
+                self.Manager.changestate('runP1')
+                game.CP = random.randint(1,6)
+                game.run()
+
+            if(self.reroll_button.draw(screen)):
+                self.Manager.changestate('runP1')
+                game.CP = random.randint(1,6)
+                game.run()
+            
+            pygame.display.update()
+
 class Player1Turn:
     def __init__(self) -> None:
         self.Manager = gameStateManager
@@ -1135,7 +1179,8 @@ class OOC_Activation:
         self.melee_button = Button(240, 500, self.move_image, 1)
         self.ocDoor_button = Button(300, 500, self.move_image, 1)
         self.guard_button = Button(360, 500, self.move_image, 1)
-        self.un_jam_button = Button(420, 500, self.move_image, 1)
+        self.overwatch_button = Button(420, 500, self.move_image, 1)
+        self.un_jam_button = Button(480, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
