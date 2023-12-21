@@ -425,7 +425,7 @@ class Game:                                         #can variables be exported t
                         hit = True
                     elif((c != 0) and (((a >= 5) or (b >= 5) or (c >=5)) or ((self.selected_Model.susf) and ((a >= 4) or (b >= 4) or (c >= 4))))):
                         hit = True
-                    elif(((a == b) and not (c != 0)) and (self.is_playing == self.player2)):
+                    elif(((a == b) and not (c != 0)) and (self.is_playing == self.player2) and (self.selected_Model.weapon != 'flamer')):
                         game.selected_Model.jam = True
                     else:
                         game.selected_Model.susf = True
@@ -667,6 +667,15 @@ class Game:                                         #can variables be exported t
                                                 SM1 += 1
                                             else:
                                                 SM2 += 1
+                                for row in map: 
+                                    for tile in row:
+                                        if(tile.occupand in SM_ModellList):
+                                            checked = self.vision(tile.occupand, tile)
+                                            if(self.selected_tile in checked):
+                                                if(self.CP != 0):
+                                                    self.Manager.ooc = True
+                                                    self.Manager.ooc_models.append(tile.occupand)
+
                                 if(((GS1 > SM1) & (GS1 > SM2)) or ((GS2 > SM1) & (GS2 > SM2)) or ((GS3 > SM1) & (GS3 > SM2))):
                                     self.clicked_tile.is_occupied = False
                                     self.clicked_tile.occupand = None
@@ -860,10 +869,15 @@ class Game:                                         #can variables be exported t
                     self.Manager.gs_turnaftermove = self.selected_Model
                     self.clicked_model = self.selected_Model
                     self.clicked_tile = self.selected_tile
+
                     for row in map: 
                         for tile in row:
                             if(tile.occupand in SM_ModellList):
                                 checked = self.vision(tile.occupand, tile)
+                                if(self.selected_tile in checked):
+                                    if(self.CP != 0):
+                                        self.Manager.ooc = True
+                                        self.Manager.ooc_models.append(tile.occupand)
                                 if(tile.occupand.overwatch == True):
                                     if((tile.occupand.jam == False) & (self.clicked_tile in checked)):
                                         self.selected_Model = tile.occupand
@@ -1121,7 +1135,7 @@ class OOC_Activation:
         self.melee_button = Button(240, 500, self.move_image, 1)
         self.ocDoor_button = Button(300, 500, self.move_image, 1)
         self.guard_button = Button(360, 500, self.move_image, 1)
-
+        self.un_jam_button = Button(420, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1185,6 +1199,19 @@ class OOC_Activation:
                     game.selected_Model.overwatch = False
                     game.selected_Model.guard = True
 
+            if(self.overwatch_button.draw(screen)):
+                if((game.CP) > 1):
+                    if(game.selected_Model.weapon != 'flamer'):
+                        game.redAP(game.selected_Model, 2)
+                        game.selected_Model.overwatch = True
+                        game.selected_Model.guard = False
+
+            if(self.un_jam_button.draw(screen)):
+                if(game.CP != 0):
+                    if(game.selected_Model.jam == True):
+                        game.redAP(game.selected_Model, 1)
+                        game.selected_Model.jam = False
+
             pygame.display.update()
 
 class Player1Activation:
@@ -1204,6 +1231,7 @@ class Player1Activation:
         self.melee_button = Button(240, 500, self.move_image, 1)
         self.ocDoor_button = Button(300, 500, self.move_image, 1)
         self.guard_button = Button(360, 500, self.move_image, 1)
+        self.overwatch_button = Button(420, 500, self.move_image, 1)
 
         while(True):
             for event in pygame.event.get():
@@ -1286,6 +1314,17 @@ class Player1Activation:
                             game.redAP(game.selected_Model, 2)
                             game.selected_Model.overwatch = False
                             game.selected_Model.guard = True
+
+            if(self.overwatch_button.draw(screen)):
+                if((game.selected_Model.AP + game.CP) > 1):
+                    if(game.selected_Model.weapon != 'flamer'):
+                        if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
+                                if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                                    self.activated_model.AP = 0
+                                    self.activated_model = game.selected_Model
+                                game.redAP(game.selected_Model, 2)
+                                game.selected_Model.overwatch = True
+                                game.selected_Model.guard = False
 
             pygame.display.update()
 
