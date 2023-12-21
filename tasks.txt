@@ -13,3 +13,16 @@ Speicherfile:
     Higscore/ liste(kann scrollen usw)
 
 später neue Steuerung
+
+Fehler:
+    verhindere das shoot nach move exploited werden kann
+    überall when selectedmodel != none einfügen
+    sm schießen kostet nur AP wenn auch was angschossen wird
+    overwatch
+    oot cp Nutzung
+    blip activation verhindert NICHT das aufdecken
+    gesicht in wand verhindert das bewegen nach links und rechts(GS)
+
+referenz:
+rank : 'sergeant'
+weapon : 'fist','AssaultCanon','powerSword,'flamer','chainFist','claws'

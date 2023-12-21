@@ -478,7 +478,7 @@ class Game:                                         #can variables be exported t
                                             if(self.selected_tile in checked):
                                                 if(self.CP != 0):
                                                     self.Manager.ooc = True
-                                                    self.Manager.ooc_models.append(tile)
+                                                    self.Manager.ooc_models.append(tile.occupand)
                                             # if(tile.occupand.overwatch == True):
                                             #     if((tile.occupand.jam == False) & (self.clicked_tile in checked)):
                                             #         self.selected_Model = tile.occupand
@@ -1355,6 +1355,10 @@ class Player2Activation:
             SB.display(screen)
             BB.display(screen)
 
+            if(self.Manager.ooc == True):
+                self.Manager.changestate('ooc')
+                game.run()
+
             if(self.Manager.gs_turnaftermove != None):
                 game.selected_Model = self.Manager.gs_turnaftermove
                 self.Manager.changestate('turn')
@@ -1683,7 +1687,7 @@ class Tile:
         if(self.rect.collidepoint(pos)) and (pygame.mouse.get_pressed()[0] == 1):
             self.clicked = True
         if(pygame.mouse.get_pressed()[0] == 0 and self.clicked):
-            if((gameStateManager.ooc == True) and (self in gameStateManager.ooc_models)):
+            if((gameStateManager.ooc == True) and (self.occupand in gameStateManager.ooc_models)):
                 game.selected_Model = self.occupand
                 game.selected_tile = self
             elif(gameStateManager.ooc == True):
