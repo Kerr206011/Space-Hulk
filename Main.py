@@ -1,12 +1,14 @@
 from Data import *
 from sys import exit
 
-game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_Main(), 'start':gamestateNewGame(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot(), 'reveal':gamestate_reveal(), 'gsprep':gamestate_reinforcement()}
+game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_Main(), 'start':gamestateNewGame(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot(), 'reveal':gamestate_reveal(), 'gsprep':gamestate_reinforcement(), 'actP1':Player1Activation()}
 
 gs = Blip()
 bl = Genestealer()
 cp = SpaceMarine('flamer', 'none')
+sg = SpaceMarine('powerSword', 'sergeant')
 SM_ModellList.append(cp)
+SM_ModellList.append(sg)
 GS_ModellList.append(bl)
 BL_ModellList.append(gs)
 door1 = [map[5][2]]
@@ -23,6 +25,8 @@ gameStateManager.sections = [[map[5][2],map[5][3],map[5][4],door1,door2],[map[5]
 
 map[5][1].occupand = cp
 map[5][1].is_occupied = True
+map[5][2].occupand = sg
+map[5][2].is_occupied = True
 
 map[5][8].occupand = bl
 map[5][8].is_occupied = True

@@ -151,7 +151,7 @@ class Game:                                         #can variables be exported t
             case(0,1):
                 ofset_x = 1
                 ofset_y = 0
-                ofs = (0, -1)
+                ofs = (0, 1)
             case(-1,0):
                 ofset_x = 0
                 ofset_y = 1
@@ -159,7 +159,7 @@ class Game:                                         #can variables be exported t
             case(0,-1):
                 ofset_x = 1
                 ofset_y = 0
-                ofs = (0,1)
+                ofs = (0,-1)
         runS = True
         runL1 = True
         runL2 = True
@@ -460,13 +460,13 @@ class Game:                                         #can variables be exported t
                                 self.redAP(self.selected_Model, 1)
                                 a = True
                                 
-                if(map[self.selected_tile.y +1][self.selected_tile.x].is_buring):
+                if(map[self.clicked_tile.y +1][self.clicked_tile.x].is_buring):
                     a = False
-                elif(map[self.selected_tile.y - 1][self.selected_tile.x].is_buring):
+                elif(map[self.clicked_tile.y - 1][self.clicked_tile.x].is_buring):
                     a = False
-                elif(map[self.selected_tile.y][self.selected_tile.x + 1].is_buring):
+                elif(map[self.clicked_tile.y][self.clicked_tile.x + 1].is_buring):
                     a = False
-                elif(map[self.selected_tile.y][self.selected_tile.x - 1].is_buring):
+                elif(map[self.clicked_tile.y][self.clicked_tile.x - 1].is_buring):
                     a = False
         if(a):
             if(self.clicked_tile.is_open == True):
@@ -822,11 +822,13 @@ class Game:                                         #can variables be exported t
                 for tile in lis:
                     if(tile.is_occupied == False):
                         lis.remove(tile)
-                    if(tile.occupand in SM_ModellList):
+                    elif(tile.occupand in SM_ModellList):
                         lis.remove(tile)
-                    if(tile.occupand in BL_ModellList):
+                    elif(tile.occupand in BL_ModellList):
                         self.Manager.rev_models.append(tile)
                         lis.remove(tile)
+                for tile in lis:
+                    print(tile.y,tile.x)
                 self.selected_Model.susf = False
                 if(self.Manager.rev_models.__len__() != 0):
                     self.Manager.save_model = self.selected_Model
@@ -1075,13 +1077,53 @@ class Player1Turn:
             
             SB.display(screen)
             BB.display(screen)
+
+            if((game.selected_Model in SM_ModellList) and (game.is_playing == game.player1)):
+                self.Manager.changestate('actP1')
+                game.run()
+
+            pygame.display.update()
+
+class Player1Activation:
+    def __init__(self) -> None:
+        self.Manager = gameStateManager
+        self.activated_model = None
+
+    def run(self):
+        if(self.activated_model == None):
+            self.activated_model = game.selected_Model
+        self.move_image = pygame.image.load('Pictures/Wall.png')
+        self.turn_button = Button(60, 500, self.move_image, 1)
+        self.move_button = Button(0, 500, self.move_image, 1)
+        self.changeturn_button = Button(120, 500, self.move_image, 1)
+        self.shoot_button = Button(180, 500, self.move_image, 1)
+        self.melee_button = Button(240, 500, self.move_image, 1)
+        self.ocDoor_button = Button(300, 500, self.move_image, 1)
+        while(True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            for row in map:
+                for tile in row:
+                    tile.render(screen)
+                    tile.interact()
+            
+            SB.display(screen)
+            BB.display(screen)
             
             if(self.move_button.draw(screen)):
                 if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
+                    if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                        self.activated_model.AP = 0
+                        self.activated_model = game.selected_Model
                     game.moveModel()
 
             if(self.turn_button.draw(screen)):
                 if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
+                    if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                        self.activated_model.AP = 0
+                        self.activated_model = game.selected_Model
                     if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
                         self.Manager.changestate('turn')
                         game.run()
@@ -1099,25 +1141,37 @@ class Player1Turn:
             
             if(self.shoot_button.draw(screen)):
                 if(game.selected_Model != None):
-                    if(game.selected_Model.weapon != 'claws'):
-                        if(((game.selected_Model.AP + game.CP) > 1) and (game.selected_Model.weapon == 'flamer')):
-                            game.redAP(game.selected_Model, 1)
-                            self.Manager.changestate('shoot')
-                            game.run()
-                        elif(((game.selected_Model.AP + game.CP) != 0) and (game.selected_Model.weapon != 'flamer')):
-                            game.redAP(game.selected_Model, 1)
-                            self.Manager.changestate('shoot')
-                            game.run()
-                        else: print('nicht genug AP')
+                    if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
+                        if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                            self.activated_model.AP = 0
+                            self.activated_model = game.selected_Model
+                        if(game.selected_Model.weapon != 'claws'):
+                            if(((game.selected_Model.AP + game.CP) > 1) and (game.selected_Model.weapon == 'flamer')):
+                                game.redAP(game.selected_Model, 1)
+                                self.Manager.changestate('shoot')
+                                game.run()
+                            elif(((game.selected_Model.AP + game.CP) != 0) and (game.selected_Model.weapon != 'flamer')):
+                                game.redAP(game.selected_Model, 1)
+                                self.Manager.changestate('shoot')
+                                game.run()
+                            else: print('nicht genug AP')
 
             if(self.melee_button.draw(screen)):
                 if(game.selected_Model != None):
-                    if((game.selected_Model.AP + game.CP) != 0):
-                        game.melee()
-                    else: print('nicht genug AP')
+                    if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
+                        if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                            self.activated_model.AP = 0
+                            self.activated_model = game.selected_Model
+                        if((game.selected_Model.AP + game.CP) != 0):
+                            game.melee()
+                        else: print('nicht genug AP')
             
             if(self.ocDoor_button.draw(screen)):
-                game.ocDoor()
+                if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
+                    if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                        self.activated_model.AP = 0
+                        self.activated_model = game.selected_Model
+                    game.ocDoor()
 
             pygame.display.update()
 
