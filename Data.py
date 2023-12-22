@@ -1884,69 +1884,71 @@ class Tile:
         self.is_open = False
         self.is_buring = False
         self.is_SMentry = False
+        self.is_used = True
 
     def render(self, screen):
-        if(self.is_wall): 
-            image = pygame.image.load('Pictures/Wall.png')
-            self.image = pygame.transform.scale(image,(self.size,self.size))
-        elif(self.is_door):
-            if((map[self.y+1][self.x].is_wall == True) and (map[self.y-1][self.x].is_wall == True)):
-                #path = if self.is_open == False "" else ""
-                if(self.is_open == False):
-                    image = pygame.image.load('Pictures/Door.png')
-                    self.image = pygame.transform.scale(image,(self.size,self.size))
-                else:
-                    image = pygame.image.load('Pictures/Door_open.png')
-                    self.image = pygame.transform.scale(image,(self.size,self.size))
-            else:
-                if(self.is_open == False):
-                    image = pygame.image.load('Pictures/Door.png')
-                    imagen = pygame.transform.scale(image,(self.size,self.size))
-                    self.image = pygame.transform.rotate(imagen,90)
-                else:
-                    image = pygame.image.load('Pictures/Door_open.png')
-                    imagen = pygame.transform.scale(image,(self.size,self.size))
-                    self.image = pygame.transform.rotate(imagen,90)
-
-        elif(self.is_entrypoint):
-            image = pygame.image.load('Pictures/entrypoint.PNG')
-            if((map[self.y][self.x - 1].is_lurkingpoint == False) and (map[self.y][self.x - 1].is_wall == False)):
+        if(self.is_used):
+            if(self.is_wall): 
+                image = pygame.image.load('Pictures/Wall.png')
                 self.image = pygame.transform.scale(image,(self.size,self.size))
-            elif((map[self.y + 1][self.x].is_lurkingpoint == False) and (map[self.y + 1][self.x].is_wall == False)):
-                imager = pygame.transform.scale(image,(self.size,self.size))
-                self.image = pygame.transform.rotate(imager,90)
-            elif((map[self.y][self.x + 1].is_lurkingpoint == False) and (map[self.y][self.x + 1].is_wall == False)):
-                imager = pygame.transform.scale(image,(self.size,self.size))
-                self.image = pygame.transform.rotate(imager,180)
+            elif(self.is_door):
+                if((map[self.y+1][self.x].is_wall == True) and (map[self.y-1][self.x].is_wall == True)):
+                    #path = if self.is_open == False "" else ""
+                    if(self.is_open == False):
+                        image = pygame.image.load('Pictures/Door.png')
+                        self.image = pygame.transform.scale(image,(self.size,self.size))
+                    else:
+                        image = pygame.image.load('Pictures/Door_open.png')
+                        self.image = pygame.transform.scale(image,(self.size,self.size))
+                else:
+                    if(self.is_open == False):
+                        image = pygame.image.load('Pictures/Door.png')
+                        imagen = pygame.transform.scale(image,(self.size,self.size))
+                        self.image = pygame.transform.rotate(imagen,90)
+                    else:
+                        image = pygame.image.load('Pictures/Door_open.png')
+                        imagen = pygame.transform.scale(image,(self.size,self.size))
+                        self.image = pygame.transform.rotate(imagen,90)
+
+            elif(self.is_entrypoint):
+                image = pygame.image.load('Pictures/entrypoint.PNG')
+                if((map[self.y][self.x - 1].is_lurkingpoint == False) and (map[self.y][self.x - 1].is_wall == False)):
+                    self.image = pygame.transform.scale(image,(self.size,self.size))
+                elif((map[self.y + 1][self.x].is_lurkingpoint == False) and (map[self.y + 1][self.x].is_wall == False)):
+                    imager = pygame.transform.scale(image,(self.size,self.size))
+                    self.image = pygame.transform.rotate(imager,90)
+                elif((map[self.y][self.x + 1].is_lurkingpoint == False) and (map[self.y][self.x + 1].is_wall == False)):
+                    imager = pygame.transform.scale(image,(self.size,self.size))
+                    self.image = pygame.transform.rotate(imager,180)
+                else:
+                    imager = pygame.transform.scale(image,(self.size,self.size))
+                    self.image = pygame.transform.rotate(imager,270)
+            elif(self.is_buring):
+                image = pygame.image.load('Pictures/Floor_burning.png')
+                self.image = pygame.transform.scale(image,(self.size,self.size))
             else:
-                imager = pygame.transform.scale(image,(self.size,self.size))
-                self.image = pygame.transform.rotate(imager,270)
-        elif(self.is_buring):
-            image = pygame.image.load('Pictures/Floor_burning.png')
-            self.image = pygame.transform.scale(image,(self.size,self.size))
-        else:
-            image = pygame.image.load('Pictures/Floor.png')
-            self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                image = pygame.image.load('Pictures/Floor.png')
+                self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
 
-        screen.blit(self.image, (self.x*self.size, self.y*self.size))
-        if(self.is_occupied):
-            match(self.occupand.face):
-                case((1,0)):
-                    imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                
-                case(-1,0):
-                    imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                    imaget = pygame.transform.rotate(imaget,180)
-                
-                case((0,1)):
-                    imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                    imaget = pygame.transform.rotate(imaget,270)
+            screen.blit(self.image, (self.x*self.size, self.y*self.size))
+            if(self.is_occupied):
+                match(self.occupand.face):
+                    case((1,0)):
+                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                    
+                    case(-1,0):
+                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                        imaget = pygame.transform.rotate(imaget,180)
+                    
+                    case((0,1)):
+                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                        imaget = pygame.transform.rotate(imaget,270)
 
-                case((0,-1)):
-                    imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                    imaget = pygame.transform.rotate(imaget,90)
-    
-            screen.blit(imaget, (self.x*self.size, self.y*self.size))
+                    case((0,-1)):
+                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                        imaget = pygame.transform.rotate(imaget,90)
+        
+                screen.blit(imaget, (self.x*self.size, self.y*self.size))
     
     def interact(self):
         pos = pygame.mouse.get_pos()
