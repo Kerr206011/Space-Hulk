@@ -7,7 +7,8 @@ GS_ModellList = []                     #a list of Genstealer models
 BL_ModellList = []
 
 pygame.init()
-screen = pygame.display.set_mode((700,600))
+#screen = pygame.display.set_mode((1080,700))
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 screen.fill('black')
 pygame.display.set_caption('Space Hulk')
 
@@ -1103,8 +1104,8 @@ class CP_reroll:
 
     def run(self):
         self.move_image = pygame.image.load('Pictures/Wall.png')
-        self.changeturn_button = Button(120, 500, self.move_image, 1)
-        self.reroll_button = Button(60, 500, self.move_image, 1)
+        self.changeturn_button = Button(870, 500, self.move_image, 1)
+        self.reroll_button = Button(810, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1136,7 +1137,7 @@ class Player1Turn:
 
     def run(self):
         self.move_image = pygame.image.load('Pictures/Wall.png')
-        self.changeturn_button = Button(120, 500, self.move_image, 1)
+        self.changeturn_button = Button(930, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1172,15 +1173,15 @@ class OOC_Activation:
     def run(self):
         pressed = False
         self.move_image = pygame.image.load('Pictures/Wall.png')
-        self.turn_button = Button(60, 500, self.move_image, 1)
-        self.move_button = Button(0, 500, self.move_image, 1)
-        self.changeturn_button = Button(120, 500, self.move_image, 1)
-        self.shoot_button = Button(180, 500, self.move_image, 1)
-        self.melee_button = Button(240, 500, self.move_image, 1)
-        self.ocDoor_button = Button(300, 500, self.move_image, 1)
-        self.guard_button = Button(360, 500, self.move_image, 1)
-        self.overwatch_button = Button(420, 500, self.move_image, 1)
-        self.un_jam_button = Button(480, 500, self.move_image, 1)
+        self.turn_button = Button(870, 500, self.move_image, 1)
+        self.move_button = Button(810, 500, self.move_image, 1)
+        self.changeturn_button = Button(930, 500, self.move_image, 1)
+        self.shoot_button = Button(990, 500, self.move_image, 1)
+        self.melee_button = Button(1050, 500, self.move_image, 1)
+        self.ocDoor_button = Button(1110, 500, self.move_image, 1)
+        self.guard_button = Button(1170, 500, self.move_image, 1)
+        self.overwatch_button = Button(1230, 500, self.move_image, 1)
+        self.un_jam_button = Button(1290, 500, self.move_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1269,14 +1270,14 @@ class Player1Activation:
         if(self.activated_model == None):
             self.activated_model = game.selected_Model
         self.move_image = pygame.image.load('Pictures/Wall.png')
-        self.turn_button = Button(60, 500, self.move_image, 1)
-        self.move_button = Button(0, 500, self.move_image, 1)
-        self.changeturn_button = Button(120, 500, self.move_image, 1)
-        self.shoot_button = Button(180, 500, self.move_image, 1)
-        self.melee_button = Button(240, 500, self.move_image, 1)
-        self.ocDoor_button = Button(300, 500, self.move_image, 1)
-        self.guard_button = Button(360, 500, self.move_image, 1)
-        self.overwatch_button = Button(420, 500, self.move_image, 1)
+        self.turn_button = Button(870, 500, self.move_image, 1)
+        self.move_button = Button(810, 500, self.move_image, 1)
+        self.changeturn_button = Button(930, 500, self.move_image, 1)
+        self.shoot_button = Button(990, 500, self.move_image, 1)
+        self.melee_button = Button(1050, 500, self.move_image, 1)
+        self.ocDoor_button = Button(1110, 500, self.move_image, 1)
+        self.guard_button = Button(1170, 500, self.move_image, 1)
+        self.overwatch_button = Button(1230, 500, self.move_image, 1)
 
         while(True):
             for event in pygame.event.get():
@@ -1815,9 +1816,9 @@ class Blip(Model):
         self.count = random.randint(1,3)
 
 #generate a Map of tiles
-map_width = 20
-map_height = 20
-tile_size = 25
+map_width = 30
+map_height = 26
+tile_size = 27
 
 map = [[Tile(x, y, tile_size, ) for x in range(map_width)] for y in range(map_height)]
 
@@ -1825,7 +1826,7 @@ class Sidebar():
     def __init__(self):
         self.SM_Modelcount = len(SM_ModellList)
         self.timer = int
-        self.pos = (500,0)
+        self.pos = (810,0)
 
     def display(self,screen):
         my_font = pygame.font.SysFont('Bahnschrift', 20)
@@ -1838,12 +1839,12 @@ class Sidebar():
         player2_Text = my_font.render('GS: '+game.player2, False, (0,0,0))
         GS_count_Text = my_font.render('GS Models: '+str((len(GS_ModellList)+len(BL_ModellList))),False,(0,0,0))
         SM_count_Text = my_font.render('SM Models: '+str(len(SM_ModellList)),False,(0,0,0))
-        screen.blit(CP_Text, (500,90))
-        screen.blit(round_Text, (500,60))
-        screen.blit(player1_Text, (500,0))
-        screen.blit(player2_Text, (500,30))
-        screen.blit(GS_count_Text, (500,120))
-        screen.blit(SM_count_Text, (500,150))
+        screen.blit(CP_Text, (810,90))
+        screen.blit(round_Text, (810,60))
+        screen.blit(player1_Text, (810,0))
+        screen.blit(player2_Text, (810,30))
+        screen.blit(GS_count_Text, (810,120))
+        screen.blit(SM_count_Text, (810,150))
 SB = Sidebar()  #initiates an Object of Sidebar(singelton)
 
 class Bottombar():
@@ -1865,7 +1866,8 @@ class Bottombar():
             #reload/clear_jam
     
     def display(self,screen):
-        screen.blit(self.image, self.pos)
+        pass
+        #screen.blit(self.image, self.pos)
 
     def interact(self,screen):
         pass
