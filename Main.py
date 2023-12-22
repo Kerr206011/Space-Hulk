@@ -189,8 +189,31 @@ for tile in map[21]:
 for tile in map[22]:
     if(tile.x < 6 or tile.x == 14 or tile.x == 15 or tile.x == 16 or tile.x > 25 or (tile.x > 19 and tile.x < 23)):
         removetiles.append(tile)
-    elif(tile.x == 6 or tile.x == 10 or tile.x == 11 or tile.x == 13 or (tile.x > 16 and tile.x < 20) or (tile.x > 23 and tile.x < 27)):
+    elif(tile.x == 6 or tile.x == 10 or tile.x == 11 or tile.x == 13 or (tile.x > 16 and tile.x < 20) or (tile.x > 22 and tile.x < 28)):
         tile.is_wall = True
+
+for tile in map[23]:
+    if(tile.x < 6 or tile.x > 14):
+        removetiles.append(tile)
+    elif((tile.x > 5 and tile.x < 12) or tile.x == 14 or tile.x == 13):
+        tile.is_wall = True
+    elif(tile.x == 12):
+        tile.is_entrypoint = True
+
+for tile in map[24]:
+    if(tile.x < 10 or tile.x > 14):
+        removetiles.append(tile)
+    elif(tile.x == 10 or tile.x == 14):
+        tile.is_wall = True
+    elif(tile.x > 10 and tile.x < 14):
+        tile.is_lurkingpoint = True
+
+for tile in map[25]:
+    if(tile.x < 10 or tile.x > 14):
+        removetiles.append(tile)
+    elif(tile.x > 9 and tile.x < 15):
+        tile.is_wall = True
+
 for ins in removetiles:
     for row in map:
         for tile in row:
