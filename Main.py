@@ -3,65 +3,82 @@ from sys import exit
 
 game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_Main(), 'start':gamestateNewGame(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot(), 'reveal':gamestate_reveal(), 'gsprep':gamestate_reinforcement(), 'actP1':Player1Activation(), 'actP2':Player2Activation(), 'ooc':OOC_Activation(), 'reroll':CP_reroll(), 'smplace':gamestate_SMplace(), 'gsplace':gamestate_gsplace()}
 
-gs = Blip()
-bl = Genestealer()
 cp = SpaceMarine('flamer', 'none')
 sg = SpaceMarine('powerSword', 'sergeant')
 SM_ModellList.append(cp)
 SM_ModellList.append(sg)
-GS_ModellList.append(bl)
-BL_ModellList.append(gs)
 door1 = [map[5][2]]
 door2 = [map[5][4]]
 gameStateManager.sections = []
 
-removetiles = [map[1][1],map[2][2]]
+# removetiles = [map[0][0],map[0][1],map[0][2],map[0][3],map[0][4],map[0][5],map[][],map[1][1],map[1][2],map[2][1],map[2][2]]
 
-for row in map:
-    for tile in row:
-        if(tile in removetiles):
-            row.remove(tile)
-# for section in gameStateManager.sections:
-#     if map[1][1] in section:
-#         for tile in section:
-#             tile.is_wall = True
-#     if map[4][4] in section:
-#         for tile in section:
-#             tile.is_buring = True
+# for ins in removetiles:
+#     for row in map:
+#         for tile in row:
+#             if(tile == ins):
+#                 row.remove(tile)
 
-# map[5][1].occupand = cp
-# map[5][1].is_occupied = True
-# map[5][2].occupand = sg
-# map[5][2].is_occupied = True
+removetiles = []
 
-map[5][1].is_SMentry = True
-map[5][2].is_SMentry = True
+for tile in map[0]:
+    if(tile.x < 19) or (tile.x > 23):
+        removetiles.append(tile)
+    else:
+        tile.is_wall = True
 
-map[5][8].occupand = bl
-map[5][8].is_occupied = True
+for tile in map[1]:
+    if(tile.x < 19) or (tile.x > 23):
+        removetiles.append(tile)
+    elif(tile.x == 19 or tile.x == 23):
+        tile.is_wall = True
 
-map[6][1].is_wall = True
-map[4][1].is_wall = True
-map[6][2].is_wall = True
-map[4][2].is_wall = True
-map[6][3].is_wall = True
-map[4][3].is_wall = True
-map[5][3].is_door = True
+for tile in map[2]:
+    if(tile.x < 19) or (tile.x > 23):
+        removetiles.append(tile)
+    elif(tile.x == 19 or tile.x == 23):
+        tile.is_wall = True
 
-map[4][5].is_entrypoint = True
-map[4][4].is_wall = True
-map[4][6].is_wall = True
-map[3][5].is_lurkingpoint = True
-map[3][4].is_lurkingpoint = True
-map[3][6].is_lurkingpoint = True
+for tile in map[3]:
+    if(tile.x < 19) or (tile.x > 23):
+        removetiles.append(tile)
+    elif(tile.x == 19 or tile.x == 23):
+        tile.is_wall = True
+
+for tile in map[4]:
+    if(tile.x < 19) or (tile.x > 23):
+        removetiles.append(tile)
+    elif(tile.x != 21):
+        tile.is_wall = True
+        
+for tile in map[5]:
+    if(tile.x < 20) or (tile.x > 22 and tile.x < 25):
+        removetiles.append(tile)
+    elif(tile.x != 21):
+        tile.is_wall = True
+
+for tile in map[6]:
+    if(tile.x < 20) or (tile.x > 22 and tile.x < 25):
+        removetiles.append(tile)
+    elif(tile.x == 20 or tile.x == 22 or tile.x == 25 or tile.x == 29):
+        tile.is_wall = True
+    elif(tile.x > 25 and tile.x <29):
+        tile.is_lurkingpoint = True
+
+for tile in map[7]:
+    if(tile.x < 20) or (tile.x > 22 and tile.x < 25):
+        removetiles.append(tile)
+    elif(tile.x == 20 or tile.x == 22 or (tile.x > 24 and tile.x != 27)):
+        tile.is_wall = True
+    elif(tile.x > 25 and tile.x <29):
+        tile.is_lurkingpoint = True
+        
+# for ins in removetiles:
+#     for row in map:
+#         for tile in row:
+#             if(tile == ins):
+#                 row.remove(tile)
 
 print(screen.get_size())
-
-map[5][9].occupand = gs
-map[5][9].is_occupied = True
-for row in map:
-    for tile in row:
-        if((tile.x == 0) or (tile.x == 19) or (tile.y == 0) or (tile.y == 19)):
-            tile.is_wall = True
 
 game.run()
