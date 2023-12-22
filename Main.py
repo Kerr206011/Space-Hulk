@@ -1,7 +1,7 @@
 from Data import *
 from sys import exit
 
-game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_Main(), 'start':gamestateNewGame(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot(), 'reveal':gamestate_reveal(), 'gsprep':gamestate_reinforcement(), 'actP1':Player1Activation(), 'actP2':Player2Activation(), 'ooc':OOC_Activation(), 'reroll':CP_reroll()}
+game.states = {'runP1':Player1Turn(), 'runP2':Player2Turn(), 'main': gamestate_Main(), 'start':gamestateNewGame(), 'turn':gamestateTurn(), 'shoot':gamestate_shoot(), 'reveal':gamestate_reveal(), 'gsprep':gamestate_reinforcement(), 'actP1':Player1Activation(), 'actP2':Player2Activation(), 'ooc':OOC_Activation(), 'reroll':CP_reroll(), 'smplace':gamestate_SMplace(), 'gsplace':gamestate_gsplace()}
 
 gs = Blip()
 bl = Genestealer()
@@ -13,8 +13,14 @@ GS_ModellList.append(bl)
 BL_ModellList.append(gs)
 door1 = [map[5][2]]
 door2 = [map[5][4]]
-gameStateManager.sections = [[map[5][2],map[5][3],map[5][4],door1,door2],[map[5][5], map[5][6], map[5][7],map[5][8]]]
+gameStateManager.sections = []
 
+removetiles = [map[1][1],map[2][2]]
+
+for row in map:
+    for tile in row:
+        if(tile in removetiles):
+            row.remove(tile)
 # for section in gameStateManager.sections:
 #     if map[1][1] in section:
 #         for tile in section:
@@ -23,10 +29,13 @@ gameStateManager.sections = [[map[5][2],map[5][3],map[5][4],door1,door2],[map[5]
 #         for tile in section:
 #             tile.is_buring = True
 
-map[5][1].occupand = cp
-map[5][1].is_occupied = True
-map[5][2].occupand = sg
-map[5][2].is_occupied = True
+# map[5][1].occupand = cp
+# map[5][1].is_occupied = True
+# map[5][2].occupand = sg
+# map[5][2].is_occupied = True
+
+map[5][1].is_SMentry = True
+map[5][2].is_SMentry = True
 
 map[5][8].occupand = bl
 map[5][8].is_occupied = True
@@ -45,6 +54,8 @@ map[4][6].is_wall = True
 map[3][5].is_lurkingpoint = True
 map[3][4].is_lurkingpoint = True
 map[3][6].is_lurkingpoint = True
+
+print(screen.get_size())
 
 map[5][9].occupand = gs
 map[5][9].is_occupied = True
