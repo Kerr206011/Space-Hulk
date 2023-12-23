@@ -7,17 +7,6 @@ cp = SpaceMarine('flamer', 'none')
 sg = SpaceMarine('powerSword', 'sergeant')
 SM_ModellList.append(cp)
 SM_ModellList.append(sg)
-door1 = [map[5][2]]
-door2 = [map[5][4]]
-gameStateManager.sections = []
-
-# removetiles = [map[0][0],map[0][1],map[0][2],map[0][3],map[0][4],map[0][5],map[][],map[1][1],map[1][2],map[2][1],map[2][2]]
-
-# for ins in removetiles:
-#     for row in map:
-#         for tile in row:
-#             if(tile == ins):
-#                 row.remove(tile)
 
 removetiles = []
 
@@ -111,7 +100,7 @@ for tile in map[12]:
 for tile in map[13]:
     if(tile.x == 29):
         removetiles.append(tile)
-    elif(tile.x < 7 or (tile.x > 9 and tile.x < 15) or (tile.x > 15 and tile.x < 21) or (tile.x > 21 and tile.x <27) or tile.x ==28):
+    elif(tile.x < 7 or (tile.x > 9 and tile.x < 21) or (tile.x > 21 and tile.x <27) or tile.x ==28):
         tile.is_wall = True
 
 for tile in map[14]:
@@ -220,6 +209,13 @@ for ins in removetiles:
             if(tile == ins):
                 tile.is_used = False
 
+map[12][1].is_SMentry = True
+map[12][2].is_SMentry = True
+map[12][3].is_SMentry = True
+map[12][4].is_SMentry = True
+map[12][5].is_SMentry = True
+
+gameStateManager.sections = [[map[12][1],map[12][2],map[12][3],map[12][4],map[12][5]],[map[12][6],map[12][7],map[12][8],map[12][9],map[12][10],map[11][7],map[11][8],map[11][9],map[13][7],map[13][8],map[13][9],map[14][8]]]
 print(screen.get_size())
 
 game.run()
