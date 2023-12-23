@@ -215,7 +215,7 @@ map[12][3].is_SMentry = True
 map[12][4].is_SMentry = True
 map[12][5].is_SMentry = True
 
-gameStateManager.sections = [[map[12][1],map[12][2],map[12][3],map[12][4],map[12][5]],[map[12][6],map[12][7],map[12][8],map[12][9],map[12][10],map[11][7],map[11][8],map[11][9],map[13][7],map[13][8],map[13][9],map[14][8]]]
+gameStateManager.sections = [[map[12][1],map[12][2],map[12][3],map[12][4],map[12][5]],[map[12][6],map[12][7],map[12][8],map[12][9],map[12][10],map[11][7],map[11][8],map[11][9],map[13][7],map[13][8],map[13][9],map[14][8]],[map[12][11],map[12][12],map[12][13]],[map[15][8],map[16][8],map[17][8],map[18][8]],[]]
 print(screen.get_size())
 
 game.run()
