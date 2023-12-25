@@ -816,7 +816,7 @@ class Game:                                         #can variables be exported t
                         if(self.selected_Model.AP != 0):
                             c = 1
                             b = True
-                elif(((self.selected_tile.x + ofset_x == self.clicked_tile.x) and (ofset_x != 0)) or ((self.selected_tile.x - ofset_x == self.clicked_tile.x) and (ofset_x != 0)) or ((self.selected_tile.y + ofset_y == self.clicked_tile.y) and (ofset_y != 0)) or ((self.clicked_tile.y - ofset_y == self.clicked_tile.y) and (ofset_y != 0))):
+                elif(((self.selected_tile.x + ofset_x == self.clicked_tile.x) and (ofset_x != 0)) or ((self.selected_tile.x - ofset_x == self.clicked_tile.x) and (ofset_x != 0)) or ((self.selected_tile.y + ofset_y == self.clicked_tile.y) and (ofset_y != 0)) or ((self.selected_tile.y - ofset_y == self.clicked_tile.y) and (ofset_y != 0))):
                     if(self.selected_Model.AP != 0):
                         c = 1
                         b = True
@@ -1181,7 +1181,6 @@ class CP_reroll:
 
             if(self.changeturn_button.draw(screen)):
                 self.Manager.changestate('runP1')
-                game.CP = random.randint(1,6)
                 game.run()
 
             if(self.reroll_button.draw(screen)):
@@ -1213,6 +1212,7 @@ class Player1Turn:
             BB.display(screen)
 
             if(self.changeturn_button.draw(screen)):
+                Player1Activation.activated_model = None
                 game.is_playing = game.player2
                 game.GS_prep()
                 print(self.Manager.givestate())
@@ -1374,7 +1374,7 @@ class Player1Activation:
             
             if(self.move_button.draw(screen)):
                 if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
-                    if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                    if((self.activated_model != game.selected_Model) and (game.selected_Model in SM_ModellList)):
                         self.activated_model.AP = 0
                         self.activated_model = game.selected_Model
                     self.Manager.SM_move = True
@@ -1382,7 +1382,7 @@ class Player1Activation:
 
             if(self.turn_button.draw(screen)):
                 if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
-                    if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                    if((self.activated_model != game.selected_Model) and (game.selected_Model in SM_ModellList)):
                         self.activated_model.AP = 0
                         self.activated_model = game.selected_Model
                     if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
@@ -1392,6 +1392,7 @@ class Player1Activation:
                 else:print('anderes model wählen')
             
             if(self.changeturn_button.draw(screen)):
+                self.activated_model = None
                 game.is_playing = game.player2
                 game.GS_prep()
                 print(self.Manager.givestate())
@@ -1427,7 +1428,7 @@ class Player1Activation:
             
             if(self.ocDoor_button.draw(screen)):
                 if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
-                    if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                    if((self.activated_model != game.selected_Model) and (game.selected_Model in SM_ModellList)):
                         self.activated_model.AP = 0
                         self.activated_model = game.selected_Model
                     game.ocDoor()
@@ -1435,7 +1436,7 @@ class Player1Activation:
             if(self.guard_button.draw(screen)):
                 if((game.selected_Model.AP + game.CP) > 1):
                     if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
-                            if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                            if((self.activated_model != game.selected_Model) and (game.selected_Model in SM_ModellList)):
                                 self.activated_model.AP = 0
                                 self.activated_model = game.selected_Model
                             game.redAP(game.selected_Model, 2)
@@ -1446,7 +1447,7 @@ class Player1Activation:
                 if((game.selected_Model.AP + game.CP) > 1):
                     if(game.selected_Model.weapon != 'flamer'):
                         if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
-                                if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
+                                if((self.activated_model != game.selected_Model) and (game.selected_Model in SM_ModellList)):
                                     self.activated_model.AP = 0
                                     self.activated_model = game.selected_Model
                                 game.redAP(game.selected_Model, 2)
@@ -1481,6 +1482,7 @@ class Player2Turn:
                 game.run()
 
             if(self.changeturn_button.draw(screen)):
+                Player2Activation.activated_model = None
                 game.is_playing = game.player1
                 game.SM_prep()
                 print(self.Manager.givestate())
@@ -1559,6 +1561,7 @@ class Player2Activation:
                     else:print('anderes model wählen')
 
             if(self.changeturn_button.draw(screen)):
+                self.activated_model = None
                 game.is_playing = game.player1
                 game.SM_prep()
                 print(self.Manager.givestate())
