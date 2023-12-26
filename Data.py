@@ -440,8 +440,11 @@ class Game:                                         #can variables be exported t
                     game.clicked_tile.is_occupied = False
                     game.clicked_tile.occupand = None
                     game.clicked_tile = None
+
             if(self.clicked_tile != None):
                 if((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False)):
+                    if(self.Manager.SM_move == False):
+                        self.redAP(self.selected_Model, 1)
                     if((self.selected_Model.weapon == 'fist') or (self.selected_Model.weapon == 'powerSword') or (self.selected_Model.weapon == 'chainFist')):
                         if((a == 6) or (b == 6) or (c == 6)):
                             self.clicked_tile.is_door = False
@@ -467,7 +470,7 @@ class Game:                                         #can variables be exported t
             if(self.clicked_tile.is_door == True):
                 if((self.selected_Model != None) and (self.clicked_tile.is_occupied == False)):
                     ofs = game.selected_Model.face
-                    if(((self.selected_tile.x + ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y + ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
+                    if((((self.selected_tile.x + ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y + ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))) or ((self.selected_Model in BL_ModellList) and (self.distance(self.selected_tile,self.clicked_tile) == 1))):
                         if(self.is_playing == self.player1):
                             if((self.selected_Model.AP != 0) | (self.CP != 0)):
                                 self.redAP(self.selected_Model, 1)
@@ -1139,10 +1142,11 @@ class gamestateNewGame:
                         else:
                             game.player2 = game.player2[:-1]
                     elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
-                        if(p1):p1 = False
+                        if(p1 and game.player1 != ''):p1 = False
                         elif((game.player2 != None) and (game.player2 != game.player1)):
                             game.is_playing = game.player1
                             self.gameStateManager.changestate('smplace')
+                            screen.fill((50, 50, 50))
                             game.run()
 
             # Clear the screen
@@ -1572,10 +1576,10 @@ class Player2Activation:
 
             if(self.reveal_button.draw(screen)):
                 if(game.selected_Model in BL_ModellList):
-                    if((self.activated_model != game.selected_Model) and ((game.selected_Model in GS_ModellList) or (game.selected_Model in BL_ModellList))):
-                        self.activated_model.AP = 0
-                        self.activated_model = game.selected_Model
-                    if(game.selected_Model.AP == 6):
+                    if(game.selected_tile.is_lurkingpoint == False):
+                        if((self.activated_model != game.selected_Model) and ((game.selected_Model in GS_ModellList) or (game.selected_Model in BL_ModellList))):
+                            self.activated_model.AP = 0
+                            self.activated_model = game.selected_Model
                         self.Manager.rev_models.append(game.selected_tile)
                         game.reveal(game.selected_tile)
 
@@ -1804,7 +1808,11 @@ class gamestate_reveal:
 
             self.tile.is_occupied = False
             BL_ModellList.remove(self.tile.occupand)
-            self.tile.occupand = Genestealer()
+            if(self.tile.occupand.AP == 6):
+                self.tile.occupand = Genestealer()
+            else:
+                self.tile.occupand = Genestealer()
+                self.tile.occupand.AP = 0
             self.tile.is_occupied = True
             GS_ModellList.append(self.tile.occupand)
             self.Manager.rev_count -= 1
@@ -1831,7 +1839,7 @@ class gamestate_reveal:
             if(self.place_button.draw(screen)):
                 if(game.clicked_tile != None):
                     if(((game.clicked_tile.x == game.selected_tile.x) or (game.clicked_tile.x == (game.selected_tile.x -1)) or (game.clicked_tile.x == (game.selected_tile.x +1))) and ((game.clicked_tile.y == game.selected_tile.y) or (game.clicked_tile.y == (game.selected_tile.y -1)) or (game.clicked_tile.y == (game.selected_tile.y +1)))):
-                        if(game.clicked_tile.is_occupied == False):
+                        if((game.clicked_tile.is_occupied == False) and (game.clicked_tile.is_wall == False) and (game.clicked_tile.is_entrypoint == False)):
                             game.clicked_tile.occupand = Genestealer()
                             GS_ModellList.append(game.clicked_tile.occupand)
                             game.clicked_tile.is_occupied = True
@@ -1846,7 +1854,7 @@ class gamestate_reveal:
             for row in map:
                 for tile in row:
                     if(((tile.x == game.selected_tile.x) or (tile.x == (game.selected_tile.x -1)) or (tile.x == (game.selected_tile.x +1))) and ((tile.y == game.selected_tile.y) or (tile.y == (game.selected_tile.y -1)) or (tile.y == (game.selected_tile.y +1)))):
-                        if((tile.is_occupied == False) & (((tile.is_door == True) & (tile.is_open == True)) or (tile.is_door == False)) & (tile.is_wall == False)):
+                        if((tile.is_occupied == False) & (((tile.is_door == True) & (tile.is_open == True)) or (tile.is_door == False)) & (tile.is_wall == False) & (tile.is_entrypoint == False)):
                             lis.append(tile)
         
             if((self.Manager.rev_count == 0) or (lis == [])):
