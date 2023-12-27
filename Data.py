@@ -443,8 +443,12 @@ class Game:                                         #can variables be exported t
 
             if(self.clicked_tile != None):
                 if((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False)):
-                    if(self.Manager.SM_move == False):
+                    if(self.Manager.SM_move == True):
+                        self.Manager.SM_move = False
+                    elif(self.selected_Model.weapon != 'flamer'):
+                        print('shoot')
                         self.redAP(self.selected_Model, 1)
+                        self.selected_Model.guard = False
                     if((self.selected_Model.weapon == 'fist') or (self.selected_Model.weapon == 'powerSword') or (self.selected_Model.weapon == 'chainFist')):
                         if((a == 6) or (b == 6) or (c == 6)):
                             self.clicked_tile.is_door = False
@@ -1110,10 +1114,10 @@ class gamestateTurn:
                     self.gameStateManager.changestate('reveal')
                     game.run()
                 elif(game.is_playing == game.player1):
-                    self.gameStateManager.changestate('runP1')
+                    self.gameStateManager.changestate('actP1')
                     game.run()
                 else:
-                    self.gameStateManager.changestate('runP2')
+                    self.gameStateManager.changestate('actP2')
                     game.run()
 
             pygame.display.update()
@@ -1199,8 +1203,10 @@ class Player1Turn:
         self.Manager = gameStateManager
 
     def run(self):
-        self.cease_image = pygame.image.load('Pictures/cease.png')
-        self.changeturn_button = Button(930, 500, self.cease_image, 1)
+        self.change_image = pygame.image.load('Pictures/end_turn.png')
+        self.activate_image = pygame.image.load('Pictures/Activate.png')
+        self.changeturn_button = Button(930, 500, self.change_image, 1)
+        self.activate_button = Button(810, 500, self.activate_image, 1)
 
         while(True):
             for event in pygame.event.get():
@@ -1225,7 +1231,7 @@ class Player1Turn:
                 self.Manager.changestate('gsprep')
                 game.run()
                 
-            if((game.selected_Model in SM_ModellList) and (game.is_playing == game.player1)):
+            if(((game.selected_Model in SM_ModellList) and (game.is_playing == game.player1)) and self.activate_button.draw(screen)):
                 self.Manager.changestate('actP1')
                 game.run()
 
@@ -1286,7 +1292,7 @@ class OOC_Activation:
             if((self.changeturn_button.draw(screen)) or (pressed == True)):
                 self.Manager.ooc = False
                 self.Manager.ooc_models = []
-                self.Manager.changestate('runP2')
+                self.Manager.changestate('actP2')
                 game.run()
 
             if(self.shoot_button.draw(screen)):
@@ -1347,7 +1353,7 @@ class Player1Activation:
 
         self.move_image = pygame.image.load('Pictures/move.png')
         self.turn_image = pygame.image.load('Pictures/turn.png')
-        self.change_image = pygame.image.load('Pictures/end_turn.png')
+        self.change_image = pygame.image.load('Pictures/cease.png')
         self.shoot_image = pygame.image.load('Pictures/shoot.png')
         self.melee_image = pygame.image.load('Pictures/melee.png')
         self.oc_door_image = pygame.image.load('Pictures/interact.png')
@@ -1396,13 +1402,9 @@ class Player1Activation:
                 else:print('anderes model wählen')
             
             if(self.changeturn_button.draw(screen)):
+                self.activated_model.AP = 0
                 self.activated_model = None
-                game.is_playing = game.player2
-                game.GS_prep()
-                print(self.Manager.givestate())
-                print(game.is_playing)
-                print('0')
-                self.Manager.changestate('gsprep')
+                self.Manager.changestate('runP1')
                 game.run()
 
             if(self.shoot_button.draw(screen)):
@@ -1466,7 +1468,9 @@ class Player2Turn:
 
     def run(self):
         self.change_image = pygame.image.load('Pictures/end_turn.png')
+        self.activate_image = pygame.image.load('Pictures/Activate.png')
         self.changeturn_button = Button(810, 500, self.change_image, 1)
+        self.activate_button = Button(870, 500, self.activate_image, 1)
 
         while(True):
             for event in pygame.event.get():
@@ -1495,7 +1499,7 @@ class Player2Turn:
                 self.Manager.changestate('runP1')
                 game.run()
 
-            if(((game.selected_Model in GS_ModellList) or (game.selected_Model in BL_ModellList)) and (game.is_playing == game.player2)):
+            if((((game.selected_Model in GS_ModellList) or (game.selected_Model in BL_ModellList)) and (game.is_playing == game.player2)) and self.activate_button.draw(screen)):
                 self.Manager.changestate('actP2')
                 game.run()
 
@@ -1512,7 +1516,7 @@ class Player2Activation:
 
         self.move_image = pygame.image.load('Pictures/move.png')
         self.turn_image = pygame.image.load('Pictures/turn.png')
-        self.change_image = pygame.image.load('Pictures/end_turn.png')
+        self.change_image = pygame.image.load('Pictures/cease.png')
         self.melee_image = pygame.image.load('Pictures/melee.png')
         self.oc_door_image = pygame.image.load('Pictures/interact.png')
         self.reveal_image = pygame.image.load('Pictures/reveal.png')
@@ -1565,13 +1569,9 @@ class Player2Activation:
                     else:print('anderes model wählen')
 
             if(self.changeturn_button.draw(screen)):
+                self.activated_model.AP = 0
                 self.activated_model = None
-                game.is_playing = game.player1
-                game.SM_prep()
-                print(self.Manager.givestate())
-                print(game.is_playing)
-                print('1')
-                self.Manager.changestate('runP1')
+                self.Manager.changestate('runP2')
                 game.run()
 
             if(self.reveal_button.draw(screen)):
@@ -1623,10 +1623,10 @@ class gamestate_shoot:
             if(self.shoot_button.draw(screen)):
                 game.shoot()
                 if(game.is_playing == game.player1):
-                   self.manager.changestate('runP1')
+                   self.manager.changestate('actP1')
                    game.run()
                 else:
-                    self.manager.changestate('runP2')
+                    self.manager.changestate('actP2')
                     game.run()
 
             pygame.display.update()
@@ -1787,7 +1787,7 @@ class gamestate_gsplace:
                                         d = game.distance(bl, tile)
                                         if(d < 7):
                                             bl.occupand.AP = 0
-                self.Manager.changestate('runP1')
+                self.Manager.changestate('reroll')
                 game.run()
             pygame.display.update()
 
@@ -1867,7 +1867,7 @@ class gamestate_reveal:
                             self.Manager.changestate('shoot')
                             game.run()
                         else:
-                            self.Manager.changestate('runP1')
+                            self.Manager.changestate('actP1')
                     else: 
                         self.Manager.changestate('runP2')
                         game.run()
@@ -1973,6 +1973,13 @@ class Tile:
                 game.clicked_model = self.occupand
                 print(self.occupand)
                 game.clicked_tile = self
+            elif(gameStateManager.givestate() == 'shoot'):
+                if(self.is_occupied == True):
+                    if self.occupand in GS_ModellList:
+                        game.clicked_tile = self
+                        game.clicked_model = self.occupand
+                elif(self.is_door == True and self.is_open == False):
+                    game.clicked_tile = self
             elif(((self.is_occupied) and (self.occupand in SM_ModellList) and (game.is_playing == game.player1)) or ((self.is_occupied) and ((self.occupand in GS_ModellList) or (self.occupand in BL_ModellList)) and (game.is_playing == game.player2))):
                 game.selected_Model = self.occupand
                 game.selected_tile = self
@@ -2039,6 +2046,9 @@ class Sidebar():
         screen.blit(player2_Text, (810,30))
         screen.blit(GS_count_Text, (810,120))
         screen.blit(SM_count_Text, (810,150))
+        if(gameStateManager.givestate() == 'actP1' or gameStateManager.givestate() == 'actP2'):
+            active_model_AP = my_font.render('AP: '+str(game.selected_Model.AP), False,(0,0,0))
+            screen.blit(active_model_AP, (810,180))
 SB = Sidebar()  #initiates an Object of Sidebar(singelton)
 
 class Bottombar():
@@ -2049,15 +2059,7 @@ class Bottombar():
         self.rect = self.image.get_rect()
         self.rect.topleft = self.pos
         self.pressed = False
-        
-        # needed buttons:
-            #move
-            #turn
-            #shoot
-            #fight
-            #overwatch
-            #guard
-            #reload/clear_jam
+        self.slots = [(810,500),(870,500),(930,500),(990,500),(1050,500),(1110,500),(1170,500),(1230,500),(810,560)]
     
     def display(self,screen):
         screen.blit(self.image, self.pos)
