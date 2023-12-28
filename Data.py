@@ -1513,7 +1513,7 @@ class Player2Activation:
     def run(self):
         if(self.activated_model == None):
             self.activated_model = game.selected_Model
-
+                                                                                                                
         self.move_image = pygame.image.load('Pictures/move.png')
         self.turn_image = pygame.image.load('Pictures/turn.png')
         self.change_image = pygame.image.load('Pictures/cease.png')
