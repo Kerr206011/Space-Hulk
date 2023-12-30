@@ -441,7 +441,7 @@ class Game:                                         #can variables be exported t
                     game.clicked_tile.occupand = None
                     game.clicked_tile = None
 
-            if(self.clicked_tile != None):
+            if((self.clicked_tile != None) and (self.selected_Model.weapon != 'flamer')):
                 if((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False)):
                     if(self.Manager.SM_move == True):
                         self.Manager.SM_move = False
@@ -1354,6 +1354,9 @@ class Player1Activation:
         pressed = False
         if(self.activated_model == None):
             self.activated_model = game.selected_Model
+        if(not (self.activated_model in SM_ModellList)):
+            self.Manager.changestate('runP1')
+            game.run()
 
         self.move_image = pygame.image.load('Pictures/move.png')
         self.turn_image = pygame.image.load('Pictures/turn.png')
@@ -1638,9 +1641,10 @@ class gamestate_shoot:
 class gamestate_reinforcement:
     def __init__(self) -> None:
         self.Manager = gameStateManager
+        self.amount = 2
 
     def run(self):
-        amount = 2
+        amount = self.amount
         self.place_image = pygame.image.load('Pictures/placemodel.png')
         self.place_button = Button(810, 500, self.place_image, 1)
 
@@ -2033,7 +2037,8 @@ class Sidebar():
         self.SM_Modelcount = len(SM_ModellList)
         self.timer = int
         self.pos = (810,0)
-        hint = ''
+        self.hint = ''
+        self.roll = ''
 
     def display(self,screen):
         my_font = pygame.font.SysFont('Bahnschrift', 20)
@@ -2051,6 +2056,9 @@ class Sidebar():
         player2_Text = my_font.render('GS: '+game.player2, False, (0,0,0))
         GS_count_Text = my_font.render('GS Models: '+str((len(GS_ModellList)+len(BL_ModellList))),False,(0,0,0))
         SM_count_Text = my_font.render('SM Models: '+str(len(SM_ModellList)),False,(0,0,0))
+        hint_Text = my_font.render('Hint: ' + str(self.hint), False, (0,0,0))
+        roll_Text = my_font.render('Last Roll: ' + str(self.roll), False, (0,0,0))
+
         if(state == 'ooc'):
             is_playing_text = my_font.render('playing: '+ game.player1,False, (0,0,0))
         else:
@@ -2058,23 +2066,94 @@ class Sidebar():
         if(smodel != None):
             active_model_AP = my_font.render('AP: '+str(game.selected_Model.AP), False,(0,0,0))
             if(smodel in SM_ModellList):
-                active_model_weapon = my_font.render('weapon: '+ smodel.weapon, False,(0,0,0))
-                active_model_rank = my_font.render('rank: '+ smodel.rank, False,(0,0,0))
+                active_model_weapon = my_font.render('weapon: '+ str(smodel.weapon), False,(0,0,0))
+                active_model_rank = my_font.render('rank: '+ (smodel.rank), False,(0,0,0))
             elif(cmodel != None):
                 if(cmodel in SM_ModellList):
-                    clicked_model_weapon = my_font.render('weapon: '+ cmodel.weapon, False, (0,0,0))
-                    clicked_model_rank = my_font.render('rank: '+ cmodel.rank,False,(0,0,0))
+                    clicked_model_weapon = my_font.render('weapon: '+ str(cmodel.weapon), False, (0,0,0))
+                    clicked_model_rank = my_font.render('rank: '+ str(cmodel.rank),False,(0,0,0))
+                    
         match(state):
             case('turn'):
                 screen.blit(is_playing_text, (810,30))
                 screen.blit(active_model_AP, (810,60))
-                if(state == 'actP1' or state == 'ooc'):
-                    screen.blit()
-                    screen.blit(active_model_weapon, (810,120))
-                    screen.blit(active_model_rank, (810,150))
-                    screen.blit(CP_Text, (810,90))                    
+                screen.blit(hint_Text, (810,120))
+                screen.blit(CP_Text, (810,90)) 
+                if(smodel in SM_ModellList):
+                    screen.blit(active_model_weapon, (810,150))
+                    screen.blit(active_model_rank, (810,180))   
+
             case('runP1'):
+                if(smodel != None):
+                    screen.blit(is_playing_text, (810,30))
+                    screen.blit(active_model_AP, (810,60))
+                    screen.blit(CP_Text, (810,90))
+                    screen.blit(hint_Text, (810,120))
+                    screen.blit(roll_Text, (810,150))
+                else:
+                    screen.blit(is_playing_text, (810,30))
+                    screen.blit(CP_Text, (810,60))
+                    screen.blit(hint_Text, (810,90))
+                    screen.blit(roll_Text, (810,120))
+
+            case('actP1'):
+                screen.blit(is_playing_text, (810,30))
+                screen.blit(active_model_AP, (810,60))
+                screen.blit(CP_Text, (810,90))
+                screen.blit(hint_Text, (810,120))
+                screen.blit(active_model_weapon, (810,150))
+                screen.blit(active_model_rank, (810,180)) 
+                screen.blit(roll_Text, (810,210))
+
+            case('reroll'):
+                screen.blit(is_playing_text, (810,30))
+                screen.blit(CP_Text, (810,60))
+                screen.blit(hint_Text, (810,90))
+
+            case('ooc'):
+                screen.blit(is_playing_text, (810,30))
+                screen.blit(active_model_AP, (810,60))
+                screen.blit(CP_Text, (810,90))
+                screen.blit(hint_Text, (810,120))
+                screen.blit(active_model_weapon, (810,150))
+                screen.blit(active_model_rank, (810,180)) 
+                screen.blit(roll_Text, (810,210))
+
+            case('runP2'):
+                if(smodel != None):
+                    screen.blit(is_playing_text, (810,30))
+                    screen.blit(active_model_AP, (810,60))
+                    screen.blit(CP_Text, (810,90))
+                    screen.blit(hint_Text, (810,120))
+                    screen.blit(roll_Text, (810,150))
+                else:
+                    screen.blit(is_playing_text, (810,30))
+                    screen.blit(CP_Text, (810,60))
+                    screen.blit(hint_Text, (810,90))
+                    screen.blit(roll_Text, (810,120))
+
+            case('actP2'):
+                screen.blit(is_playing_text, (810,30))
+                screen.blit(active_model_AP, (810,60))
+                screen.blit(CP_Text, (810,90))
+                screen.blit(hint_Text, (810,120)) 
+                screen.blit(roll_Text, (810,150))
+
+            case('shoot'):
+                if(smodel in SM_ModellList):
+                    if(smodel.susf == True):
+                        sus = my_font.render('Sustained', False, (0,0,0))
+                        screen.blit(sus,(810,210))
+                screen.blit(is_playing_text, (810,30))
+                screen.blit(active_model_AP, (810,60))
+                screen.blit(CP_Text, (810,90))
+                screen.blit(hint_Text, (810,120))
+                screen.blit(active_model_weapon, (810,150))
+                screen.blit(active_model_rank, (810,180)) 
+
+            case('gsprep'):
                 pass
+
         # screen.blit(CP_Text, (810,90))
         screen.blit(round_Text, (810,0))
         # screen.blit(player1_Text, (810,0))
