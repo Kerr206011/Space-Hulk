@@ -1127,7 +1127,7 @@ class gamestateNewGame:
         self.gameStateManager = gameStateManager
     def run(self):
         p1 = True
-        font = pygame.font.SysFont('Bahnschrift', 20)
+        font = pygame.font.SysFont('Bahnschrift', 50)
         while (True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1158,10 +1158,13 @@ class gamestateNewGame:
 
             # Render the input string
             if(p1):
+                hint_surface = font.render('Spieler 1:',True, (0,0,0))
                 text_surface = font.render(game.player1, True, (0, 0, 0))
             else:
+                hint_surface = font.render('Spieler 2:', True, (0,0,0))
                 text_surface = font.render(game.player2, True, (0,0,0))
-            screen.blit(text_surface, (50, 50))
+            screen.blit(hint_surface, (50, 50))
+            screen.blit(text_surface, (50, 150))
             pygame.display.update()
 
 class CP_reroll:
@@ -1205,7 +1208,7 @@ class Player1Turn:
     def run(self):
         self.change_image = pygame.image.load('Pictures/end_turn.png')
         self.activate_image = pygame.image.load('Pictures/Activate.png')
-        self.changeturn_button = Button(930, 500, self.change_image, 1)
+        self.changeturn_button = Button(870, 500, self.change_image, 1)
         self.activate_button = Button(810, 500, self.activate_image, 1)
 
         while(True):
@@ -1213,6 +1216,7 @@ class Player1Turn:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                
             for row in map:
                 for tile in row:
                     tile.render(screen)
@@ -2034,19 +2038,27 @@ class Sidebar():
         image = pygame.image.load('Pictures/Sidebar.png')
         image2 = pygame.transform.scale(image, (int(470), int(500)))
         screen.blit(image2, self.pos)
+        smodel = game.selected_Model
+        cmodel = game.clicked_model
+        state = gameStateManager.givestate()
+        if(smodel != None):
+            AP_Text = my_font.render('AP: '+str(game.selected_Model.AP), False, (0,0,0))
         CP_Text = my_font.render('CP: '+str(game.CP), False, (0,0,0))
         round_Text = my_font.render('Round: '+str(game.round), False, (0, 0, 0))
         player1_Text = my_font.render('SM: '+game.player1,False,(0,0,0))
         player2_Text = my_font.render('GS: '+game.player2, False, (0,0,0))
         GS_count_Text = my_font.render('GS Models: '+str((len(GS_ModellList)+len(BL_ModellList))),False,(0,0,0))
         SM_count_Text = my_font.render('SM Models: '+str(len(SM_ModellList)),False,(0,0,0))
+        match(gameStateManager.givestate()):
+            case('runP1'):
+                pass
         screen.blit(CP_Text, (810,90))
         screen.blit(round_Text, (810,60))
         screen.blit(player1_Text, (810,0))
         screen.blit(player2_Text, (810,30))
         screen.blit(GS_count_Text, (810,120))
         screen.blit(SM_count_Text, (810,150))
-        if(gameStateManager.givestate() == 'actP1' or gameStateManager.givestate() == 'actP2'):
+        if(state == 'actP1' or state == 'actP2'):
             active_model_AP = my_font.render('AP: '+str(game.selected_Model.AP), False,(0,0,0))
             screen.blit(active_model_AP, (810,180))
 SB = Sidebar()  #initiates an Object of Sidebar(singelton)
