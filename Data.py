@@ -467,6 +467,11 @@ class Game:                                         #can variables be exported t
                         self.reveal(self.Manager.rev_models[0])
         print(a,b,c)
         print(self.selected_Model.AP)
+        if(self.selected_Model.weapon != 'flamer'):
+            if(c != 0):
+                SB.roll = str(a) + ' | ' + str(b) + ' | ' +str(c)
+            else:
+                SB.roll = str(a) + ' | ' + str(b)
 
     def ocDoor(self):
         a = False
@@ -713,7 +718,12 @@ class Game:                                         #can variables be exported t
                                     self.Manager.changestate('turn')
                                     self.run()
 
-            print(GS1,GS2,GS3,SM1,SM2)                
+            print(GS1,GS2,GS3,SM1,SM2)
+            if(self.is_playing == self.player1):
+                if(SM2 == 0):
+                    if(GS3 == 0):
+                        SB.roll = 'Space Marine: '+str(SM1)+str(SM2)'\n' + 'Genstealer: ' + str(GS1) + str(GS2) + str(GS3)
+
         for row in map: 
             for tile in row:
                 if(tile.occupand in SM_ModellList):
@@ -2039,6 +2049,7 @@ class Sidebar():
         self.pos = (810,0)
         self.hint = ''
         self.roll = ''
+        self.amount = ''
 
     def display(self,screen):
         my_font = pygame.font.SysFont('Bahnschrift', 20)
@@ -2058,6 +2069,7 @@ class Sidebar():
         SM_count_Text = my_font.render('SM Models: '+str(len(SM_ModellList)),False,(0,0,0))
         hint_Text = my_font.render('Hint: ' + str(self.hint), False, (0,0,0))
         roll_Text = my_font.render('Last Roll: ' + str(self.roll), False, (0,0,0))
+        amount_Text = my_font.render('Remaining Modells: ' + self.amount, False, (0,0,0))
 
         if(state == 'ooc'):
             is_playing_text = my_font.render('playing: '+ game.player1,False, (0,0,0))
@@ -2066,10 +2078,36 @@ class Sidebar():
         if(smodel != None):
             active_model_AP = my_font.render('AP: '+str(game.selected_Model.AP), False,(0,0,0))
             if(smodel in SM_ModellList):
-                active_model_weapon = my_font.render('weapon: '+ str(smodel.weapon), False,(0,0,0))
+                match(smodel.weapon):
+                    case('fist'):
+                        wpn = 'Powerfist & Stormbolter'
+                    case('AssaultCanon'):
+                        wpn = 'Powerfist & Assault Cannon'
+                    case('powerSword'):
+                        wpn = 'Powersword & Stormbolter'
+                    case('flamer'):
+                        wpn = 'Powerfist & Heavy Flamer'
+                    case('chainFist'):
+                        wpn = 'Chainfist & Stormbolter'
+                    case('claws'):
+                        wpn = 'Lightning Claws'
+                active_model_weapon = my_font.render('weapon: '+ wpn, False,(0,0,0))
                 active_model_rank = my_font.render('rank: '+ (smodel.rank), False,(0,0,0))
             elif(cmodel != None):
                 if(cmodel in SM_ModellList):
+                    match(cmodel.weapon):
+                        case('fist'):
+                            wpn = 'Powerfist & Stormbolter'
+                        case('AssaultCanon'):
+                            wpn = 'Powerfist & Assault Cannon'
+                        case('powerSword'):
+                            wpn = 'Powersword & Stormbolter'
+                        case('flamer'):
+                            wpn = 'Powerfist & Heavy Flamer'
+                        case('chainFist'):
+                            wpn = 'Chainfist & Stormbolter'
+                        case('claws'):
+                            wpn = 'Lightning Claws'
                     clicked_model_weapon = my_font.render('weapon: '+ str(cmodel.weapon), False, (0,0,0))
                     clicked_model_rank = my_font.render('rank: '+ str(cmodel.rank),False,(0,0,0))
                     
@@ -2152,17 +2190,31 @@ class Sidebar():
                 screen.blit(active_model_rank, (810,180)) 
 
             case('gsprep'):
-                pass
+                screen.blit(hint_Text, (810,30))
+                screen.blit(amount_Text, (810,0))
+                screen.blit(CP_Text, (810,60))
 
-        # screen.blit(CP_Text, (810,90))
+            case('smplace'):
+                screen.blit(is_playing_text, (810,30))
+                screen.blit(CP_Text, (810,60))
+                screen.blit(amount_Text, (810,90))
+                screen.blit(hint_Text, (810,180))
+                screen.blit(active_model_weapon, (810,120))
+                screen.blit(active_model_rank, (810,150)) 
+
+            case('gsplace'):
+                screen.blit(is_playing_text, (810,30))
+                screen.blit(CP_Text, (810,60))
+                screen.blit(amount_Text, (810,90))
+                screen.blit(hint_Text, (810,120))
+
+            case('reveal'):
+                screen.blit(is_playing_text, (810,30))
+                screen.blit(CP_Text, (810,60))
+                screen.blit(amount_Text, (810,90))
+                screen.blit(hint_Text, (810,120))
+
         screen.blit(round_Text, (810,0))
-        # screen.blit(player1_Text, (810,0))
-        # screen.blit(player2_Text, (810,30))
-        # screen.blit(GS_count_Text, (810,120))
-        # screen.blit(SM_count_Text, (810,150))
-        if(state == 'actP1' or state == 'actP2'):
-            active_model_AP = my_font.render('AP: '+str(game.selected_Model.AP), False,(0,0,0))
-            screen.blit(active_model_AP, (810,180))
 SB = Sidebar()  #initiates an Object of Sidebar(singelton)
 
 class Bottombar():
