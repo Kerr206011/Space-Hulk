@@ -955,12 +955,12 @@ class gamestateTurn:
         self.face_image = pygame.image.load('Pictures/melee_face.png')
         self.move_image = pygame.image.load('Pictures/move.png')
 
-        self.turnright_button = Button(930, 200, self.turn_right_image, 1)
-        self.turnleft_button = Button(810, 200, self.turn_left_image, 1)
-        self.noturn_button = Button(870, 200, self.noturn_image, 1)
-        self.fullturn_button = Button(990, 200, self.fullturn_image, 1)
-        self.face_button = Button(930, 200, self.face_image, 1)
-        self.move_button = Button(930, 200, self.move_image, 1)
+        self.turnright_button = Button(930, 500, self.turn_right_image, 1)
+        self.turnleft_button = Button(810, 500, self.turn_left_image, 1)
+        self.noturn_button = Button(870, 500, self.noturn_image, 1)
+        self.fullturn_button = Button(990, 500, self.fullturn_image, 1)
+        self.face_button = Button(930, 500, self.face_image, 1)
+        self.move_button = Button(930, 500, self.move_image, 1)
 
         while(True):
             pressed = False
@@ -2014,6 +2014,7 @@ class SpaceMarine(Model):
 class Genestealer(Model):
     def __init__(self):
         super().__init__(6, 'Pictures/Models/Gs.png')
+        self.is_broodlord = False
 
 class Blip(Model):
     def __init__(self):
@@ -2032,32 +2033,54 @@ class Sidebar():
         self.SM_Modelcount = len(SM_ModellList)
         self.timer = int
         self.pos = (810,0)
+        hint = ''
 
     def display(self,screen):
         my_font = pygame.font.SysFont('Bahnschrift', 20)
         image = pygame.image.load('Pictures/Sidebar.png')
         image2 = pygame.transform.scale(image, (int(470), int(500)))
         screen.blit(image2, self.pos)
+
         smodel = game.selected_Model
         cmodel = game.clicked_model
         state = gameStateManager.givestate()
-        if(smodel != None):
-            AP_Text = my_font.render('AP: '+str(game.selected_Model.AP), False, (0,0,0))
+
         CP_Text = my_font.render('CP: '+str(game.CP), False, (0,0,0))
         round_Text = my_font.render('Round: '+str(game.round), False, (0, 0, 0))
         player1_Text = my_font.render('SM: '+game.player1,False,(0,0,0))
         player2_Text = my_font.render('GS: '+game.player2, False, (0,0,0))
         GS_count_Text = my_font.render('GS Models: '+str((len(GS_ModellList)+len(BL_ModellList))),False,(0,0,0))
         SM_count_Text = my_font.render('SM Models: '+str(len(SM_ModellList)),False,(0,0,0))
-        match(gameStateManager.givestate()):
+        if(state == 'ooc'):
+            is_playing_text = my_font.render('playing: '+ game.player1,False, (0,0,0))
+        else:
+            is_playing_text = my_font.render('playing: '+ game.is_playing, False, (0,0,0))
+        if(smodel != None):
+            active_model_AP = my_font.render('AP: '+str(game.selected_Model.AP), False,(0,0,0))
+            if(smodel in SM_ModellList):
+                active_model_weapon = my_font.render('weapon: '+ smodel.weapon, False,(0,0,0))
+                active_model_rank = my_font.render('rank: '+ smodel.rank, False,(0,0,0))
+            elif(cmodel != None):
+                if(cmodel in SM_ModellList):
+                    clicked_model_weapon = my_font.render('weapon: '+ cmodel.weapon, False, (0,0,0))
+                    clicked_model_rank = my_font.render('rank: '+ cmodel.rank,False,(0,0,0))
+        match(state):
+            case('turn'):
+                screen.blit(is_playing_text, (810,30))
+                screen.blit(active_model_AP, (810,60))
+                if(state == 'actP1' or state == 'ooc'):
+                    screen.blit()
+                    screen.blit(active_model_weapon, (810,120))
+                    screen.blit(active_model_rank, (810,150))
+                    screen.blit(CP_Text, (810,90))                    
             case('runP1'):
                 pass
-        screen.blit(CP_Text, (810,90))
-        screen.blit(round_Text, (810,60))
-        screen.blit(player1_Text, (810,0))
-        screen.blit(player2_Text, (810,30))
-        screen.blit(GS_count_Text, (810,120))
-        screen.blit(SM_count_Text, (810,150))
+        # screen.blit(CP_Text, (810,90))
+        screen.blit(round_Text, (810,0))
+        # screen.blit(player1_Text, (810,0))
+        # screen.blit(player2_Text, (810,30))
+        # screen.blit(GS_count_Text, (810,120))
+        # screen.blit(SM_count_Text, (810,150))
         if(state == 'actP1' or state == 'actP2'):
             active_model_AP = my_font.render('AP: '+str(game.selected_Model.AP), False,(0,0,0))
             screen.blit(active_model_AP, (810,180))
