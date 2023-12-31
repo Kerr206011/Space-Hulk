@@ -539,6 +539,7 @@ class Game:                                         #can variables be exported t
                         self.reveal(self.Manager.rev_models[0])
                 
     def melee(self):
+        door = False
         facing = False
         SM1 = 0
         SM2 = 0
@@ -548,16 +549,21 @@ class Game:                                         #can variables be exported t
         if((self.selected_tile != None) & (self.clicked_tile != None)):
             if((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False)):
                 self.redAP(self.selected_Model, 1)
+                door = True
                 if(self.is_playing == self.player1):
                     match(self.selected_Model.weapon):
                         case('fist'):
                             SM1 = random.randint(1,6)
+                            SB.roll = str(SM1)
                         case('powerSword'):
                             SM1 = random.randint(1,6)
+                            SB.roll = str(SM1)
                         case('chainFist'):
                             SM1 = 6
+                            SB.roll = str(SM1)
                         case('AssaultCanon'):
                             SM1 = random.randint(1,6)
+                            SB.roll = str(SM1)
                         case('claws'):
                             SM1 = random.randint(1,6)
                             SM2 = random.randint(1,6)
@@ -565,15 +571,19 @@ class Game:                                         #can variables be exported t
                                 SM1 += 1
                             else:
                                 SM2 += 1
+                            SB.roll = str(SM1)+' | '+str(SM2)
                         case('flamer'):
                             SM1 = random.randint(1,6)
+                            SB.roll = str(SM1)
                     if(self.selected_Model.rank == 'sergeant'):
                         SM1 += 1
                         if(SM2 != 0):
                             SM2 += 1
+                        SB.roll = str(SM1)
                     if((SM1 >= 6) or (SM2 >= 6)):
                         self.clicked_tile.is_door = False
                 if(self.is_playing == self.player2):
+                    SB.roll = str(GS1)+' | '+str(GS2)+' | '+str(GS3)
                     if((GS1 >= 6) or (GS2 >= 6) or (GS3 >= 6)):
                         self.clicked_tile.is_door = False
                 print(GS1,GS2,GS3,SM1,SM2)
@@ -600,12 +610,16 @@ class Game:                                         #can variables be exported t
                                 match(self.selected_Model.weapon):
                                     case('fist'):
                                         SM1 = random.randint(1,6)
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('chainFist'):
                                         SM1 = random.randint(1,6)
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('AssaultCanon'):
                                         SM1 = random.randint(1,6)
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('flamer'):
                                         SM1 = random.randint(1,6)
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('powerSword'):
                                         SM1 = random.randint(1,6)
                                         print(GS1,GS2,GS3,SM1,SM2)  
@@ -616,6 +630,7 @@ class Game:                                         #can variables be exported t
                                                 GS2 = random.randint(1,6)
                                             else:
                                                 GS3 = random.randint(1,6)
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('claws'):
                                         SM1 = random.randint(1,6)
                                         SM2 = random.randint(1,6)
@@ -623,10 +638,12 @@ class Game:                                         #can variables be exported t
                                             SM1 += 1
                                         else:
                                             SM2 += 1
+                                        SB.roll = 'SM: '+str(SM1)+' | '+str(SM2)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                 if(self.selected_Model.rank == 'sergeant'):
                                     SM1 += 1
                                     if(SM2 != 0):
                                         SM2 += 1
+                                    SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                 if(((SM1 > GS1) & (SM1 > GS2) & (SM1 > GS3)) or ((SM2 > GS1) & (SM2 > GS2) & (SM2 > GS3))):
                                     self.clicked_tile.is_occupied = False
                                     self.clicked_tile.occupand = None
@@ -649,12 +666,16 @@ class Game:                                         #can variables be exported t
                                 match(self.clicked_model.weapon):
                                     case('fist'):
                                         SM1 = random.randint(1,6)
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('chainFist'):
                                         SM1 = random.randint(1,6)
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('AssaultCanon'):
                                         SM1 = random.randint(1,6)
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('flamer'):
                                         SM1 = random.randint(1,6)
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('claws'):
                                         SM1 = random.randint(1,6)
                                         if(facing):   
@@ -663,6 +684,7 @@ class Game:                                         #can variables be exported t
                                                 SM1 += 1
                                             else:
                                                 SM2 += 1
+                                        SB.roll = 'SM: '+str(SM1)+' | '+str(SM2) +'|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('powerSword'):
                                         SM1 = random.randint(1,6)
                                         print(GS1,GS2,GS3,SM1,SM2)  
@@ -677,6 +699,7 @@ class Game:                                         #can variables be exported t
                                     SM1 += 1
                                     if(SM2 != 0):
                                         SM2 += 1
+                                    SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                 if(self.clicked_model.guard == True):
                                     if(((SM1 < GS1) or (SM1 < GS2) or (SM1 < GS3)) or ((SM2 != 0) and ((SM2 < GS1) or (SM2 < GS2) or (SM2 < GS3)))):
                                         if((SM2 > SM1) or (SM2 == 0)):
@@ -693,6 +716,10 @@ class Game:                                         #can variables be exported t
                                                 SM1 += 1
                                             else:
                                                 SM2 += 1
+                                        if(SM2 != 0):
+                                            SB.roll = 'SM: '+str(SM1)+' | '+str(SM2)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
+                                        else:
+                                            SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                 for row in map: 
                                     for tile in row:
                                         if(tile.occupand in SM_ModellList):
@@ -719,10 +746,6 @@ class Game:                                         #can variables be exported t
                                     self.run()
 
             print(GS1,GS2,GS3,SM1,SM2)
-            if(self.is_playing == self.player1):
-                if(SM2 == 0):
-                    if(GS3 == 0):
-                        SB.roll = 'Space Marine: '+str(SM1)+str(SM2)'\n' + 'Genstealer: ' + str(GS1) + str(GS2) + str(GS3)
 
         for row in map: 
             for tile in row:
@@ -982,6 +1005,15 @@ class gamestateTurn:
             for row in map:
                 for tile in row: 
                     tile.render(screen)
+             if(self.gameStateManager.melee_turn == True):
+            SB.hint = 'Turn to attacker?'
+            elif((self.gameStateManager.gs_moveturn == True) and (self.gameStateManager.turn == False)):
+                SB.hint = 'Move forwards?'
+            elif(self.gameStateManager.turn == True):
+                SB.hint = 'Choose the facing of the modell.'
+            else:
+                SB.hint = 'Turn the model using the buttons.'
+            
             SB.display(screen)
             BB.display(screen)
             
@@ -1187,6 +1219,8 @@ class CP_reroll:
 
         self.changeturn_button = Button(870, 500, self.cease_image, 1)
         self.reroll_button = Button(810, 500, self.reroll_image, 1)
+        SB.hint = 'Reroll the amount of CP?'
+
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1231,6 +1265,12 @@ class Player1Turn:
                 for tile in row:
                     tile.render(screen)
                     tile.interact()
+            if(game.selected_Model == None):
+                SB.hint = 'Select a model.'
+            elif(game.selected_Model.AP != 0):
+                SB.hint = 'Activate model?'
+            elif(game.selected_Model.AP == 0):
+                SB.hint = 'Reactivate model? Every action now costs CP!'
             
             SB.display(screen)
             BB.display(screen)
@@ -1746,7 +1786,7 @@ class gamestate_SMplace:
                 for tile in row: 
                     tile.render(screen)
                     tile.interact()
-            
+            game.selected_Model = SM_ModellList[x]
             SB.display(screen)
             BB.display(screen)
 
@@ -2052,6 +2092,7 @@ class Sidebar():
         self.amount = ''
 
     def display(self,screen):
+
         my_font = pygame.font.SysFont('Bahnschrift', 20)
         image = pygame.image.load('Pictures/Sidebar.png')
         image2 = pygame.transform.scale(image, (int(470), int(500)))
