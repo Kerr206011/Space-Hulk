@@ -1005,8 +1005,8 @@ class gamestateTurn:
             for row in map:
                 for tile in row: 
                     tile.render(screen)
-             if(self.gameStateManager.melee_turn == True):
-            SB.hint = 'Turn to attacker?'
+            if(self.gameStateManager.melee_turn == True):
+                SB.hint = 'Turn to attacker?'
             elif((self.gameStateManager.gs_moveturn == True) and (self.gameStateManager.turn == False)):
                 SB.hint = 'Move forwards?'
             elif(self.gameStateManager.turn == True):
