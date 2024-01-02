@@ -1542,6 +1542,11 @@ class Player2Turn:
                     tile.render(screen)
                     tile.interact()
             
+            if(game.selected_Model == None):
+                SB.hint = 'Select a model.'
+            elif(game.selected_Model.AP != 0):
+                SB.hint = 'Activate model?'
+            
             SB.display(screen)
             BB.display(screen)
 
@@ -1676,6 +1681,11 @@ class gamestate_shoot:
                 for tile in row: 
                     tile.render(screen)
                     tile.interact()
+            
+            if(game.clicked_model == None):
+                SB.hint = 'Select a target.'
+            else:
+                SB.hint = ''
                 
             SB.display(screen)
             BB.display(screen)
@@ -1710,6 +1720,12 @@ class gamestate_reinforcement:
                 for tile in row: 
                     tile.render(screen)
                     tile.interact()
+
+            SB.amount = str(amount)
+            if(game.selected_tile.is_lurkingpoint == False):
+                SB.hint = 'Select a lurkingpoint.'
+            else:
+                SB.hint = ''
             SB.display(screen)
             BB.display(screen)
             if(self.place_button.draw(screen)):
@@ -1789,6 +1805,15 @@ class gamestate_SMplace:
                 for tile in row: 
                     tile.render(screen)
                     tile.interact()
+
+            SB.amount = str(SM_ModellList.__len__() - x)
+            if(game.selected_tile == None):
+                SB.hint = 'Select an Entrypoint.'
+            elif(game.selected_tile.is_SMentry == False):
+                SB.hint = 'Select an Entrypoint.'
+            else:
+                SB.hint = ''
+
             game.selected_Model = SM_ModellList[x]
             SB.display(screen)
             BB.display(screen)
@@ -1823,6 +1848,15 @@ class gamestate_gsplace:
                 for tile in row: 
                     tile.render(screen)
                     tile.interact()
+
+            SB.amount = str(amount)
+            if(game.selected_tile == None):
+                SB.hint = 'Select an Entrypoint.'
+            elif(game.selected_tile.is_lurkingpoint == False):
+                SB.hint = 'Select an Entrypoint.'
+            else:
+                SB.hint = ''
+
             SB.display(screen)
             BB.display(screen)
             if(self.place_button.draw(screen)):
@@ -1893,6 +1927,14 @@ class gamestate_reveal:
                 for tile in row: 
                     tile.render(screen)
                     tile.interact()
+            
+            SB.amount = str(self.Manager.rev_count)
+            if(game.selected_tile == None):
+                SB.hint = 'Select an Entrypoint.'
+            elif(game.selected_tile.is_lurkingpoint == False):
+                SB.hint = 'Select an Entrypoint.'
+            else:
+                SB.hint = ''
             
             SB.display(screen)
             BB.display(screen)
