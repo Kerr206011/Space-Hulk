@@ -1316,6 +1316,7 @@ class OOC_Activation:
         self.guard_button = Button(1170, 500, self.guard_image, 1)
         self.overwatch_button = Button(1230, 500, self.overwatch_image, 1)
         self.un_jam_button = Button(1290, 500, self.unjam_image, 1)
+        SB.hint = 'Use CP for an out of sequence activation?'
         
         while(True):
             for event in pygame.event.get():
@@ -1438,6 +1439,8 @@ class Player1Activation:
             
             SB.display(screen)
             BB.display(screen)
+            if(SB.hint != ''):
+                SB.hint = 'Press X-Button to finish model activation.'
             
             if(self.move_button.draw(screen)):
                 if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
