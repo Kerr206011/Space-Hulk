@@ -75,6 +75,7 @@ gameStateManager = GameStateManager('main')
 
 class Game:                                         #can variables be exported to individual gamestates?
     def __init__(self) -> None:
+        self.level = 1
         self.Manager = gameStateManager
         self.states = {}                            #a list of gamestates that the game can have
         self.is_playing = str                       #the name of the player who is playing
@@ -143,6 +144,25 @@ class Game:                                         #can variables be exported t
             else: Model.AP -= amount
         if((Model in GS_ModellList) or (Model in BL_ModellList)):
             Model.AP -= amount
+
+    def checkwin(self):
+        match(self.level):
+            case(1):
+                f = False
+                w = False
+                winlis = [map[4][21],map[3][20],map[3][21],map[3][22],map[2][20],map[2][21],map[2][22],map[1][20],map[1][21],map[1][22]]
+                for model in SM_ModellList:
+                    if(model.weapon == 'flamer'):
+                        f = True
+                for tile in winlis:
+                    if(tile.is_buring == True):
+                        w = True
+                if((self.Heavy_flamer_ammo == 0) or (f == False)):
+                    #gs winns
+                    pass
+                elif(w):
+                    self.Manager.changestate('smwin')
+                    game.run()
 
     def vision(self,model,tile):
         ofset_x = 0
@@ -839,6 +859,8 @@ class Game:                                         #can variables be exported t
                     b = True
                     if(self.clicked_tile.is_buring):
                         b = False
+                    if(self.selected_Model.AP == 0):
+                        b = False
                     if(b):
                         c = 1
 
@@ -1209,6 +1231,23 @@ class gamestateNewGame:
             screen.blit(text_surface, (50, 150))
             pygame.display.update()
 
+class SM_win:
+    def __init__(self) -> None:
+        self.Manager = gameStateManager
+
+    def run(self):
+        screen.fill((50, 50, 50))
+        cease_image = pygame.image.load('Pictures/cease.png')
+        end_button = Button(50,150,cease_image,(1))
+        font = pygame.font.SysFont('Bahnschrift', 50)
+        hint_surface = font.render(game.player1 + ' Winns!\n Congratulations',True, (0,0,0))
+        screen.blit(hint_surface, (50,50))
+        while (True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
 class CP_reroll:
     def __init__(self) -> None:
         self.Manager = gameStateManager
@@ -1578,11 +1617,9 @@ class Player2Turn:
 
             if(self.changeturn_button.draw(screen)):
                 Player2Activation.activated_model = None
+                game.checkwin()
                 game.is_playing = game.player1
                 game.SM_prep()
-                print(self.Manager.givestate())
-                print(game.is_playing)
-                print('1')
                 self.Manager.changestate('runP1')
                 game.run()
 
@@ -1744,7 +1781,9 @@ class gamestate_reinforcement:
                     tile.interact()
 
             SB.amount = str(amount)
-            if(game.selected_tile.is_lurkingpoint == False):
+            if(game.selected_tile == None):
+                SB.hint = 'Select a lurkingpoint.'
+            elif(game.selected_tile.is_lurkingpoint == False):
                 SB.hint = 'Select a lurkingpoint.'
             else:
                 SB.hint = ''
