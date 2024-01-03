@@ -1205,7 +1205,7 @@ class gamestateNewGame:
             else:
                 hint_surface = font.render('Spieler 2:', True, (0,0,0))
                 text_surface = font.render(game.player2, True, (0,0,0))
-            screen.blit(hint_surface, (50, 50))
+            screen.blit(hint_surface, (50,50))
             screen.blit(text_surface, (50, 150))
             pygame.display.update()
 
@@ -1260,6 +1260,15 @@ class Player1Turn:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        k = True
+                        while k:
+                            for row in map:
+                                for tile in row:
+                                    tile.x += 10
+                                    tile.rect.topleft = ((tile.x * tile.size),(tile.y * tile.size))
+                            k = False
                 
             for row in map:
                 for tile in row:
