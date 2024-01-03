@@ -1264,8 +1264,24 @@ class Player1Turn:
                     if event.key == pygame.K_s:
                         for row in map:
                             for tile in row:
-                                tile.xb += 10
+                                tile.yb -= 1
                                 tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    screen.fill((50, 50, 50))
                 
             for row in map:
                 for tile in row:
@@ -1989,8 +2005,8 @@ class Tile:
     def __init__(self, x, y, size):
         self.x = x                      # x position on the grid
         self.y = y                      # y position on the grid
-        self.bx = x
-        self.by = y
+        self.xb = x
+        self.yb = y
         image = pygame.image.load('Pictures/Floor.png')     # image of the floor tiles
         self.image = pygame.transform.scale(image, (int(size), int(size)))
         self.size = size # size of the tile in pixels
@@ -2052,7 +2068,7 @@ class Tile:
                 image = pygame.image.load('Pictures/Floor.png')
                 self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
 
-            screen.blit(self.image, (self.x*self.size, self.y*self.size))
+            screen.blit(self.image, (self.xb*self.size, self.yb*self.size))
             if(self.is_occupied):
                 match(self.occupand.face):
                     case((1,0)):
@@ -2070,7 +2086,7 @@ class Tile:
                         imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
                         imaget = pygame.transform.rotate(imaget,90)
         
-                screen.blit(imaget, (self.x*self.size, self.y*self.size))
+                screen.blit(imaget, (self.xb*self.size, self.yb*self.size))
     
     def interact(self):
         pos = pygame.mouse.get_pos()
