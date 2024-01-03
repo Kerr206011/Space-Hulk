@@ -1262,13 +1262,10 @@ class Player1Turn:
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_s:
-                        k = True
-                        while k:
-                            for row in map:
-                                for tile in row:
-                                    tile.x += 10
-                                    tile.rect.topleft = ((tile.x * tile.size),(tile.y * tile.size))
-                            k = False
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 10
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
                 
             for row in map:
                 for tile in row:
@@ -1992,6 +1989,8 @@ class Tile:
     def __init__(self, x, y, size):
         self.x = x                      # x position on the grid
         self.y = y                      # y position on the grid
+        self.bx = x
+        self.by = y
         image = pygame.image.load('Pictures/Floor.png')     # image of the floor tiles
         self.image = pygame.transform.scale(image, (int(size), int(size)))
         self.size = size # size of the tile in pixels
