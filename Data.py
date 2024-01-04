@@ -1569,27 +1569,33 @@ class Player1Turn:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_s:
-                        for row in map:
-                            for tile in row:
-                                tile.yb -= 1
-                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
-                    if event.key == pygame.K_w:
-                        for row in map:
-                            for tile in row:
-                                tile.yb += 1
-                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
-                    if event.key == pygame.K_a:
-                        for row in map:
-                            for tile in row:
-                                tile.xb += 1
-                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
-                    if event.key == pygame.K_d:
-                        for row in map:
-                            for tile in row:
-                                tile.xb -= 1
-                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
-                    screen.fill((50, 50, 50))
+                    k = True
+                    while(k):
+                        for event in pygame.event.get():
+                            if event.type == pygame.KEYUP:
+                                k = False
+                        if event.key == pygame.K_s:
+                            for row in map:
+                                for tile in row:
+                                    tile.yb -= 1
+                                    tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                        if event.key == pygame.K_w:
+                            for row in map:
+                                for tile in row:
+                                    tile.yb += 1
+                                    tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                        if event.key == pygame.K_a:
+                            for row in map:
+                                for tile in row:
+                                    tile.xb += 1
+                                    tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                        if event.key == pygame.K_d:
+                            for row in map:
+                                for tile in row:
+                                    tile.xb -= 1
+                                    tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                        screen.fill((50, 50, 50))
                 
             for row in map:
                 for tile in row:
