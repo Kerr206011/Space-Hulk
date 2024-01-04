@@ -122,7 +122,11 @@ class Game:                                         #can variables be exported t
                         self.Manager.save_model = self.selected_Model
                         self.Manager.save_tile = self.selected_tile
                         self.reveal(self.Manager.rev_models[0])
-        if(self.CP != 6):
+        x = False
+        for model in SM_ModellList: 
+            if(model.rank == 'sergeant'):
+                x = True
+        if((self.CP != 6) and (x)):
             self.Manager.changestate('reroll')
             self.run()
 
@@ -1026,6 +1030,36 @@ class gamestateTurn:
                 if event.type == pygame.QUIT:
                     pygame.quit
                     sys.exit
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                    screen.fill((50, 50, 50))
             for row in map:
                 for tile in row: 
                     tile.render(screen)
@@ -1509,8 +1543,35 @@ class gamestate_level:
                 game.reinforcement = 2
                 game.gs_start = 2
 
-                gameStateManager.sections = [[map[12][1],map[12][2],map[12][3],map[12][4],map[12][5]],[map[12][6],map[12][7],map[12][8],map[12][9],map[12][10],map[11][7],map[11][8],map[11][9],map[13][7],map[13][8],map[13][9],map[14][8]],[map[12][11],map[12][12],map[12][13]],[map[15][8],map[16][8],map[17][8],map[18][8]],[map[19][8],map[20][7],map[20][8],map[20][9],map[21][7],map[21][8],map[21][9],map[21][10],map[22][7],map[22][8],map[22][9]],[map[21][11],map[21][12],map[20][12],map[22][12]],[map[12][14],map[12][15],map[11][15],map[12][16]],[map[10][15],map[9][15],map[9][16]],[map[9][17],map[9][18],map[9][19]],[map[9][20],map[9][21],map[9][22],map[8][21],map[10][21]],[map[7][21],map[6][21],map[5][21]],[map[4][21],map[3][20],map[3][21],map[3][22],map[2][20],map[2][21],map[2][22],map[1][20],map[1][21],map[1][22]],[map[9][23],map[9][24],map[9][25]],[map[9][26],map[9][27],map[8][27],map[10][27]],[map[11][27],map[12][27],map[12][26],map[13][27]],[map[12][25],map[12][24],map[12][23]],[map[12][22],map[12][21],map[12][20],map[13][21],map[11][21]],[map[14][21],map[15][21],map[16][21],map[17][21],map[18][21]],[map[19][21],map[20][21],map[20][20],map[20][22]],[map[12][19],map[12][18],map[12][17]]]
+                gameStateManager.sections = [[map[12][1],map[12][2],
+                                              map[12][3],map[12][4],map[12][5]],
+                                              [map[12][6],map[12][7],map[12][8],map[12][9],map[12][10],map[11][7],map[11][8],map[11][9],map[13][7],map[13][8],map[13][9],map[14][8]],
+                                              [map[12][11],map[12][12],map[12][13]],
+                                              [map[15][8],map[16][8],map[17][8],map[18][8]],
+                                              [map[19][8],map[20][7],map[20][8],map[20][9],map[21][7],map[21][8],map[21][9],map[21][10],map[22][7],map[22][8],map[22][9]],
+                                              [map[21][11],map[21][12],map[20][12],map[22][12]],
+                                              [map[12][14],map[12][15],map[11][15],map[12][16]],
+                                              [map[10][15],map[9][15],map[9][16]],
+                                              [map[9][17],map[9][18],map[9][19]],
+                                              [map[9][20],map[9][21],map[9][22],map[8][21],map[10][21]],
+                                              [map[7][21],map[6][21],map[5][21]],
+                                              [map[4][21],map[3][20],map[3][21],map[3][22],map[2][20],map[2][21],map[2][22],map[1][20],map[1][21],map[1][22]],
+                                              [map[9][23],map[9][24],map[9][25]],
+                                              [map[9][26],map[9][27],map[8][27],map[10][27]],
+                                              [map[11][27],map[12][27],map[12][26],map[13][27]],
+                                              [map[12][25],map[12][24],map[12][23]],
+                                              [map[12][22],map[12][21],map[12][20],map[13][21],map[11][21]],
+                                              [map[14][21],map[15][21],map[16][21],map[17][21],map[18][21]],
+                                              [map[19][21],map[20][21],map[20][20],map[20][22]],
+                                              [map[12][19],map[12][18],map[12][17]]]
                 screen.fill((50,50,50))
+                x = 0
+                liste = [1,4,6,8,16,18,14,12,10]
+                while (x < liste.__len__()):
+                    for tile in gameStateManager.sections[liste[x]]:
+                        tile.group = 'b'
+                    x += 1
+
                 self.Manager.changestate('smplace')
                 game.run()
             pygame.display.update()
@@ -1568,34 +1629,36 @@ class Player1Turn:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
                 if event.type == pygame.KEYDOWN:
-                    k = True
-                    while(k):
-                        for event in pygame.event.get():
-                            if event.type == pygame.KEYUP:
-                                k = False
-                        if event.key == pygame.K_s:
-                            for row in map:
-                                for tile in row:
-                                    tile.yb -= 1
-                                    tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
-                        if event.key == pygame.K_w:
-                            for row in map:
-                                for tile in row:
-                                    tile.yb += 1
-                                    tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
-                        if event.key == pygame.K_a:
-                            for row in map:
-                                for tile in row:
-                                    tile.xb += 1
-                                    tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
-                        if event.key == pygame.K_d:
-                            for row in map:
-                                for tile in row:
-                                    tile.xb -= 1
-                                    tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
                                 
-                        screen.fill((50, 50, 50))
+                    screen.fill((50, 50, 50))
                 
             for row in map:
                 for tile in row:
@@ -1660,6 +1723,37 @@ class OOC_Activation:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                    screen.fill((50, 50, 50))
+
             for row in map:
                 for tile in row:
                     tile.render(screen)
@@ -1769,6 +1863,36 @@ class Player1Activation:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                    screen.fill((50, 50, 50))
             for row in map:
                 for tile in row:
                     tile.render(screen)
@@ -1875,6 +1999,36 @@ class Player2Turn:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                    screen.fill((50, 50, 50))
             for row in map:
                 for tile in row: 
                     tile.render(screen)
@@ -1934,6 +2088,36 @@ class Player2Activation:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                    screen.fill((50, 50, 50))
             for row in map:
                 for tile in row: 
                     tile.render(screen)
@@ -2013,6 +2197,37 @@ class gamestate_shoot:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                    screen.fill((50, 50, 50))
+
             for row in map:
                 for tile in row: 
                     tile.render(screen)
@@ -2051,6 +2266,37 @@ class gamestate_reinforcement:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                    screen.fill((50, 50, 50))
+
             for row in map:
                 for tile in row: 
                     tile.render(screen)
@@ -2138,6 +2384,36 @@ class gamestate_SMplace:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                    screen.fill((50, 50, 50))
             for row in map:
                 for tile in row: 
                     tile.render(screen)
@@ -2181,6 +2457,36 @@ class gamestate_gsplace:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                    screen.fill((50, 50, 50))
             for row in map:
                 for tile in row: 
                     tile.render(screen)
@@ -2219,8 +2525,12 @@ class gamestate_gsplace:
                                         d = game.distance(bl, tile)
                                         if(d < 7):
                                             bl.occupand.AP = 0
-                self.Manager.changestate('reroll')
-                game.run()
+                if game.CP != 6:
+                    self.Manager.changestate('reroll')
+                    game.run()
+                else:
+                    self.Manager.changestate('runP1')
+                    game.run()
             pygame.display.update()
 
 class gamestate_reveal:
@@ -2260,6 +2570,36 @@ class gamestate_reveal:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEWHEEL:
+                    for row in map:
+                        for tile in row:
+                            tile.size += event.y
+                            tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
+                            print(event.y)
+                    screen.fill((50,50,50))
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_s:
+                        for row in map:
+                            for tile in row:
+                                tile.yb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_w:
+                        for row in map:
+                            for tile in row:
+                                tile.yb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_a:
+                        for row in map:
+                            for tile in row:
+                                tile.xb += 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                    if event.key == pygame.K_d:
+                        for row in map:
+                            for tile in row:
+                                tile.xb -= 1
+                                tile.rect.topleft = ((tile.xb * tile.size),(tile.yb * tile.size))
+                                
+                    screen.fill((50, 50, 50))
             for row in map:
                 for tile in row: 
                     tile.render(screen)
@@ -2322,7 +2662,7 @@ class Tile:
         self.y = y                      # y position on the grid
         self.xb = x
         self.yb = y
-        image = pygame.image.load('Pictures/Floor.png')     # image of the floor tiles
+        image = pygame.image.load('Pictures/Floor_1.png')     # image of the floor tiles
         self.image = pygame.transform.scale(image, (int(size), int(size)))
         self.size = size # size of the tile in pixels
         self.is_occupied = False # true if occupied by any miniature
@@ -2338,6 +2678,7 @@ class Tile:
         self.is_buring = False
         self.is_SMentry = False
         self.is_used = True
+        self.group = 'a'
 
     def render(self, screen):
         if(self.is_used):
@@ -2347,21 +2688,53 @@ class Tile:
             elif(self.is_door):
                 if((map[self.y+1][self.x].is_wall == True) and (map[self.y-1][self.x].is_wall == True)):
                     #path = if self.is_open == False "" else ""
-                    if(self.is_open == False):
-                        image = pygame.image.load('Pictures/Door.png')
-                        self.image = pygame.transform.scale(image,(self.size,self.size))
+                    if(self.group == 'a'):
+                        if(self.is_open == False):
+                            image = pygame.image.load('Pictures/Door.png')
+                            self.image = pygame.transform.scale(image,(self.size,self.size))
+                        elif(self.is_buring == True):
+                            image = pygame.image.load('Pictures/Door_burning.png')
+                            self.image = pygame.transform.scale(image, (self.size,self.size))
+                        else:
+                            image = pygame.image.load('Pictures/Door_open.png')
+                            self.image = pygame.transform.scale(image,(self.size,self.size))
                     else:
-                        image = pygame.image.load('Pictures/Door_open.png')
-                        self.image = pygame.transform.scale(image,(self.size,self.size))
+                        if(self.is_open == False):
+                            image = pygame.image.load('Pictures/Door_2.png')
+                            self.image = pygame.transform.scale(image,(self.size,self.size))
+                        elif(self.is_buring == True):
+                            image = pygame.image.load('Pictures/Door_2_burning.png')
+                            self.image = pygame.transform.scale(image, (self.size,self.size))
+                        else:
+                            image = pygame.image.load('Pictures/Door_open_2.png')
+                            self.image = pygame.transform.scale(image,(self.size,self.size))
                 else:
-                    if(self.is_open == False):
-                        image = pygame.image.load('Pictures/Door.png')
-                        imagen = pygame.transform.scale(image,(self.size,self.size))
-                        self.image = pygame.transform.rotate(imagen,90)
+                    if(self.group == 'a'):
+                        if(self.is_open == False):
+                            image = pygame.image.load('Pictures/Door.png')
+                            imagen = pygame.transform.scale(image,(self.size,self.size))
+                            self.image = pygame.transform.rotate(imagen,90)
+                        elif(self.is_buring == True):
+                            image = pygame.image.load('Pictures/Door_burning.png')
+                            imagen = pygame.transform.scale(image,(self.size,self.size))
+                            self.image = pygame.transform.rotate(imagen,90)
+                        else:
+                            image = pygame.image.load('Pictures/Door_open.png')
+                            imagen = pygame.transform.scale(image,(self.size,self.size))
+                            self.image = pygame.transform.rotate(imagen,90)
                     else:
-                        image = pygame.image.load('Pictures/Door_open.png')
-                        imagen = pygame.transform.scale(image,(self.size,self.size))
-                        self.image = pygame.transform.rotate(imagen,90)
+                        if(self.is_open == False):
+                            image = pygame.image.load('Pictures/Door_2.png')
+                            imagen = pygame.transform.scale(image,(self.size,self.size))
+                            self.image = pygame.transform.rotate(imagen,90)
+                        elif(self.is_buring == True):
+                            image = pygame.image.load('Pictures/Door_2_burning.png')
+                            imagen = pygame.transform.scale(image,(self.size,self.size))
+                            self.image = pygame.transform.rotate(imagen,90)
+                        else:
+                            image = pygame.image.load('Pictures/Door_open_2.png')
+                            imagen = pygame.transform.scale(image,(self.size,self.size))
+                            self.image = pygame.transform.rotate(imagen,90)
 
             elif(self.is_entrypoint):
                 image = pygame.image.load('Pictures/entrypoint.PNG')
@@ -2377,11 +2750,19 @@ class Tile:
                     imager = pygame.transform.scale(image,(self.size,self.size))
                     self.image = pygame.transform.rotate(imager,270)
             elif(self.is_buring):
-                image = pygame.image.load('Pictures/Floor_burning.png')
-                self.image = pygame.transform.scale(image,(self.size,self.size))
+                if(self.group == 'a'):
+                    image = pygame.image.load('Pictures/Floor_burning.png')
+                    self.image = pygame.transform.scale(image, (int(self.size),int(self.size)))
+                else:
+                    image = pygame.image.load('Pictures/Floor_2_burning.png')
+                    self.image = pygame.transform.scale(image, (int(self.size),int(self.size)))
             else:
-                image = pygame.image.load('Pictures/Floor.png')
-                self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                if(self.group == 'a'):
+                    image = pygame.image.load('Pictures/Floor.png')
+                    self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                else:
+                    image = pygame.image.load('Pictures/Floor_2.png')
+                    self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
 
             screen.blit(self.image, (self.xb*self.size, self.yb*self.size))
             if(self.is_occupied):
@@ -2574,13 +2955,14 @@ class Sidebar():
                     screen.blit(roll_Text, (810,120))
 
             case('actP1'):
-                screen.blit(is_playing_text, (810,30))
-                screen.blit(active_model_AP, (810,60))
-                screen.blit(CP_Text, (810,90))
-                screen.blit(hint_Text, (810,120))
-                screen.blit(active_model_weapon, (810,150))
-                screen.blit(active_model_rank, (810,180)) 
-                screen.blit(roll_Text, (810,210))
+                if(smodel != None):
+                    screen.blit(is_playing_text, (810,30))
+                    screen.blit(active_model_AP, (810,60))
+                    screen.blit(CP_Text, (810,90))
+                    screen.blit(hint_Text, (810,120))
+                    screen.blit(active_model_weapon, (810,150))
+                    screen.blit(active_model_rank, (810,180)) 
+                    screen.blit(roll_Text, (810,210))
 
             case('reroll'):
                 screen.blit(is_playing_text, (810,30))
@@ -2588,13 +2970,14 @@ class Sidebar():
                 screen.blit(hint_Text, (810,90))
 
             case('ooc'):
-                screen.blit(is_playing_text, (810,30))
-                screen.blit(active_model_AP, (810,60))
-                screen.blit(CP_Text, (810,90))
-                screen.blit(hint_Text, (810,120))
-                screen.blit(active_model_weapon, (810,150))
-                screen.blit(active_model_rank, (810,180)) 
-                screen.blit(roll_Text, (810,210))
+                if(smodel != None):
+                    screen.blit(is_playing_text, (810,30))
+                    screen.blit(active_model_AP, (810,60))
+                    screen.blit(CP_Text, (810,90))
+                    screen.blit(hint_Text, (810,120))
+                    screen.blit(active_model_weapon, (810,150))
+                    screen.blit(active_model_rank, (810,180)) 
+                    screen.blit(roll_Text, (810,210))
 
             case('runP2'):
                 if(smodel != None):
@@ -2610,23 +2993,25 @@ class Sidebar():
                     screen.blit(roll_Text, (810,120))
 
             case('actP2'):
-                screen.blit(is_playing_text, (810,30))
-                screen.blit(active_model_AP, (810,60))
-                screen.blit(CP_Text, (810,90))
-                screen.blit(hint_Text, (810,120)) 
-                screen.blit(roll_Text, (810,150))
+                if(smodel != None):
+                    screen.blit(is_playing_text, (810,30))
+                    screen.blit(active_model_AP, (810,60))
+                    screen.blit(CP_Text, (810,90))
+                    screen.blit(hint_Text, (810,120)) 
+                    screen.blit(roll_Text, (810,150))
 
             case('shoot'):
                 if(smodel in SM_ModellList):
                     if(smodel.susf == True):
                         sus = my_font.render('Sustained', False, (0,0,0))
                         screen.blit(sus,(810,210))
+                if(smodel != None):
+                    screen.blit(active_model_AP, (810,60))
+                    screen.blit(active_model_weapon, (810,150))
+                    screen.blit(active_model_rank, (810,180)) 
                 screen.blit(is_playing_text, (810,30))
-                screen.blit(active_model_AP, (810,60))
                 screen.blit(CP_Text, (810,90))
                 screen.blit(hint_Text, (810,120))
-                screen.blit(active_model_weapon, (810,150))
-                screen.blit(active_model_rank, (810,180)) 
 
             case('gsprep'):
                 screen.blit(hint_Text, (810,30))
