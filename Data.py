@@ -76,6 +76,8 @@ gameStateManager = GameStateManager('main')
 class Game:                                         #can variables be exported to individual gamestates?
     def __init__(self) -> None:
         self.level = 1
+        self.reinforcement = int
+        self.gs_start = int
         self.Manager = gameStateManager
         self.states = {}                            #a list of gamestates that the game can have
         self.is_playing = str                       #the name of the player who is playing
@@ -1298,6 +1300,7 @@ class gamestate_level:
                     print(event.y)
 
             if(lvl1_button.draw(screen)):
+                game.level = 1
                 removetiles = []
 
                 for tile in map[0]:
@@ -1498,15 +1501,15 @@ class gamestate_level:
                         for tile in row:
                             if(tile == ins):
                                 tile.is_used = False                                                                                                                                                           
+                for tile in [map[12][1],map[12][2],map[12][3], map[12][4],map[12][5]]:
+                    tile.is_SMentry = True
+                for model in [SpaceMarine('flamer', 'none'),SpaceMarine('powerSword','sergeant'),SpaceMarine('fist','none'),SpaceMarine('fist','none'),SpaceMarine('fist','none')]:
+                    SM_ModellList.append(model)
 
-                map[12][1].is_SMentry = True
-                map[12][2].is_SMentry = True
-                map[12][3].is_SMentry = True
-                map[12][4].is_SMentry = True
-                map[12][5].is_SMentry = True
+                game.reinforcement = 2
+                game.gs_start = 2
 
                 gameStateManager.sections = [[map[12][1],map[12][2],map[12][3],map[12][4],map[12][5]],[map[12][6],map[12][7],map[12][8],map[12][9],map[12][10],map[11][7],map[11][8],map[11][9],map[13][7],map[13][8],map[13][9],map[14][8]],[map[12][11],map[12][12],map[12][13]],[map[15][8],map[16][8],map[17][8],map[18][8]],[map[19][8],map[20][7],map[20][8],map[20][9],map[21][7],map[21][8],map[21][9],map[21][10],map[22][7],map[22][8],map[22][9]],[map[21][11],map[21][12],map[20][12],map[22][12]],[map[12][14],map[12][15],map[11][15],map[12][16]],[map[10][15],map[9][15],map[9][16]],[map[9][17],map[9][18],map[9][19]],[map[9][20],map[9][21],map[9][22],map[8][21],map[10][21]],[map[7][21],map[6][21],map[5][21]],[map[4][21],map[3][20],map[3][21],map[3][22],map[2][20],map[2][21],map[2][22],map[1][20],map[1][21],map[1][22]],[map[9][23],map[9][24],map[9][25]],[map[9][26],map[9][27],map[8][27],map[10][27]],[map[11][27],map[12][27],map[12][26],map[13][27]],[map[12][25],map[12][24],map[12][23]],[map[12][22],map[12][21],map[12][20],map[13][21],map[11][21]],[map[14][21],map[15][21],map[16][21],map[17][21],map[18][21]],[map[19][21],map[20][21],map[20][20],map[20][22]],[map[12][19],map[12][18],map[12][17]]]
-                print(screen.get_size())
                 screen.fill((50,50,50))
                 self.Manager.changestate('smplace')
                 game.run()
@@ -1539,11 +1542,13 @@ class CP_reroll:
 
             if(self.changeturn_button.draw(screen)):
                 self.Manager.changestate('runP1')
+                game.selected_Model = None
                 game.run()
 
             if(self.reroll_button.draw(screen)):
                 self.Manager.changestate('runP1')
                 game.CP = random.randint(1,6)
+                game.selected_Model = None
                 game.run()
             
             pygame.display.update()
@@ -1602,6 +1607,7 @@ class Player1Turn:
 
             if(self.changeturn_button.draw(screen)):
                 Player1Activation.activated_model = None
+                game.selected_Model = None
                 game.is_playing = game.player2
                 game.GS_prep()
                 print(self.Manager.givestate())
@@ -1789,6 +1795,7 @@ class Player1Activation:
             if(self.changeturn_button.draw(screen)):
                 self.activated_model.AP = 0
                 self.activated_model = None
+                game.selected_Model = None
                 self.Manager.changestate('runP1')
                 game.run()
 
@@ -2027,10 +2034,9 @@ class gamestate_shoot:
 class gamestate_reinforcement:
     def __init__(self) -> None:
         self.Manager = gameStateManager
-        self.amount = 2
 
     def run(self):
-        amount = self.amount
+        amount = game.reinforcement
         self.place_image = pygame.image.load('Pictures/placemodel.png')
         self.place_button = Button(810, 500, self.place_image, 1)
 
@@ -2069,7 +2075,7 @@ class gamestate_reinforcement:
             if((amount == 0) or (lis == [])):
                 for row in map:
                     for bl in row:
-                        if(bl.occupand in BL_ModellList):
+                        if((bl.occupand in BL_ModellList) and (bl.is_lurkingpoint == True)):
                             for row in map:
                                 for tile in row:
                                     if(tile.occupand in SM_ModellList):
@@ -2161,7 +2167,7 @@ class gamestate_gsplace:
         self.Manager = gameStateManager
 
     def run(self):
-        amount = 2
+        amount = game.gs_start
         self.place_image = pygame.image.load('Pictures/placemodel.png')
         self.place_button = Button(810, 500, self.place_image, 1)
         while(True):
@@ -2410,6 +2416,20 @@ class Tile:
                         game.clicked_model = self.occupand
                 elif(self.is_door == True and self.is_open == False):
                     game.clicked_tile = self
+            elif(gameStateManager.givestate() == 'actP1'):
+                if(self.is_occupied == True):
+                    if self.occupand in GS_ModellList:
+                        game.clicked_tile = self
+                        game.clicked_model = self.occupand
+                else:
+                    game.clicked_tile = self
+            elif(gameStateManager.givestate() == 'actP2'):
+                if(self.is_occupied == True):
+                    if self.occupand in SM_ModellList:
+                        game.clicked_tile = self
+                        game.clicked_model = self.occupand
+                else:
+                    game.clicked_tile = self
             elif(((self.is_occupied) and (self.occupand in SM_ModellList) and (game.is_playing == game.player1)) or ((self.is_occupied) and ((self.occupand in GS_ModellList) or (self.occupand in BL_ModellList)) and (game.is_playing == game.player2))):
                 game.selected_Model = self.occupand
                 game.selected_tile = self
@@ -2604,7 +2624,7 @@ class Sidebar():
 
             case('gsprep'):
                 screen.blit(hint_Text, (810,30))
-                screen.blit(amount_Text, (810,0))
+                screen.blit(amount_Text, (810,90))
                 screen.blit(CP_Text, (810,60))
 
             case('smplace'):
