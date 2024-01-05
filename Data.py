@@ -2766,21 +2766,43 @@ class Tile:
 
             screen.blit(self.image, (self.xb*self.size, self.yb*self.size))
             if(self.is_occupied):
-                match(self.occupand.face):
-                    case((1,0)):
-                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                    
-                    case(-1,0):
-                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                        imaget = pygame.transform.rotate(imaget,180)
-                    
-                    case((0,1)):
-                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                        imaget = pygame.transform.rotate(imaget,270)
+                if(self.occupand == game.selected_Model):
+                    if(game.is_playing == game.player1):
+                        match(self.occupand.face):
+                            case((1,0)):
+                                image = pygame.image.load('Pictures/Models/SM_select.png')
+                                imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                            
+                            case(-1,0):
+                                image = pygame.image.load('Pictures/Models/SM_select.png')
+                                imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                                imaget = pygame.transform.rotate(imaget,180)
+                            
+                            case((0,1)):
+                                image = pygame.image.load('Pictures/Models/SM_select.png')
+                                imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                                imaget = pygame.transform.rotate(imaget,270)
 
-                    case((0,-1)):
-                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                        imaget = pygame.transform.rotate(imaget,90)
+                            case((0,-1)):
+                                image = pygame.image.load('Pictures/Models/SM_select.png')
+                                imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                                imaget = pygame.transform.rotate(imaget,90)
+                else:
+                    match(self.occupand.face):
+                        case((1,0)):
+                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                        
+                        case(-1,0):
+                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,180)
+                        
+                        case((0,1)):
+                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,270)
+
+                        case((0,-1)):
+                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,90)
         
                 screen.blit(imaget, (self.xb*self.size, self.yb*self.size))
     
