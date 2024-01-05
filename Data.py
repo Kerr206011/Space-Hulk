@@ -2524,6 +2524,10 @@ class gamestate_SMplace:
 
             if(len(SM_ModellList) == x):
                 self.Manager.changestate('gsplace')
+                for row in map:
+                    for tile in row:
+                        if(tile.is_SMentry == True):
+                            tile.is_SMentry = False
                 game.run()
             pygame.display.update()
 
@@ -2839,6 +2843,12 @@ class Tile:
                 else:
                     image = pygame.image.load('Pictures/Floor_2_burning.png')
                     self.image = pygame.transform.scale(image, (int(self.size),int(self.size)))
+            elif(self.is_lurkingpoint == True):
+                image = pygame.image.load('Pictures/lurking.png')
+                self.image = pygame.transform.scale(image,(int(self.size),int(self.size)))
+            elif(self.is_SMentry == True):
+                image = pygame.image.load('Pictures/SM_entry.png')
+                self.image = pygame.transform.scale(image, (int(self.size),int(self.size)))
             else:
                 if(self.group == 'a'):
                     image = pygame.image.load('Pictures/Floor.png')
