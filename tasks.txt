@@ -15,13 +15,30 @@ Speicherfile:
 später neue Steuerung
 
 Fehler:
-    verhindere das shoot nach move exploited werden kann
     überall when selectedmodel != none einfügen
-    sm schießen kostet nur AP wenn auch was angschossen wird
     overwatch
-    oot cp Nutzung
-    blip activation verhindert NICHT das aufdecken
-    gesicht in wand verhindert das bewegen nach links und rechts(GS)
+    gamestate turn nicht aufrufen wenn model tot ist
+    shoot braucht kein AP wenn waffe kein ranged hatt
+    distance nur über gänge(blip deactivation)
+
+features:
+    frage nach bevor du das interacted model änderst
+    selected und clicked Modelle bokommen spezielle Bilder
+    main menu button 
+    scroll permanenet
+    door shoot erweitern
+    in P2 act/turn einen anzeigebutton und info für die Menge
+    actP2 zeigt ausrüstung des clicked_modells an
+    AssaultCanon implementation beenden (shoot/melee)
+    sm_place braucht rotation
+    sm_place braucht liste
+    in P2turn waffen und rang des models anzeigen
+    bei win werte auf None / 0 setzten
+    cp reroll nur wenn sergeant
+    bilder für:
+        sm_start + burn, lurkingpoint, modelle durchsichtig
+    waffen beim auswählen anzeigen
+
 
 referenz:
 rank : 'sergeant'

@@ -411,6 +411,36 @@ class Game:                                         #can variables be exported t
         distance = abs(z)
         return distance
     
+    def gsdistance(self,tiles,tilee):
+        ran = False
+        k = True
+        i = 0
+        tilestart = tiles
+        tilelis = []
+        dist = self.distance(tiles,tilee)
+        chelis = [[map[tilestart.y][tilestart.x + 1],map[tilestart.y][tilestart.x - 1],map[tilestart.y + 1][tilestart.x],map[tilestart.y - 1][tilestart.x]]]
+        for liste in chelis:
+            for tile in liste:
+                if(self.distance(tile,tilee) < dist):
+                    dist = self.distance(tile,tilee)
+                    tilelis.append(tile)
+        while k:
+            for tile in tilelis:
+                chelis.append([map[tile.y][tile.x + 1],map[tile.y][tile.x - 1],map[tile.y + 1][tile.x],map[tile.y - 1][tile.x]])
+            tilelis = []
+            for liste in chelis:
+                for tile in liste:
+                    if((self.distance(tile,tilee) < dist) and (tile.is_wall == False)):
+                        dist = self.distance(tile,tilee)
+                        tilelis.append(tile)
+            chelis = []
+            i += 1
+            if(i <= 6):
+                if(dist == 0):
+                    ran = True
+                k = False
+        return ran
+    
     def shoot(self):
         if(self.selected_Model in SM_ModellList):
             liste = game.vision(self.selected_Model,self.selected_tile)
@@ -965,7 +995,7 @@ class Game:                                         #can variables be exported t
                 lis = game.vision(self.selected_Model, self.selected_tile)
                 remlis = []
                 for tile in lis:
-                    if(tile.is_occupied == False):
+                    if((tile.is_occupied == False) and ((tile.is_door == False) or (tile.is_open == True))):
                         remlis.append(tile)
                     elif(tile.occupand in SM_ModellList):
                         remlis.append(tile)
@@ -2366,14 +2396,27 @@ class gamestate_reinforcement:
 
             if((amount == 0) or (lis == [])):
                 for row in map:
-                    for bl in row:
-                        if((bl.occupand in BL_ModellList) and (bl.is_lurkingpoint == True)):
+                    for tile in row:
+                        if(tile.is_entrypoint == True):
                             for row in map:
-                                for tile in row:
-                                    if(tile.occupand in SM_ModellList):
-                                        d = game.distance(bl, tile)
-                                        if(d < 7):
-                                            bl.occupand.AP = 0
+                                for obj in row:
+                                    if(obj.occupand in SM_ModellList):
+                                        if(game.gsdistance(obj,tile)):
+                                            for lkp in [map[tile.y][tile.x + 1],map[tile.y][tile.x - 1],map[tile.y + 1][tile.x],map[tile.y - 1][tile.x],map[tile.y +1][tile.x + 1],map[tile.y + 1][tile.x - 1],map[tile.y - 1][tile.x - 1],map[tile.y - 1][tile.x + 1]]:
+                                                if lkp.is_lurkingpoint:
+                                                    print('ä')
+                                                    if lkp.is_occupied == True:
+                                                        lkp.occupand.AP = 0
+
+                # for row in map:
+                #     for bl in row:
+                #         if((bl.occupand in BL_ModellList) and (bl.is_lurkingpoint == True)):
+                #             for row in map:
+                #                 for tile in row:
+                #                     if(tile.occupand in SM_ModellList):
+                #                         d = game.distance(bl, tile)
+                #                         if(d < 7):
+                #                             bl.occupand.AP = 0
                 self.Manager.changestate('runP2')
                 game.run()
             pygame.display.update()
@@ -2806,43 +2849,43 @@ class Tile:
 
             screen.blit(self.image, (self.xb*self.size, self.yb*self.size))
             if(self.is_occupied):
-                if(self.occupand == game.selected_Model):
-                    if(game.is_playing == game.player1):
-                        match(self.occupand.face):
-                            case((1,0)):
-                                image = pygame.image.load('Pictures/Models/SM_select.png')
-                                imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                # if(self.occupand == game.selected_Model):
+                #     if(game.is_playing == game.player1):
+                #         match(self.occupand.face):
+                #             case((1,0)):
+                #                 image = pygame.image.load('Pictures/Models/SM_select.png')
+                #                 imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
                             
-                            case(-1,0):
-                                image = pygame.image.load('Pictures/Models/SM_select.png')
-                                imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                                imaget = pygame.transform.rotate(imaget,180)
+                #             case(-1,0):
+                #                 image = pygame.image.load('Pictures/Models/SM_select.png')
+                #                 imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                #                 imaget = pygame.transform.rotate(imaget,180)
                             
-                            case((0,1)):
-                                image = pygame.image.load('Pictures/Models/SM_select.png')
-                                imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                                imaget = pygame.transform.rotate(imaget,270)
+                #             case((0,1)):
+                #                 image = pygame.image.load('Pictures/Models/SM_select.png')
+                #                 imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                #                 imaget = pygame.transform.rotate(imaget,270)
 
-                            case((0,-1)):
-                                image = pygame.image.load('Pictures/Models/SM_select.png')
-                                imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                                imaget = pygame.transform.rotate(imaget,90)
-                else:
-                    match(self.occupand.face):
-                        case((1,0)):
-                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                        
-                        case(-1,0):
-                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                            imaget = pygame.transform.rotate(imaget,180)
-                        
-                        case((0,1)):
-                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                            imaget = pygame.transform.rotate(imaget,270)
+                #             case((0,-1)):
+                #                 image = pygame.image.load('Pictures/Models/SM_select.png')
+                #                 imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                #                 imaget = pygame.transform.rotate(imaget,90)
+                #else:
+                match(self.occupand.face):
+                    case((1,0)):
+                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                    
+                    case(-1,0):
+                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                        imaget = pygame.transform.rotate(imaget,180)
+                    
+                    case((0,1)):
+                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                        imaget = pygame.transform.rotate(imaget,270)
 
-                        case((0,-1)):
-                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                            imaget = pygame.transform.rotate(imaget,90)
+                    case((0,-1)):
+                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                        imaget = pygame.transform.rotate(imaget,90)
         
                 screen.blit(imaget, (self.xb*self.size, self.yb*self.size))
     
