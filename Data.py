@@ -214,7 +214,15 @@ class Game:                                         #can variables be exported t
                 if(i == 1):
                     is_looking_at_object = True 
                 i = 1
-            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+            elif((checked_tile.is_door == True) and (checked_tile.is_open == False)):
+                seenModels.append(checked_tile)
+                x = ((tile.x) + (ofset_x) + (ofs[0]))
+                y = ((tile.y) + (ofset_y) + (ofs[1]))
+                runS = False
+                if(i == 1):
+                    is_looking_at_object = True 
+                i = 1
+            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or (checked_tile.is_entrypoint)):
                 x = ((tile.x) + (ofset_x) + (ofs[0]))
                 y = ((tile.y) + (ofset_y) + (ofs[1]))
                 runS = False
@@ -261,7 +269,20 @@ class Game:                                         #can variables be exported t
                 if((i == 1) and (checked_tile.is_occupied == True)):
                     b = True
                     runL2 = False
-            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+            elif((checked_tile.is_door == True) and (checked_tile.is_open == False)):
+                seenModels.append(checked_tile)
+                runL1 = False
+                if((i == 1) or (b)):
+                    runL2 = False
+                    x = ((tile.x) - (ofset_x) + (ofs[0]))
+                    y = ((tile.y) - (ofset_y) + (ofs[1]))
+                else:
+                    x = tile.x + (2 * ofset_x) + (2 * ofs[0])
+                    y = tile.y + (2 * ofset_y) + (2 * ofs[1])
+                i = 1
+                b = False
+
+            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or (checked_tile.is_entrypoint)):
                 runL1 = False
                 if((i == 1) or (b)):
                     runL2 = False
@@ -304,7 +325,12 @@ class Game:                                         #can variables be exported t
             checked_tile = map[y][x]
             if((checked_tile.is_occupied == True) or ((checked_tile.is_entrypoint == False) and (checked_tile.is_wall == False) and (checked_tile.is_buring == False) and ((checked_tile.is_door == False) or (checked_tile.is_open == True)))):
                 seenModels.append(checked_tile)
-            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+            elif((checked_tile.is_door == True) and (checked_tile.is_open == False)):
+                seenModels.append(checked_tile)
+                runL2 = False
+                x = ((tile.x) - (ofset_x) + (ofs[0]))
+                y = ((tile.y) - (ofset_y) + (ofs[1]))
+            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or (checked_tile.is_entrypoint)):
                 runL2 = False
                 x = ((tile.x) - (ofset_x) + (ofs[0]))
                 y = ((tile.y) - (ofset_y) + (ofs[1]))
@@ -326,7 +352,14 @@ class Game:                                         #can variables be exported t
                 if((i == 1) and (checked_tile.is_occupied == True)):
                     b = True
                     runR2 = False
-            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+            elif((checked_tile.is_door == True) and (checked_tile.is_open == False)):
+                runR1 = False
+                if((i == 1) or (b)):
+                    runR2 = False
+                else:
+                    x = ((tile.x) - (2 * ofset_x) + (2 * ofs[0]))
+                    y = ((tile.y) - (2 * ofset_y) + (2 * ofs[1]))
+            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or (checked_tile.is_entrypoint)):
                 runR1 = False
                 if((i == 1) or (b)):
                     runR2 = False
@@ -356,7 +389,10 @@ class Game:                                         #can variables be exported t
             checked_tile = map[y][x]
             if((checked_tile.is_occupied == True) or ((checked_tile.is_entrypoint == False) and (checked_tile.is_wall == False) and (checked_tile.is_buring == False) and ((checked_tile.is_door == False) or (checked_tile.is_open == True)))):
                 seenModels.append(checked_tile)
-            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or ((checked_tile.is_door == True) and (checked_tile.is_open == False)) or (checked_tile.is_entrypoint)):
+            elif((checked_tile.is_door == True) and (checked_tile.is_open == False)):
+                seenModels.append(checked_tile)
+                runR2 = False
+            elif((checked_tile.is_buring == True) or (checked_tile.is_wall == True) or (checked_tile.is_entrypoint)):
                 runR2 = False
             if((map[(checked_tile.y)+(ofset_y)][(checked_tile.x)+(ofset_x)].is_wall) and (map[(checked_tile.y)-(ofset_y)][(checked_tile.x)-(ofset_x)].is_wall)):
                 runR2 = False
@@ -927,22 +963,26 @@ class Game:                                         #can variables be exported t
                 self.Manager.save_model = None
                 self.Manager.save_tile = None
                 lis = game.vision(self.selected_Model, self.selected_tile)
+                remlis = []
                 for tile in lis:
                     if(tile.is_occupied == False):
-                        lis.remove(tile)
+                        remlis.append(tile)
                     elif(tile.occupand in SM_ModellList):
-                        lis.remove(tile)
+                        remlis.append(tile)
                     elif(tile.occupand in BL_ModellList):
                         self.Manager.rev_models.append(tile)
-                        lis.remove(tile)
-                for tile in lis:
-                    print(tile.y,tile.x)
+                        remlis.append(tile)
+                for tile in remlis:
+                    for obj in lis:
+                        if tile == obj:
+                            lis.remove(tile)
                 self.selected_Model.susf = False
                 if(self.Manager.rev_models.__len__() != 0):
                     self.Manager.save_model = self.selected_Model
                     self.Manager.save_tile = self.selected_tile
                     self.reveal(self.Manager.rev_models[0])
                 elif(lis != []):
+                    print(lis.__len__())
                     if((self.selected_Model.weapon != 'claws') and (self.selected_Model.weapon != 'flamer')):
                         self.Manager.changestate('shoot')
                         game.run()
