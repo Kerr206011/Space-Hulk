@@ -146,7 +146,7 @@ class Game:                                         #can variables be exported t
         if(Model in SM_ModellList):
             if(amount > Model.AP):
                 Model.AP = 0
-                self.CP -= (amount - Model.AP)
+                self.CP = self.CP - ((amount) - (Model.AP))
             else: Model.AP -= amount
         if((Model in GS_ModellList) or (Model in BL_ModellList)):
             Model.AP -= amount
@@ -1848,6 +1848,7 @@ class OOC_Activation:
             if((self.changeturn_button.draw(screen)) or (pressed == True)):
                 self.Manager.ooc = False
                 self.Manager.ooc_models = []
+                game.is_playing = game.player2
                 self.Manager.changestate('actP2')
                 game.run()
 
@@ -2951,7 +2952,7 @@ class Model:
 
 class SpaceMarine(Model):
     def __init__(self, weapon, rank):
-        super().__init__(4,'Pictures/Models/SM_test.png')
+        super().__init__(4,'Pictures/Models/SM.png')
         self.weapon = weapon
         self.rank = rank
         self.susf = False
@@ -2966,7 +2967,7 @@ class Genestealer(Model):
 
 class Blip(Model):
     def __init__(self):
-        super().__init__(6, 'Pictures/Models/Blip_new.PNG')
+        super().__init__(6, 'Pictures/Models/Blip.PNG')
         self.count = random.randint(1,3)
 
 #generate a Map of tiles
@@ -3086,13 +3087,14 @@ class Sidebar():
 
             case('ooc'):
                 if(smodel != None):
-                    screen.blit(is_playing_text, (810,30))
-                    screen.blit(active_model_AP, (810,60))
-                    screen.blit(CP_Text, (810,90))
-                    screen.blit(hint_Text, (810,120))
-                    screen.blit(active_model_weapon, (810,150))
-                    screen.blit(active_model_rank, (810,180)) 
-                    screen.blit(roll_Text, (810,210))
+                    if(smodel in SM_ModellList):
+                        screen.blit(is_playing_text, (810,30))
+                        screen.blit(active_model_AP, (810,60))
+                        screen.blit(CP_Text, (810,90))
+                        screen.blit(hint_Text, (810,120))
+                        screen.blit(active_model_weapon, (810,150))
+                        screen.blit(active_model_rank, (810,180)) 
+                        screen.blit(roll_Text, (810,210))
 
             case('runP2'):
                 if(smodel != None):
