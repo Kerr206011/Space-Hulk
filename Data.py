@@ -2951,7 +2951,7 @@ class Model:
 
 class SpaceMarine(Model):
     def __init__(self, weapon, rank):
-        super().__init__(4,'Pictures/Models/SM.png')
+        super().__init__(4,'Pictures/Models/SM_test.png')
         self.weapon = weapon
         self.rank = rank
         self.susf = False
