@@ -145,8 +145,8 @@ class Game:                                         #can variables be exported t
     def redAP(self,Model,amount):
         if(Model in SM_ModellList):
             if(amount > Model.AP):
-                Model.AP = 0
                 self.CP = self.CP - ((amount) - (Model.AP))
+                Model.AP = 0
             else: Model.AP -= amount
         if((Model in GS_ModellList) or (Model in BL_ModellList)):
             Model.AP -= amount
@@ -557,8 +557,7 @@ class Game:                                         #can variables be exported t
                         self.Manager.save_model = self.selected_Model
                         self.Manager.save_tile = self.selected_tile
                         self.reveal(self.Manager.rev_models[0])
-        print(a,b,c)
-        print(self.selected_Model.AP)
+
         if(self.selected_Model.weapon != 'flamer'):
             if(c != 0):
                 SB.roll = str(a) + ' | ' + str(b) + ' | ' +str(c)
@@ -843,10 +842,18 @@ class Game:                                         #can variables be exported t
             for tile in row:
                 if(tile.occupand in SM_ModellList):
                     checked = self.vision(tile.occupand, tile)
-                    for tile in checked:
-                        if(tile.occupand in BL_ModellList):
-                            self.Manager.rev_models.append(tile)
-                            checked.remove(tile)
+                    for tiles in checked:
+                        if(tiles.occupand in BL_ModellList):
+                            self.Manager.rev_models.append(tiles)
+                            checked.remove(tiles)
+                        if(self.is_playing == self.player2):
+                            if(tiles.occupand == self.selected_Model):
+                                if((tile.occupand.jam == False) and (tile.occupand.overwatch == True)):
+                                    self.clicked_tile = self.selected_tile
+                                    self.clicked_model = self.selected_Model
+                                    self.selected_tile = tile
+                                    self.selected_Model = tile.occupand
+                                    self.shoot()
                     if(self.Manager.rev_models.__len__() != 0):
                         self.Manager.save_model = self.selected_Model
                         self.Manager.save_tile = self.selected_tile
@@ -1035,6 +1042,8 @@ class Game:                                         #can variables be exported t
                                         self.selected_Model = tile.occupand
                                         self.selected_tile = tile
                                         self.shoot()
+                                        self.selected_Model = self.Manager.save_model
+                                        self.selected_tile = self.Manager.save_tile
                                 for tile in checked:
                                     if(tile.occupand in BL_ModellList):
                                         self.Manager.rev_models.append(tile)
@@ -1054,6 +1063,8 @@ class Game:                                         #can variables be exported t
                                     if(model == self.selected_tile):
                                         c = True
                     if(c):
+                        if(a & b):
+                            self.selected_Model.AP +=1
                         self.selected_tile.is_occupied = False
                         self.Manager.save_tile.occupand = self.Manager.save_model
                         self.selected_tile.occupand = None
@@ -1229,7 +1240,13 @@ class gamestateTurn:
 
             if(self.noturn_button.draw(screen)):
                 pressed = True
-                self.gameStateManager.turn = False
+                if(self.gameStateManager.turn == True):
+                    self.gameStateManager.turn = False
+                    if(self.gameStateManager.rev_count == 0):
+                        game.selected_Model = None
+                        game.selected_tile = None
+                        self.gameStateManager.changestate('runP2')
+                        game.run()
                 self.gameStateManager.melee_turn = False
                 self.gameStateManager.gs_moveturn = False
                 self.gameStateManager.gs_turnaftermove = None
@@ -1284,8 +1301,19 @@ class gamestateTurn:
                     self.gameStateManager.changestate('reveal')
                     game.run()
                 elif(game.is_playing == game.player1):
-                    self.gameStateManager.changestate('actP1')
-                    game.run()
+                    if(self.gameStateManager.ooc == True):
+                        game.is_playing = game.player2
+                        self.gameStateManager.ooc = False
+                        self.gameStateManager.ooc_models = []
+                        game.selected_Model = None
+                        game.selected_tile = None
+                        game.clicked_tile = None
+                        game.clicked_model = None
+                        self.gameStateManager.changestate('runP2')
+                        game.run()
+                    else:
+                        self.gameStateManager.changestate('actP1')
+                        game.run()
                 else:
                     self.gameStateManager.changestate('actP2')
                     game.run()
@@ -1831,70 +1859,76 @@ class OOC_Activation:
             
             SB.display(screen)
             BB.display(screen)
-            
-            if(self.move_button.draw(screen)):
-                if(game.selected_Model in self.Manager.ooc_models):
-                    if(game.CP != 0):
-                        game.moveModel()
-                        pressed = True
+            if(game.selected_Model != None):
+                if(self.move_button.draw(screen)):
+                    if(game.selected_Model in self.Manager.ooc_models):
+                        if(game.CP != 0):
+                            game.moveModel()
+                            pressed = True
 
-            if(self.turn_button.draw(screen)):
-                if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
-                    pressed = True
-                    self.Manager.changestate('turn')
-                    game.run()
-                else:print('no AP/CP')
+                if(self.turn_button.draw(screen)):
+                    if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
+                        self.Manager.changestate('turn')
+                        game.run()
+                    else:print('no AP/CP')
+
+                if(self.shoot_button.draw(screen)):
+                    if(game.selected_Model != None):
+                        if(game.selected_Model.weapon != 'claws'):
+                            if(((game.CP) > 1) and (game.selected_Model.weapon == 'flamer')):
+                                self.Manager.changestate('shoot')
+                                game.run()
+                            elif(((game.CP) != 0) and (game.selected_Model.weapon != 'flamer')):
+                                self.Manager.changestate('shoot')
+                                game.run()
+                            else: print('nicht genug AP')
+
+                if(self.melee_button.draw(screen)):
+                    if(game.selected_Model != None):
+                        if((game.CP) != 0):
+                            pressed = True
+                            game.melee()
+                        else: print('nicht genug AP')
             
-            if((self.changeturn_button.draw(screen)) or (pressed == True)):
+                if(self.ocDoor_button.draw(screen)):
+                    pressed = True
+                    game.ocDoor()
+
+                if(self.guard_button.draw(screen)):
+                    if((game.CP) > 1):
+                        pressed = True
+                        game.redAP(game.selected_Model, 2)
+                        game.selected_Model.overwatch = False
+                        game.selected_Model.guard = True
+
+                if(self.overwatch_button.draw(screen)):
+                    if((game.CP) > 1):
+                        if(game.selected_Model.weapon != 'flamer'):
+                            game.redAP(game.selected_Model, 2)
+                            game.selected_Model.overwatch = True
+                            game.selected_Model.guard = False
+                            pressed = True
+
+                if(self.un_jam_button.draw(screen)):
+                    if(game.CP != 0):
+                        if(game.selected_Model.jam == True):
+                            game.redAP(game.selected_Model, 1)
+                            game.selected_Model.jam = False
+                            pressed = True
+
+            if(self.changeturn_button.draw(screen)):
+                    pressed = True
+
+            if(pressed):
                 self.Manager.ooc = False
                 self.Manager.ooc_models = []
                 game.is_playing = game.player2
-                self.Manager.changestate('actP2')
+                self.Manager.changestate('runP2')
+                game.selected_Model = None
+                game.selected_tile = None
+                game.clicked_tile = None
+                game.clicked_model = None
                 game.run()
-
-            if(self.shoot_button.draw(screen)):
-                if(game.selected_Model != None):
-                    if(game.selected_Model.weapon != 'claws'):
-                        if(((game.CP) > 1) and (game.selected_Model.weapon == 'flamer')):
-                            pressed = True
-                            self.Manager.changestate('shoot')
-                            game.run()
-                        elif(((game.CP) != 0) and (game.selected_Model.weapon != 'flamer')):
-                            pressed = True
-                            self.Manager.changestate('shoot')
-                            game.run()
-                        else: print('nicht genug AP')
-
-            if(self.melee_button.draw(screen)):
-                if(game.selected_Model != None):
-                    if((game.CP) != 0):
-                        pressed = True
-                        game.melee()
-                    else: print('nicht genug AP')
-        
-            if(self.ocDoor_button.draw(screen)):
-                pressed = True
-                game.ocDoor()
-
-            if(self.guard_button.draw(screen)):
-                if((game.CP) > 1):
-                    pressed = True
-                    game.redAP(game.selected_Model, 2)
-                    game.selected_Model.overwatch = False
-                    game.selected_Model.guard = True
-
-            if(self.overwatch_button.draw(screen)):
-                if((game.CP) > 1):
-                    if(game.selected_Model.weapon != 'flamer'):
-                        game.redAP(game.selected_Model, 2)
-                        game.selected_Model.overwatch = True
-                        game.selected_Model.guard = False
-
-            if(self.un_jam_button.draw(screen)):
-                if(game.CP != 0):
-                    if(game.selected_Model.jam == True):
-                        game.redAP(game.selected_Model, 1)
-                        game.selected_Model.jam = False
 
             pygame.display.update()
 
@@ -1902,11 +1936,12 @@ class Player1Activation:
     def __init__(self) -> None:
         self.Manager = gameStateManager
         self.activated_model = None
+        self.active_tile = None
 
     def run(self):
-        pressed = False
         if(self.activated_model == None):
             self.activated_model = game.selected_Model
+            self.active_tile = game.selected_tile
         if(not (self.activated_model in SM_ModellList)):
             self.Manager.changestate('runP1')
             game.run()
@@ -2115,6 +2150,7 @@ class Player2Turn:
 
             if(self.Manager.ooc == True):
                 self.Manager.changestate('ooc')
+                game.is_playing = game.player1
                 game.run()
 
             if(self.changeturn_button.draw(screen)):
@@ -2137,8 +2173,14 @@ class Player2Activation:
         self.activated_model = None
 
     def run(self):
+        if(self.activated_model != None):
+            if(self.activated_model != game.selected_Model):
+                self.activated_model.AP = 0
+                self.activated_model = None
         if(self.activated_model == None):
             self.activated_model = game.selected_Model
+        elif((self.activated_model not in GS_ModellList) or (self.activated_model not in BL_ModellList)):
+            self.activated_model == None
                                                                                                                 
         self.move_image = pygame.image.load('Pictures/move.png')
         self.turn_image = pygame.image.load('Pictures/turn.png')
@@ -2198,6 +2240,11 @@ class Player2Activation:
 
             if(self.Manager.ooc == True):
                 self.Manager.changestate('ooc')
+                game.selected_Model = None
+                game.selected_tile = None
+                game.clicked_model = None
+                game.clicked_tile = None
+                game.is_playing = game.player1
                 game.run()
 
             if(self.Manager.gs_turnaftermove != None):
@@ -2206,10 +2253,8 @@ class Player2Activation:
                 game.run()
 
             if(self.move_button.draw(screen)):
+                print('ja')
                 if((game.is_playing == game.player2) and ((game.selected_Model in GS_ModellList) or (game.selected_Model in BL_ModellList))):
-                    if((self.activated_model != game.selected_Model) and ((game.selected_Model in GS_ModellList) or (game.selected_Model in BL_ModellList))):
-                        self.activated_model.AP = 0
-                        self.activated_model = game.selected_Model
                     game.moveModel()
 
             if(self.turn_button.draw(screen)):
@@ -2233,9 +2278,6 @@ class Player2Activation:
             if(self.reveal_button.draw(screen)):
                 if(game.selected_Model in BL_ModellList):
                     if(game.selected_tile.is_lurkingpoint == False):
-                        if((self.activated_model != game.selected_Model) and ((game.selected_Model in GS_ModellList) or (game.selected_Model in BL_ModellList))):
-                            self.activated_model.AP = 0
-                            self.activated_model = game.selected_Model
                         self.Manager.rev_models.append(game.selected_tile)
                         game.reveal(game.selected_tile)
 
@@ -2315,8 +2357,15 @@ class gamestate_shoot:
             if(self.shoot_button.draw(screen)):
                 game.shoot()
                 if(game.is_playing == game.player1):
-                   self.manager.changestate('actP1')
-                   game.run()
+                    if(self.manager.ooc == True):
+                        self.manager.ooc = False
+                        self.manager.ooc_models = []
+                        game.is_playing = game.player2
+                        self.manager.changestate('runP2')
+                        game.run()
+                    else:
+                        self.manager.changestate('actP1')
+                        game.run()
                 else:
                     self.manager.changestate('actP2')
                     game.run()
@@ -2624,6 +2673,7 @@ class gamestate_gsplace:
 class gamestate_reveal:
     def __init__(self) -> None:
         self.Manager = gameStateManager
+        self.active = False
 
     def run(self):
         self.place_image = pygame.image.load('Pictures/placemodel.png')
@@ -2634,22 +2684,24 @@ class gamestate_reveal:
 
             self.revModel = game.selected_Model
             self.Manager.rev_count = self.revModel.count
-            self.tile = game.selected_tile
+            tile = game.selected_tile
 
-            self.tile.is_occupied = False
-            BL_ModellList.remove(self.tile.occupand)
-            if(self.tile.occupand.AP == 6):
-                self.tile.occupand = Genestealer()
+            tile.is_occupied = False
+            BL_ModellList.remove(tile.occupand)
+            if(tile.occupand.AP == 6):
+                tile.occupand = Genestealer()
+                self.active = True
             else:
-                self.tile.occupand = Genestealer()
-                self.tile.occupand.AP = 0
-            self.tile.is_occupied = True
-            GS_ModellList.append(self.tile.occupand)
+                tile.occupand = Genestealer()
+                tile.occupand.AP = 0
+
+            tile.is_occupied = True
+            GS_ModellList.append(tile.occupand)
             self.Manager.rev_count -= 1
             print(self.Manager.rev_count)
-            self.Manager.rev_models.remove(self.tile)
+            self.Manager.rev_models.remove(tile)
             self.Manager.turn = True
-            game.selected_Model = self.tile.occupand
+            game.selected_Model = tile.occupand
             self.Manager.changestate('turn')
             game.run()
 
@@ -2695,9 +2747,7 @@ class gamestate_reveal:
             
             SB.amount = str(self.Manager.rev_count)
             if(game.selected_tile == None):
-                SB.hint = 'Select an Entrypoint.'
-            elif(game.selected_tile.is_lurkingpoint == False):
-                SB.hint = 'Select an Entrypoint.'
+                SB.hint = 'Select a Tile.'
             else:
                 SB.hint = ''
             
@@ -2709,6 +2759,8 @@ class gamestate_reveal:
                     if(((game.clicked_tile.x == game.selected_tile.x) or (game.clicked_tile.x == (game.selected_tile.x -1)) or (game.clicked_tile.x == (game.selected_tile.x +1))) and ((game.clicked_tile.y == game.selected_tile.y) or (game.clicked_tile.y == (game.selected_tile.y -1)) or (game.clicked_tile.y == (game.selected_tile.y +1)))):
                         if((game.clicked_tile.is_occupied == False) and (game.clicked_tile.is_wall == False) and (game.clicked_tile.is_entrypoint == False)):
                             game.clicked_tile.occupand = Genestealer()
+                            if(self.active == False):
+                                game.clicked_tile.occupand.AP = 0
                             GS_ModellList.append(game.clicked_tile.occupand)
                             game.clicked_tile.is_occupied = True
                             self.Manager.rev_count -= 1
@@ -2738,6 +2790,8 @@ class gamestate_reveal:
                             self.Manager.changestate('actP1')
                     else: 
                         self.Manager.changestate('runP2')
+                        game.selected_Model = None
+                        game.selected_tile = None
                         game.run()
                 else:
                     game.reveal(self.Manager.rev_models[0])
@@ -2857,46 +2911,72 @@ class Tile:
                 else:
                     image = pygame.image.load('Pictures/Floor_2.png')
                     self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
-
+            if(self == game.clicked_tile):
+                image = pygame.image.load('Pictures/SM_entry.png')
+                self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
             screen.blit(self.image, (self.xb*self.size, self.yb*self.size))
             if(self.is_occupied):
-                # if(self.occupand == game.selected_Model):
-                #     if(game.is_playing == game.player1):
-                #         match(self.occupand.face):
-                #             case((1,0)):
-                #                 image = pygame.image.load('Pictures/Models/SM_select.png')
-                #                 imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                            
-                #             case(-1,0):
-                #                 image = pygame.image.load('Pictures/Models/SM_select.png')
-                #                 imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                #                 imaget = pygame.transform.rotate(imaget,180)
-                            
-                #             case((0,1)):
-                #                 image = pygame.image.load('Pictures/Models/SM_select.png')
-                #                 imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                #                 imaget = pygame.transform.rotate(imaget,270)
+                if(self.occupand == game.selected_Model):
+                    if((game.is_playing == game.player1) and (self.occupand in SM_ModellList)):
+                        image = pygame.image.load('Pictures/Models/SM_select.png')
+                    elif((game.is_playing == game.player2) and (self.occupand in GS_ModellList)):
+                        image = pygame.image.load('Pictures/Models/GS_select.png')
+                    elif((game.is_playing == game.player2) and (self.occupand in BL_ModellList)):
+                        image = pygame.image.load('Pictures/Models/Blip-select.png')
+                    match(self.occupand.face):
+                        case((1,0)):
+                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                        
+                        case(-1,0):
+                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,180)
+                        
+                        case((0,1)):
+                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,270)
 
-                #             case((0,-1)):
-                #                 image = pygame.image.load('Pictures/Models/SM_select.png')
-                #                 imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                #                 imaget = pygame.transform.rotate(imaget,90)
-                #else:
-                match(self.occupand.face):
-                    case((1,0)):
-                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                    
-                    case(-1,0):
-                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                        imaget = pygame.transform.rotate(imaget,180)
-                    
-                    case((0,1)):
-                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                        imaget = pygame.transform.rotate(imaget,270)
+                        case((0,-1)):
+                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,90)
 
-                    case((0,-1)):
-                        imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                        imaget = pygame.transform.rotate(imaget,90)
+                elif(self.occupand == game.clicked_model):
+                    if(self.occupand in SM_ModellList):
+                        image = pygame.image.load('Pictures/Models/SM_clicked.png')
+                    elif(self.occupand in GS_ModellList):
+                        image = pygame.image.load('Pictures/Models/GS_clicked.png')
+                    elif(self.occupand in BL_ModellList):
+                        image = pygame.image.load('Pictures/Models/Blip_clicked.png')
+                    match(self.occupand.face):
+                        case((1,0)):
+                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                        
+                        case(-1,0):
+                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,180)
+                        
+                        case((0,1)):
+                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,270)
+
+                        case((0,-1)):
+                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,90)
+                else:                
+                    match(self.occupand.face):
+                        case((1,0)):
+                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                        
+                        case(-1,0):
+                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,180)
+                        
+                        case((0,1)):
+                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,270)
+
+                        case((0,-1)):
+                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
+                            imaget = pygame.transform.rotate(imaget,90)
         
                 screen.blit(imaget, (self.xb*self.size, self.yb*self.size))
     
@@ -2905,13 +2985,13 @@ class Tile:
         if(self.rect.collidepoint(pos)) and (pygame.mouse.get_pressed()[0] == 1):
             self.clicked = True
         if(pygame.mouse.get_pressed()[0] == 0 and self.clicked):
-            if((gameStateManager.ooc == True) and (self.occupand in gameStateManager.ooc_models)):
+            if((gameStateManager.givestate() == 'ooc') and (self.occupand in gameStateManager.ooc_models)):
                 game.selected_Model = self.occupand
                 game.selected_tile = self
-            elif(gameStateManager.ooc == True):
+            elif((gameStateManager.givestate() == 'ooc') and (self.occupand not in SM_ModellList)):
                 game.clicked_model = self.occupand
-                print(self.occupand)
                 game.clicked_tile = self
+
             elif(gameStateManager.givestate() == 'shoot'):
                 if(self.is_occupied == True):
                     if self.occupand in GS_ModellList:
@@ -2997,6 +3077,7 @@ class Sidebar():
         cmodel = game.clicked_model
         state = gameStateManager.givestate()
 
+        state_Text = my_font.render(str(gameStateManager.givestate()), False, (0,0,0))
         CP_Text = my_font.render('CP: '+str(game.CP), False, (0,0,0))
         round_Text = my_font.render('Round: '+str(game.round), False, (0, 0, 0))
         player1_Text = my_font.render('SM: '+game.player1,False,(0,0,0))
@@ -3156,6 +3237,7 @@ class Sidebar():
                 screen.blit(hint_Text, (810,120))
 
         screen.blit(round_Text, (810,0))
+        screen.blit(state_Text, (810,280))
 SB = Sidebar()  #initiates an Object of Sidebar(singelton)
 
 class Bottombar():
