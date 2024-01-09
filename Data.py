@@ -98,6 +98,8 @@ class Game:                                         #can variables be exported t
         self.selected_tile = None
         self.clicked_model = None
         self.clicked_tile = None
+        self.Manager.save_model = None
+        self.Manager.save_tile = None
         self.round += 1
         for Model in SM_ModellList:
             Model.AP = 4
@@ -141,6 +143,8 @@ class Game:                                         #can variables be exported t
             Model.AP = 6
         for Model in SM_ModellList:
             Model.AP = 0
+        self.Manager.save_model = None
+        self.Manager.save_tile = None
 
     def redAP(self,Model,amount):
         if(Model in SM_ModellList):
@@ -610,16 +614,30 @@ class Game:                                         #can variables be exported t
                     if(self.is_playing == self.player2):
                         if(tile.occupand.overwatch == True):
                             if((tile.occupand.jam == False) & (self.clicked_tile in checked)):
-                                if(self.clicked_tile.is_open == False):
+                                if(self.distance(tile, self.clicked_tile) < 14):
+                                    if(self.clicked_tile.is_open == False):
+                                        self.Manager.save_tile = self.selected_tile
+                                        self.Manager.save_model = self.selected_Model
+                                        self.selected_Model = tile.occupand
+                                        self.selected_tile = tile
+                                        self.shoot()
+                                        if(not (self.Manager.save_model in GS_ModellList)):
+                                            self.Manager.gs_turnaftermove = None
+                                        self.selected_Model = self.Manager.save_model
+                                        self.selected_tile = self.Manager.save_tile
+                            elif((tile.occupand.jam == False) & (self.selected_tile in checked)):
+                                if(self.distance(tile, self.clicked_tile) < 14):
+                                    self.Manager.save_tile = self.selected_tile
+                                    self.Manager.save_model = self.selected_Model
+                                    self.clicked_model = self.selected_Model
+                                    self.clicked_tile = self.selected_tile
                                     self.selected_Model = tile.occupand
                                     self.selected_tile = tile
                                     self.shoot()
-                            elif((tile.occupand.jam == False) & (self.selected_tile in checked)):
-                                self.clicked_model = self.selected_Model
-                                self.clicked_tile = self.selected_tile
-                                self.selected_Model = tile.occupand
-                                self.selected_tile = tile
-                                self.shoot()
+                                    if(not (self.Manager.save_model in GS_ModellList)):
+                                        self.Manager.gs_turnaftermove = None
+                                    self.selected_Model = self.Manager.save_model
+                                    self.selected_tile = self.Manager.save_tile
                     for tile in checked:
                         if(tile.occupand in BL_ModellList):
                             self.Manager.rev_models.append(tile)
@@ -849,11 +867,18 @@ class Game:                                         #can variables be exported t
                         if(self.is_playing == self.player2):
                             if(tiles.occupand == self.selected_Model):
                                 if((tile.occupand.jam == False) and (tile.occupand.overwatch == True)):
-                                    self.clicked_tile = self.selected_tile
-                                    self.clicked_model = self.selected_Model
-                                    self.selected_tile = tile
-                                    self.selected_Model = tile.occupand
-                                    self.shoot()
+                                    if(self.distance(tile,tiles) < 14):
+                                        self.clicked_tile = self.selected_tile
+                                        self.clicked_model = self.selected_Model
+                                        self.Manager.save_model = self.selected_Model
+                                        self.Manager.save_tile = self.selected_tile
+                                        self.selected_tile = tile
+                                        self.selected_Model = tile.occupand
+                                        self.shoot()
+                                        if(not (self.Manager.save_model in GS_ModellList)):
+                                            self.Manager.gs_turnaftermove = None
+                                        self.selected_tile = self.Manager.save_tile
+                                        self.selected_Model = self.Manager.save_model
                     if(self.Manager.rev_models.__len__() != 0):
                         self.Manager.save_model = self.selected_Model
                         self.Manager.save_tile = self.selected_tile
@@ -1039,11 +1064,14 @@ class Game:                                         #can variables be exported t
                                         self.Manager.ooc_models.append(tile.occupand)
                                 if(tile.occupand.overwatch == True):
                                     if((tile.occupand.jam == False) & (self.clicked_tile in checked)):
-                                        self.selected_Model = tile.occupand
-                                        self.selected_tile = tile
-                                        self.shoot()
-                                        self.selected_Model = self.Manager.save_model
-                                        self.selected_tile = self.Manager.save_tile
+                                        if(self.distance(tile, self.Manager.save_tile) < 14):
+                                            self.selected_Model = tile.occupand
+                                            self.selected_tile = tile
+                                            self.shoot()
+                                            if(not (self.Manager.save_model in GS_ModellList)):
+                                                self.Manager.gs_turnaftermove = None
+                                            self.selected_Model = self.Manager.save_model
+                                            self.selected_tile = self.Manager.save_tile
                                 for tile in checked:
                                     if(tile.occupand in BL_ModellList):
                                         self.Manager.rev_models.append(tile)
@@ -1219,7 +1247,7 @@ class gamestateTurn:
 
                 if(((game.is_playing == game.player2) or (self.gameStateManager.turn == True)) and (self.gameStateManager.gs_turnaftermove == None)):
                     if(self.fullturn_button.draw(screen)):
-                        if(game.selected_Model.AP != 0):
+                        if((game.selected_Model.AP != 0) or (self.gameStateManager.turn == True)):
                             u = True
                             match(game.selected_Model.face):
                                 case(1,0): game.selected_Model.face = (-1,0)
@@ -1242,11 +1270,19 @@ class gamestateTurn:
                 pressed = True
                 if(self.gameStateManager.turn == True):
                     self.gameStateManager.turn = False
+                    game.clicked_model = None
                     if(self.gameStateManager.rev_count == 0):
-                        game.selected_Model = None
-                        game.selected_tile = None
-                        self.gameStateManager.changestate('runP2')
-                        game.run()
+                        if(game.is_playing == game.player2):
+                            game.selected_Model = None
+                            game.selected_tile = None
+                            self.gameStateManager.changestate('runP2')
+                            game.run()
+                        else:
+                            if(self.gameStateManager.save_model in SM_ModellList):
+                                game.selected_Model = self.gameStateManager.save_model
+                                game.selected_tile = self.gameStateManager.save_tile
+                            self.gameStateManager.changestate('actP1')
+                            game.run()
                 self.gameStateManager.melee_turn = False
                 self.gameStateManager.gs_moveturn = False
                 self.gameStateManager.gs_turnaftermove = None
@@ -1284,9 +1320,18 @@ class gamestateTurn:
                                             self.gameStateManager.ooc_models.append(tile.occupand)
                                     if(tile.occupand.overwatch == True):
                                         if((tile.occupand.jam == False) & (game.selected_tile in checked)):
-                                            game.selected_Model = tile.occupand
-                                            game.selected_tile = tile
-                                            game.shoot()
+                                            if(game.distance(tile, game.selected_tile) < 14):
+                                                self.gameStateManager.save_tile = game.selected_tile
+                                                self.gameStateManager.save_model = game.selected_Model
+                                                game.selected_Model = tile.occupand
+                                                game.selected_tile = tile
+                                                game.clicked_tile = self.gameStateManager.save_tile
+                                                game.clicked_model = self.gameStateManager.save_model
+                                                game.shoot()
+                                                if(not (self.gameStateManager.save_model in GS_ModellList)):
+                                                    self.gameStateManager.gs_turnaftermove = None
+                                                game.selected_Model = self.gameStateManager.save_model
+                                                game.selected_tile = self.gameStateManager.save_tile
                                     for tile in checked:
                                         if(tile.occupand in BL_ModellList):
                                             self.gameStateManager.rev_models.append(tile)
@@ -1813,7 +1858,7 @@ class OOC_Activation:
         self.ocDoor_button = Button(1110, 500, self.oc_door_image, 1)
         self.guard_button = Button(1170, 500, self.guard_image, 1)
         self.overwatch_button = Button(1230, 500, self.overwatch_image, 1)
-        self.un_jam_button = Button(1290, 500, self.unjam_image, 1)
+        self.un_jam_button = Button(810, 560, self.unjam_image, 1)
         SB.hint = 'Use CP for an out of sequence activation?'
         
         while(True):
@@ -2360,7 +2405,11 @@ class gamestate_shoot:
                     if(self.manager.ooc == True):
                         self.manager.ooc = False
                         self.manager.ooc_models = []
+                        game.selected_Model = None
+                        game.selected_tile = None
                         game.is_playing = game.player2
+                        if(not (self.manager.save_model in GS_ModellList)):
+                            self.manager.gs_turnaftermove = None
                         self.manager.changestate('runP2')
                         game.run()
                     else:
@@ -3153,13 +3202,14 @@ class Sidebar():
 
             case('actP1'):
                 if(smodel != None):
-                    screen.blit(is_playing_text, (810,30))
-                    screen.blit(active_model_AP, (810,60))
-                    screen.blit(CP_Text, (810,90))
-                    screen.blit(hint_Text, (810,120))
-                    screen.blit(active_model_weapon, (810,150))
-                    screen.blit(active_model_rank, (810,180)) 
-                    screen.blit(roll_Text, (810,210))
+                    if(smodel in SM_ModellList):
+                        screen.blit(is_playing_text, (810,30))
+                        screen.blit(active_model_AP, (810,60))
+                        screen.blit(CP_Text, (810,90))
+                        screen.blit(hint_Text, (810,120))
+                        screen.blit(active_model_weapon, (810,150))
+                        screen.blit(active_model_rank, (810,180)) 
+                        screen.blit(roll_Text, (810,210))
 
             case('reroll'):
                 screen.blit(is_playing_text, (810,30))
