@@ -66,6 +66,7 @@ class GameStateManager:
         self.ooc = False
         self.ooc_models = []
         self.SM_move = False
+        self.savestate = None
     def changestate(self, newstate):
         self.state = newstate
     def givestate(self):
@@ -1390,7 +1391,7 @@ class gamestateNewGame:
                             game.player2 = game.player2[:-1]
                     elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                         if(p1 and game.player1 != ''):p1 = False
-                        elif((game.player2 != None) and (game.player2 != game.player1)):
+                        elif((game.player2 != '') and (game.player2 != game.player1)):
                             game.is_playing = game.player1
                             self.gameStateManager.changestate('level')
                             # self.gameStateManager.changestate('smplace')
@@ -1680,7 +1681,7 @@ class gamestate_level:
                                 tile.is_used = False                                                                                                                                                           
                 for tile in [map[12][1],map[12][2],map[12][3], map[12][4],map[12][5]]:
                     tile.is_SMentry = True
-                for model in [SpaceMarine('flamer', 'none'),SpaceMarine('powerSword','sergeant'),SpaceMarine('fist','none'),SpaceMarine('fist','none'),SpaceMarine('fist','none')]:
+                for model in [SpaceMarine('flamer', 'Battlebrother'),SpaceMarine('powerSword','sergeant'),SpaceMarine('fist','Battlebrother'),SpaceMarine('fist','Battlebrother'),SpaceMarine('fist','Battlebrother')]:
                     SM_ModellList.append(model)
 
                 game.reinforcement = 2
@@ -1764,8 +1765,10 @@ class Player1Turn:
     def run(self):
         self.change_image = pygame.image.load('Pictures/end_turn.png')
         self.activate_image = pygame.image.load('Pictures/Activate.png')
+        self.main_image = pygame.image.load('Pictures/quit.png')
         self.changeturn_button = Button(870, 500, self.change_image, 1)
         self.activate_button = Button(810, 500, self.activate_image, 1)
+        self.main_button = Button(930, 500, self.main_image, 1)
 
         while(True):
             for event in pygame.event.get():
@@ -1826,6 +1829,11 @@ class Player1Turn:
                 print(game.is_playing)
                 print('0')
                 self.Manager.changestate('gsprep')
+                game.run()
+            
+            if(self.main_button.draw(screen)):
+                self.Manager.savestate = self.Manager.givestate()
+                self.Manager.changestate('main')
                 game.run()
                 
             if(((game.selected_Model in SM_ModellList) and (game.is_playing == game.player1)) and self.activate_button.draw(screen)):
@@ -2142,8 +2150,12 @@ class Player2Turn:
     def run(self):
         self.change_image = pygame.image.load('Pictures/end_turn.png')
         self.activate_image = pygame.image.load('Pictures/Activate.png')
+        self.main_image = pygame.image.load('Pictures/quit.png')
+        self.amount_image = pygame.image.load('Pictures/Wall.png')
         self.changeturn_button = Button(810, 500, self.change_image, 1)
         self.activate_button = Button(870, 500, self.activate_image, 1)
+        self.main_button = Button(930, 500, self.main_image, 1)
+        self.amount_button = Button(1170, 500, self.amount_image, 1)
 
         while(True):
             for event in pygame.event.get():
@@ -2198,12 +2210,25 @@ class Player2Turn:
                 game.is_playing = game.player1
                 game.run()
 
+            if(game.selected_Model in BL_ModellList):
+                if(self.amount_button.draw(screen)):
+                    if(SB.bl_count == 0):
+                        SB.bl_count = game.selected_Model.count
+                    else:
+                        SB.bl_count = 0
+
             if(self.changeturn_button.draw(screen)):
                 Player2Activation.activated_model = None
                 game.checkwin()
                 game.is_playing = game.player1
                 game.SM_prep()
                 self.Manager.changestate('runP1')
+                SB.bl_count = 0
+                game.run()
+
+            if(self.main_button.draw(screen)):
+                self.Manager.savestate = self.Manager.givestate()
+                self.Manager.changestate('main')
                 game.run()
 
             if((((game.selected_Model in GS_ModellList) or (game.selected_Model in BL_ModellList)) and (game.is_playing == game.player2)) and self.activate_button.draw(screen)):
@@ -2233,6 +2258,7 @@ class Player2Activation:
         self.melee_image = pygame.image.load('Pictures/melee.png')
         self.oc_door_image = pygame.image.load('Pictures/interact.png')
         self.reveal_image = pygame.image.load('Pictures/reveal.png')
+        self.amount_image = pygame.image.load('Pictures/Wall.png')
 
         self.turn_button = Button(870, 500, self.turn_image, 1)
         self.move_button = Button(810, 500, self.move_image, 1)
@@ -2240,6 +2266,7 @@ class Player2Activation:
         self.melee_button = Button(1050, 500, self.melee_image, 1)
         self.ocDoor_button = Button(1110, 500, self.oc_door_image, 1)
         self.reveal_button = Button(990,500, self.reveal_image, 1)
+        self.amount_button = Button(1170, 500, self.amount_image, 1)
 
         while(True):
             for event in pygame.event.get():
@@ -2291,6 +2318,14 @@ class Player2Activation:
                 game.clicked_tile = None
                 game.is_playing = game.player1
                 game.run()
+            
+            
+            if(game.selected_Model in BL_ModellList):
+                if(self.amount_button.draw(screen)):
+                    if(SB.bl_count == 0):
+                        SB.bl_count = game.selected_Model.count
+                    else:
+                        SB.bl_count = 0
 
             if(self.Manager.gs_turnaftermove != None):
                 game.selected_Model = self.Manager.gs_turnaftermove
@@ -2318,6 +2353,7 @@ class Player2Activation:
                 self.activated_model.AP = 0
                 self.activated_model = None
                 self.Manager.changestate('runP2')
+                SB.bl_count = 0
                 game.run()
 
             if(self.reveal_button.draw(screen)):
@@ -2426,9 +2462,15 @@ class gamestate_reinforcement:
         self.Manager = gameStateManager
 
     def run(self):
+        bl_count = 0
+        match(game.level):
+            case(1):
+                bl_count = random.randint(1,3)
         amount = game.reinforcement
         self.place_image = pygame.image.load('Pictures/placemodel.png')
+        self.amount_image = pygame.image.load('Pictures/Wall.png')
         self.place_button = Button(810, 500, self.place_image, 1)
+        self.amount_button = Button(870, 500, self.amount_image, 1)
 
         while(True):
             for event in pygame.event.get():
@@ -2480,10 +2522,21 @@ class gamestate_reinforcement:
                 SB.hint = ''
             SB.display(screen)
             BB.display(screen)
+
+            if(self.amount_button.draw(screen)):
+                if(SB.bl_count == 0):
+                    SB.bl_count = bl_count
+                else:
+                    SB.bl_count = 0
+
             if(self.place_button.draw(screen)):
                 if(amount != 0):
                     if((game.clicked_tile != None) and (game.clicked_tile.is_lurkingpoint) and (game.clicked_tile.is_occupied == False)):
                         game.clicked_tile.occupand = Blip()
+                        game.clicked_tile.occupand.count = bl_count
+                        match(game.level):
+                            case(1):
+                                bl_count = random.randint(1,3)
                         game.clicked_tile.is_occupied = True
                         BL_ModellList.append(game.clicked_tile.occupand)
                         amount -= 1
@@ -2506,17 +2559,8 @@ class gamestate_reinforcement:
                                                     print('ä')
                                                     if lkp.is_occupied == True:
                                                         lkp.occupand.AP = 0
-
-                # for row in map:
-                #     for bl in row:
-                #         if((bl.occupand in BL_ModellList) and (bl.is_lurkingpoint == True)):
-                #             for row in map:
-                #                 for tile in row:
-                #                     if(tile.occupand in SM_ModellList):
-                #                         d = game.distance(bl, tile)
-                #                         if(d < 7):
-                #                             bl.occupand.AP = 0
                 self.Manager.changestate('runP2')
+                SB.bl_count = 0
                 game.run()
             pygame.display.update()
 
@@ -2531,11 +2575,13 @@ class gamestate_Main:
         self.move_image = pygame.image.load('Pictures/Wall.png')
         self.new_image = pygame.image.load('Pictures/new_game.png')
         self.quit_image = pygame.image.load('Pictures/quit.png')
+        self.continue_image = pygame.image.load('Pictures/continue.png')
 
-        self.start_new_button = Button(450, 250, self.new_image, 1)
-        self.start_saved_button = Button(120, 250, self.move_image, 1)
-        self.options_button = Button(180, 250, self.move_image, 1)
-        self.quit_button = Button(550, 250, self.quit_image, 1)
+        self.start_new_button = Button(560, 250, self.new_image, 1)
+        self.start_saved_button = Button(560, 250, self.move_image, 1)
+        self.options_button = Button(670, 250, self.move_image, 1)
+        self.quit_button = Button(670, 250, self.quit_image, 1)
+        self.continue_button = Button(450, 250,self.continue_image, 1) 
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -2545,6 +2591,13 @@ class gamestate_Main:
             if(self.start_new_button.draw(screen)):
                 self.Manager.changestate('start')
                 game.run()
+
+            if(self.continue_button.draw(screen)):
+                state = gameStateManager.savestate
+                if(state != None):
+                    screen.fill((50,50,50))
+                    gameStateManager.changestate(state)
+                    game.run()
             
             if(self.quit_button.draw(screen)):
                 pygame.quit()
@@ -2606,6 +2659,8 @@ class gamestate_SMplace:
                 SB.hint = 'Select an Entrypoint.'
             elif(game.selected_tile.is_SMentry == False):
                 SB.hint = 'Select an Entrypoint.'
+            elif(game.selected_tile.is_SMentry == True):
+                SB.hint = 'Click the place-Button to place the model.'
             else:
                 SB.hint = ''
 
@@ -2627,6 +2682,8 @@ class gamestate_SMplace:
                     for tile in row:
                         if(tile.is_SMentry == True):
                             tile.is_SMentry = False
+                game.is_playing = game.player2
+                game.selected_Model = None
                 game.run()
             pygame.display.update()
 
@@ -2636,8 +2693,14 @@ class gamestate_gsplace:
 
     def run(self):
         amount = game.gs_start
+        bl_count = 0
+        match(game.level):
+            case(1):
+                bl_count = random.randint(1,3)
+        self.amount_image = pygame.image.load('Pictures/Wall.png')
         self.place_image = pygame.image.load('Pictures/placemodel.png')
         self.place_button = Button(810, 500, self.place_image, 1)
+        self.amount_button = Button(870, 500, self.amount_image, 1)
         while(True):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -2683,15 +2746,26 @@ class gamestate_gsplace:
                 SB.hint = 'Select an Entrypoint.'
             elif(game.selected_tile.is_lurkingpoint == False):
                 SB.hint = 'Select an Entrypoint.'
+            elif(game.selected_tile.is_lurkingpoint == True):
+                SB.hint = 'Click the place-Button to place the model.'
             else:
                 SB.hint = ''
 
             SB.display(screen)
             BB.display(screen)
+            if(self.amount_button.draw(screen)):
+                if(SB.bl_count == 0):
+                    SB.bl_count = bl_count
+                else:
+                    SB.bl_count = 0
             if(self.place_button.draw(screen)):
                 if(amount != 0):
                     if((game.clicked_tile != None) and (game.clicked_tile.is_lurkingpoint) and (game.clicked_tile.is_occupied == False)):
                         game.clicked_tile.occupand = Blip()
+                        game.clicked_tile.occupand.count = bl_count
+                        match(game.level):
+                            case(1):
+                                bl_count = random.randint(1,3)
                         game.clicked_tile.is_occupied = True
                         BL_ModellList.append(game.clicked_tile.occupand)
                         amount -= 1
@@ -2711,6 +2785,8 @@ class gamestate_gsplace:
                                         d = game.distance(bl, tile)
                                         if(d < 7):
                                             bl.occupand.AP = 0
+                game.is_playing = game.player1
+                SB.bl_count = 0
                 if game.CP != 6:
                     self.Manager.changestate('reroll')
                     game.run()
@@ -2960,10 +3036,11 @@ class Tile:
                 else:
                     image = pygame.image.load('Pictures/Floor_2.png')
                     self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
-            if(self == game.clicked_tile):
-                image = pygame.image.load('Pictures/SM_entry.png')
-                self.image = pygame.transform.scale(image, (int(self.size), int(self.size)))
             screen.blit(self.image, (self.xb*self.size, self.yb*self.size))
+            if(self == game.clicked_tile):
+                image = pygame.image.load('Pictures/clicked_tile.png')
+                screen.blit(pygame.transform.scale(image, (int(self.size), int(self.size))),(self.xb*self.size, self.yb * self.size))
+
             if(self.is_occupied):
                 if(self.occupand == game.selected_Model):
                     if((game.is_playing == game.player1) and (self.occupand in SM_ModellList)):
@@ -2972,21 +3049,6 @@ class Tile:
                         image = pygame.image.load('Pictures/Models/GS_select.png')
                     elif((game.is_playing == game.player2) and (self.occupand in BL_ModellList)):
                         image = pygame.image.load('Pictures/Models/Blip-select.png')
-                    match(self.occupand.face):
-                        case((1,0)):
-                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                        
-                        case(-1,0):
-                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                            imaget = pygame.transform.rotate(imaget,180)
-                        
-                        case((0,1)):
-                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                            imaget = pygame.transform.rotate(imaget,270)
-
-                        case((0,-1)):
-                            imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                            imaget = pygame.transform.rotate(imaget,90)
 
                 elif(self.occupand == game.clicked_model):
                     if(self.occupand in SM_ModellList):
@@ -2995,7 +3057,18 @@ class Tile:
                         image = pygame.image.load('Pictures/Models/GS_clicked.png')
                     elif(self.occupand in BL_ModellList):
                         image = pygame.image.load('Pictures/Models/Blip_clicked.png')
-                    match(self.occupand.face):
+
+                elif(self.occupand in SM_ModellList):
+                    if(self.occupand.guard == True):
+                        image = pygame.image.load('Pictures/Models/guard.png')
+                    elif((self.occupand.overwatch == True) and (self.occupand.jam == False)):
+                        image = pygame.image.load('Pictures/Models/overwatch.png')
+                    else:
+                        image = self.occupand.image
+                else:   
+                    image = self.occupand.image      
+
+                match(self.occupand.face):
                         case((1,0)):
                             imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
                         
@@ -3009,22 +3082,6 @@ class Tile:
 
                         case((0,-1)):
                             imaget = pygame.transform.scale(image, (int(self.size), int(self.size)))
-                            imaget = pygame.transform.rotate(imaget,90)
-                else:                
-                    match(self.occupand.face):
-                        case((1,0)):
-                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                        
-                        case(-1,0):
-                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                            imaget = pygame.transform.rotate(imaget,180)
-                        
-                        case((0,1)):
-                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
-                            imaget = pygame.transform.rotate(imaget,270)
-
-                        case((0,-1)):
-                            imaget = pygame.transform.scale(self.occupand.image, (int(self.size), int(self.size)))
                             imaget = pygame.transform.rotate(imaget,90)
         
                 screen.blit(imaget, (self.xb*self.size, self.yb*self.size))
@@ -3114,6 +3171,7 @@ class Sidebar():
         self.hint = ''
         self.roll = ''
         self.amount = ''
+        self.bl_count = 0
 
     def display(self,screen):
 
@@ -3136,6 +3194,7 @@ class Sidebar():
         hint_Text = my_font.render('Hint: ' + str(self.hint), False, (0,0,0))
         roll_Text = my_font.render('Last Roll: ' + str(self.roll), False, (0,0,0))
         amount_Text = my_font.render('Remaining Modells: ' + self.amount, False, (0,0,0))
+        clicked_text = my_font.render('CLicked Model:', False, (0,0,0))
 
         if(state == 'ooc'):
             is_playing_text = my_font.render('playing: '+ game.player1,False, (0,0,0))
@@ -3159,7 +3218,9 @@ class Sidebar():
                         wpn = 'Lightning Claws'
                 active_model_weapon = my_font.render('weapon: '+ wpn, False,(0,0,0))
                 active_model_rank = my_font.render('rank: '+ (smodel.rank), False,(0,0,0))
-            elif(cmodel != None):
+
+        if(cmodel != None):
+            if(cmodel != None):
                 if(cmodel in SM_ModellList):
                     match(cmodel.weapon):
                         case('fist'):
@@ -3174,7 +3235,7 @@ class Sidebar():
                             wpn = 'Chainfist & Stormbolter'
                         case('claws'):
                             wpn = 'Lightning Claws'
-                    clicked_model_weapon = my_font.render('weapon: '+ str(cmodel.weapon), False, (0,0,0))
+                    clicked_model_weapon = my_font.render('weapon: '+ str(wpn), False, (0,0,0))
                     clicked_model_rank = my_font.render('rank: '+ str(cmodel.rank),False,(0,0,0))
                     
         match(state):
@@ -3194,6 +3255,8 @@ class Sidebar():
                     screen.blit(CP_Text, (810,90))
                     screen.blit(hint_Text, (810,120))
                     screen.blit(roll_Text, (810,150))
+                    screen.blit(active_model_weapon, (810,180))
+                    screen.blit(active_model_rank, (810,210)) 
                 else:
                     screen.blit(is_playing_text, (810,30))
                     screen.blit(CP_Text, (810,60))
@@ -3229,24 +3292,45 @@ class Sidebar():
 
             case('runP2'):
                 if(smodel != None):
+                    if(self.bl_count != 0):
+                        bl_c = my_font.render('Value: '+str(self.bl_count),False,(0,0,0))
+                        screen.blit(bl_c, (810, 180))
                     screen.blit(is_playing_text, (810,30))
                     screen.blit(active_model_AP, (810,60))
                     screen.blit(CP_Text, (810,90))
                     screen.blit(hint_Text, (810,120))
                     screen.blit(roll_Text, (810,150))
+                    if(cmodel != None):
+                        if(cmodel in SM_ModellList):
+                            screen.blit(clicked_text, (810,390))
+                            screen.blit(clicked_model_weapon,(810,420))
+                            screen.blit(clicked_model_rank, (810, 450))
                 else:
                     screen.blit(is_playing_text, (810,30))
                     screen.blit(CP_Text, (810,60))
                     screen.blit(hint_Text, (810,90))
                     screen.blit(roll_Text, (810,120))
+                    if(cmodel != None):
+                        if(cmodel in SM_ModellList):
+                            screen.blit(clicked_text, (810,390))
+                            screen.blit(clicked_model_weapon,(810,420))
+                            screen.blit(clicked_model_rank, (810, 450))
 
             case('actP2'):
                 if(smodel != None):
+                    if(self.bl_count != 0):
+                        bl_c = my_font.render('Value: '+str(self.bl_count),False,(0,0,0))
+                        screen.blit(bl_c, (810, 180))
                     screen.blit(is_playing_text, (810,30))
                     screen.blit(active_model_AP, (810,60))
                     screen.blit(CP_Text, (810,90))
                     screen.blit(hint_Text, (810,120)) 
                     screen.blit(roll_Text, (810,150))
+                if(cmodel != None):
+                    if(cmodel in SM_ModellList):
+                        screen.blit(clicked_text, (810,390))
+                        screen.blit(clicked_model_weapon,(810,420))
+                        screen.blit(clicked_model_rank, (810, 450))
 
             case('shoot'):
                 if(smodel in SM_ModellList):
@@ -3265,6 +3349,14 @@ class Sidebar():
                 screen.blit(hint_Text, (810,30))
                 screen.blit(amount_Text, (810,90))
                 screen.blit(CP_Text, (810,60))
+                if(self.bl_count != 0):
+                    bl_c = my_font.render('Value: '+str(self.bl_count),False,(0,0,0))
+                    screen.blit(bl_c, (810, 120))
+                if(cmodel != None):
+                    if(cmodel in SM_ModellList):
+                            screen.blit(clicked_text, (810,390))
+                            screen.blit(clicked_model_weapon,(810,420))
+                            screen.blit(clicked_model_rank, (810, 450))
 
             case('smplace'):
                 screen.blit(is_playing_text, (810,30))
@@ -3275,6 +3367,9 @@ class Sidebar():
                 screen.blit(active_model_rank, (810,150)) 
 
             case('gsplace'):
+                if(self.bl_count != 0):
+                    bl_c = my_font.render('Value: '+str(self.bl_count),False,(0,0,0))
+                    screen.blit(bl_c, (810, 150))
                 screen.blit(is_playing_text, (810,30))
                 screen.blit(CP_Text, (810,60))
                 screen.blit(amount_Text, (810,90))
@@ -3287,7 +3382,6 @@ class Sidebar():
                 screen.blit(hint_Text, (810,120))
 
         screen.blit(round_Text, (810,0))
-        screen.blit(state_Text, (810,280))
 SB = Sidebar()  #initiates an Object of Sidebar(singelton)
 
 class Bottombar():
@@ -3302,13 +3396,5 @@ class Bottombar():
     
     def display(self,screen):
         screen.blit(self.image, self.pos)
-
-    def interact(self,screen):
-        pass
-        # if(self.rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0] == 1):
-        #     self.pressed = True
-        # if(self.pressed and pygame.mouse.get_pressed()[0] == 0):
-        #     game.moveModel()
-        #     self.pressed = False
 
 BB = Bottombar()    #initiates an object of Bottombar(singelton)
