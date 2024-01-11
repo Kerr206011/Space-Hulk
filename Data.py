@@ -95,6 +95,7 @@ class Game:                                         #can variables be exported t
         self.CP = random.randint(1,6)               #a random number of CP for the sm player to use
 
     def SM_prep(self):
+        self.is_playing = self.player1
         self.selected_Model = None
         self.selected_tile = None
         self.clicked_model = None
@@ -110,6 +111,10 @@ class Game:                                         #can variables be exported t
         self.CP = random.randint(1,6)
         self.Manager.ooc = False
         self.Manager.ooc_models = []
+        x = False
+        for model in SM_ModellList: 
+            if(model.rank == 'sergeant'):
+                x = True
         for row in map:
             for tile in row:
                 tile.is_buring = False
@@ -122,13 +127,13 @@ class Game:                                         #can variables be exported t
                             self.Manager.rev_models.append(tile)
                             checked.remove(tile)
                     if(self.Manager.rev_models.__len__() != 0):
+                        if(x):
+                            if(self.CP != 6):
+                                self.Manager.savestate = 'reroll'
                         self.Manager.save_model = self.selected_Model
                         self.Manager.save_tile = self.selected_tile
                         self.reveal(self.Manager.rev_models[0])
-        x = False
-        for model in SM_ModellList: 
-            if(model.rank == 'sergeant'):
-                x = True
+
         if((self.CP != 6) and (x)):
             self.Manager.changestate('reroll')
             self.run()
@@ -449,7 +454,6 @@ class Game:                                         #can variables be exported t
     def shoot(self):
         if(self.selected_Model in SM_ModellList):
             liste = game.vision(self.selected_Model,self.selected_tile)
-            print(liste)
             hit = False
             match(self.selected_Model.weapon):
                 case('fist'):
@@ -510,26 +514,26 @@ class Game:                                         #can variables be exported t
                                                 BL_ModellList.remove(tile.occupand)
                                         if((tile.is_door == False) or ((tile.is_door == True) and (tile.is_open == True))):
                                             tile.is_buring = True
-
+                        else: 
+                            SB.problem = 'Tile cannot be reached!(range is 12 Tiles!)'
+                    else:
+                        SB.problem = 'No Ammo!'
             if(self.selected_Model.overwatch == True):
-                if(((a == b) and not (c != 0)) and (self.is_playing == self.player2)):
+                if(((a == b) and not (c != 0)) and (self.is_playing == self.player2) and (self.selected_Model.weapon != 'flamer')):
                     game.selected_Model.jam = True
+                    SB.problem = 'Jammed!'
             if(self.clicked_model != None) :
                 if((self.clicked_tile in liste) and (self.clicked_model in GS_ModellList)):
                     if(self.Manager.SM_move == True):
                         self.Manager.SM_move = False
                     elif((self.selected_Model.weapon != 'flamer') and (self.selected_Model.overwatch == False)):
-                        print('shoot')
                         self.redAP(self.selected_Model, 1)
                         self.selected_Model.guard = False
                     if((c == 0) and (((a == 6) or (b == 6)) or ((self.selected_Model.susf) and ((a >= 5) or (b >= 5))))):
                         hit = True
                     elif((c != 0) and (((a >= 5) or (b >= 5) or (c >=5)) or ((self.selected_Model.susf) and ((a >= 4) or (b >= 4) or (c >= 4))))):
                         hit = True
-                    elif(((a == b) and not (c != 0)) and (self.is_playing == self.player2) and (self.selected_Model.weapon != 'flamer')):
-                        game.selected_Model.jam = True
-                    else:
-                        game.selected_Model.susf = True
+                    game.selected_Model.susf = True
 
                 if(hit):
                     GS_ModellList.remove(game.clicked_model)
@@ -542,13 +546,13 @@ class Game:                                         #can variables be exported t
                 if((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False)):
                     if(self.Manager.SM_move == True):
                         self.Manager.SM_move = False
-                    elif(self.selected_Model.weapon != 'flamer'):
-                        print('shoot')
+                    else:
                         self.redAP(self.selected_Model, 1)
                         self.selected_Model.guard = False
                     if((self.selected_Model.weapon == 'fist') or (self.selected_Model.weapon == 'powerSword') or (self.selected_Model.weapon == 'chainFist')):
                         if((a == 6) or (b == 6) or (c == 6)):
                             self.clicked_tile.is_door = False
+                    self.selected_Model.susf = True
 
         for row in map: 
             for tile in row:
@@ -593,6 +597,10 @@ class Game:                                         #can variables be exported t
                                                 if(self.CP != 0):
                                                     self.Manager.ooc = True
                                                     self.Manager.ooc_models.append(tile.occupand)
+                    else:
+                        SB.problem = 'Model needs to face the Door!'
+                else:
+                    SB.problem = 'Cannot be used when model is on Tile!'
                                 
                 if(map[self.clicked_tile.y +1][self.clicked_tile.x].is_buring):
                     a = False
@@ -602,7 +610,10 @@ class Game:                                         #can variables be exported t
                     a = False
                 elif(map[self.clicked_tile.y][self.clicked_tile.x - 1].is_buring):
                     a = False
-
+            else:
+                SB.problem = 'Needs to be used on a Door!'
+        else:
+            SB.problem = 'Select a Tile!'
         if(a):
             if(self.clicked_tile.is_open == True):
                 self.clicked_tile.is_open = False
@@ -658,45 +669,47 @@ class Game:                                         #can variables be exported t
         GS3 = random.randint(1,6)
         if((self.selected_tile != None) & (self.clicked_tile != None)):
             if((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False)):
-                self.redAP(self.selected_Model, 1)
-                door = True
-                if(self.is_playing == self.player1):
-                    match(self.selected_Model.weapon):
-                        case('fist'):
-                            SM1 = random.randint(1,6)
-                            SB.roll = str(SM1)
-                        case('powerSword'):
-                            SM1 = random.randint(1,6)
-                            SB.roll = str(SM1)
-                        case('chainFist'):
-                            SM1 = 6
-                            SB.roll = str(SM1)
-                        case('AssaultCanon'):
-                            SM1 = random.randint(1,6)
-                            SB.roll = str(SM1)
-                        case('claws'):
-                            SM1 = random.randint(1,6)
-                            SM2 = random.randint(1,6)
-                            if(SM1 > SM2):
-                                SM1 += 1
-                            else:
+                if(((self.selected_tile.x + self.selected_Model.face[0]) == self.clicked_tile.x) & ((self.selected_tile.y + self.selected_Model.face[1]) == self.clicked_tile.y)):
+                    self.redAP(self.selected_Model, 1)
+                    door = True
+                    if(self.is_playing == self.player1):
+                        match(self.selected_Model.weapon):
+                            case('fist'):
+                                SM1 = random.randint(1,6)
+                                SB.roll = str(SM1)
+                            case('powerSword'):
+                                SM1 = random.randint(1,6)
+                                SB.roll = str(SM1)
+                            case('chainFist'):
+                                SM1 = 6
+                                SB.roll = str(SM1)
+                            case('AssaultCanon'):
+                                SM1 = random.randint(1,6)
+                                SB.roll = str(SM1)
+                            case('claws'):
+                                SM1 = random.randint(1,6)
+                                SM2 = random.randint(1,6)
+                                if(SM1 > SM2):
+                                    SM1 += 1
+                                else:
+                                    SM2 += 1
+                                SB.roll = str(SM1)+' | '+str(SM2)
+                            case('flamer'):
+                                SM1 = random.randint(1,6)
+                                SB.roll = str(SM1)
+                        if(self.selected_Model.rank == 'sergeant'):
+                            SM1 += 1
+                            if(SM2 != 0):
                                 SM2 += 1
-                            SB.roll = str(SM1)+' | '+str(SM2)
-                        case('flamer'):
-                            SM1 = random.randint(1,6)
                             SB.roll = str(SM1)
-                    if(self.selected_Model.rank == 'sergeant'):
-                        SM1 += 1
-                        if(SM2 != 0):
-                            SM2 += 1
-                        SB.roll = str(SM1)
-                    if((SM1 >= 6) or (SM2 >= 6)):
-                        self.clicked_tile.is_door = False
-                if(self.is_playing == self.player2):
-                    SB.roll = str(GS1)+' | '+str(GS2)+' | '+str(GS3)
-                    if((GS1 >= 6) or (GS2 >= 6) or (GS3 >= 6)):
-                        self.clicked_tile.is_door = False
-                print(GS1,GS2,GS3,SM1,SM2)
+                        if((SM1 >= 6) or (SM2 >= 6)):
+                            self.clicked_tile.is_door = False
+                    if(self.is_playing == self.player2):
+                        SB.roll = str(GS1)+' | '+str(GS2)+' | '+str(GS3)
+                        if((GS1 >= 6) or (GS2 >= 6) or (GS3 >= 6)):
+                            self.clicked_tile.is_door = False
+                else:
+                    SB.problem = 'Model needs to face the Door!'
             elif(self.clicked_model != None):
                 if(((self.selected_tile.x + self.selected_Model.face[0]) == self.clicked_tile.x) & ((self.selected_tile.y + self.selected_Model.face[1]) == self.clicked_tile.y)):
                     if(self.selected_tile.is_occupied == True):
@@ -854,7 +867,10 @@ class Game:                                         #can variables be exported t
                                     self.Manager.melee_turn = True
                                     self.Manager.changestate('turn')
                                     self.run()
-
+                    else:
+                        SB.problem = 'Select a Target!'
+                else:
+                    SB.problem = 'Model needs to face the Target!'
             print(GS1,GS2,GS3,SM1,SM2)
 
         for row in map: 
@@ -884,7 +900,6 @@ class Game:                                         #can variables be exported t
                         self.Manager.save_model = self.selected_Model
                         self.Manager.save_tile = self.selected_tile
                         self.reveal(self.Manager.rev_models[0])
-                    print(GS1,GS2,GS3,SM1,SM2)
 
     def reveal(self, tile):
         self.selected_Model = tile.occupand
@@ -913,6 +928,8 @@ class Game:                                         #can variables be exported t
         if((self.clicked_tile != None) & (self.selected_tile != None) & (self.selected_Model != None)): 
             if(self.clicked_tile.is_occupied == False):
                 a = True
+            else:
+                SB.problem = 'Tile cannot be occupied!'
             if((self.is_playing == self.player1) & (self.selected_Model in SM_ModellList)):
                 if(((self.selected_tile.x + ofs[0] == self.clicked_tile.x) and (ofs[0] != 0)) or ((self.selected_tile.y + ofs[1] == self.clicked_tile.y) and (ofs[1] != 0))):
                     if((self.selected_Model.AP != 0) | (self.CP != 0)):
@@ -925,14 +942,11 @@ class Game:                                         #can variables be exported t
                 if((self.clicked_tile.is_wall == True) or ((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False)) or (self.clicked_tile.is_entrypoint == True)):
                     b = False
                 if((((map[self.selected_tile.y+1][self.selected_tile.x].is_wall) or (map[self.selected_tile.y+1][self.selected_tile.x].is_occupied)) and ((map[self.selected_tile.y-1][self.selected_tile.x].is_wall) or (map[self.selected_tile.y-1][self.selected_tile.x].is_occupied))) or (((map[self.selected_tile.y][self.selected_tile.x+1].is_wall) or (map[self.selected_tile.y][self.selected_tile.x+1].is_occupied)) and ((map[self.selected_tile.y][self.selected_tile.x-1].is_wall) or (map[self.selected_tile.y][self.selected_tile.x-1].is_occupied)))):
-                    print('ja')
                     if(map[self.selected_tile.y + self.selected_Model.face[1]][self.selected_tile.x + self.selected_Model.face[0]].is_occupied == True):
                         if((self.clicked_tile == map[self.selected_tile.y + ofset_y + ofs[1]][self.selected_tile.x + ofset_x + ofs[0]]) or (self.clicked_tile == map[self.selected_tile.y - ofset_y + ofs[1]][self.selected_tile.x - ofset_x + ofs[0]])):
-                            print('ne')
                             b = False
                     elif(map[self.selected_tile.y - self.selected_Model.face[1]][self.selected_tile.x - self.selected_Model.face[0]].is_occupied == True):
                         if((self.clicked_tile == map[self.selected_tile.y + ofset_y - ofs[1]][self.selected_tile.x + ofset_x - ofs[0]]) or (self.clicked_tile == map[self.selected_tile.y - ofset_y - ofs[1]][self.selected_tile.x - ofset_x - ofs[0]])):
-                            print('ne')
                             b = False
                 if(self.clicked_tile.is_buring):
                     if(self.selected_tile.is_buring):
@@ -990,25 +1004,33 @@ class Game:                                         #can variables be exported t
                 if((self.clicked_tile.is_wall == True) or ((self.clicked_tile.is_door == True) and (self.clicked_tile.is_open == False)) or (self.clicked_tile.is_entrypoint == True)):
                     b = False
                 if((((map[self.selected_tile.y+1][self.selected_tile.x].is_wall) or (map[self.selected_tile.y+1][self.selected_tile.x].is_occupied)) and ((map[self.selected_tile.y-1][self.selected_tile.x].is_wall) or (map[self.selected_tile.y-1][self.selected_tile.x].is_occupied))) or (((map[self.selected_tile.y][self.selected_tile.x+1].is_wall) or (map[self.selected_tile.y][self.selected_tile.x+1].is_occupied)) and ((map[self.selected_tile.y][self.selected_tile.x-1].is_wall) or (map[self.selected_tile.y][self.selected_tile.x-1].is_occupied)))):
-                    print('ja')
                     if(map[self.selected_tile.y + self.selected_Model.face[1]][self.selected_tile.x + self.selected_Model.face[0]].is_occupied == True):
                         if((self.clicked_tile == map[self.selected_tile.y + ofset_y + ofs[1]][self.selected_tile.x + ofset_x + ofs[0]]) or (self.clicked_tile == map[self.selected_tile.y - ofset_y + ofs[1]][self.selected_tile.x - ofset_x + ofs[0]])):
-                            print('ne')
                             b = False
                     elif(map[self.selected_tile.y - self.selected_Model.face[1]][self.selected_tile.x - self.selected_Model.face[0]].is_occupied == True):
                         if((self.clicked_tile == map[self.selected_tile.y + ofset_y - ofs[1]][self.selected_tile.x + ofset_x - ofs[0]]) or (self.clicked_tile == map[self.selected_tile.y - ofset_y - ofs[1]][self.selected_tile.x - ofset_x - ofs[0]])):
-                            print('ne')
                             b = False
                 if(self.clicked_tile.is_buring):
                     if(self.selected_tile.is_buring):
                         if((random.randint(1,6)) > 1):
                             self.selected_tile.is_occupied = False
-                            SM_ModellList.remove(self.selected_Model)
+                            if(self.selected_Model in GS_ModellList):
+                                GS_ModellList.remove(self.selected_Model)
+                            elif(self.selected_Model in BL_ModellList):
+                                BL_ModellList.remove(self.selected_Model)
+                            elif(self.selected_Model in SM_ModellList):
+                                SM_ModellList.remove(self.selected_Model)
                             self.selected_tile.occupand = None
                             b = False
                     else:
                         b = False
-        print(a,b)
+        else:
+            SB.problem = 'Select a Tile!'
+        
+        if(b == False):
+            if(a == True):
+                SB.problem = 'Cannot go there!'
+
         if(a & b):
             self.redAP(self.selected_Model, c)
             self.selected_Model.guard = False
@@ -1094,6 +1116,7 @@ class Game:                                         #can variables be exported t
                     if(c):
                         if(a & b):
                             self.selected_Model.AP +=1
+                        SB.problem = 'Cannot go into line of sight!'
                         self.selected_tile.is_occupied = False
                         self.Manager.save_tile.occupand = self.Manager.save_model
                         self.selected_tile.occupand = None
@@ -1103,11 +1126,6 @@ class Game:                                         #can variables be exported t
                         self.Manager.save_model = None
                         self.Manager.save_tile = None
                         c = False
-
-        elif(not a):
-            print('Bitte wähle ein Model und ein Tile aus!')
-        elif(not b):
-            print('Dahin kannst du nicht gehen!/ Nicht genügend AP/CP')
 
     def run(self):
         self.states[self.Manager.givestate()].run()
@@ -1273,17 +1291,24 @@ class gamestateTurn:
                     self.gameStateManager.turn = False
                     game.clicked_model = None
                     if(self.gameStateManager.rev_count == 0):
+                        game.selected_Model = None
+                        game.selected_tile = None
                         if(game.is_playing == game.player2):
-                            game.selected_Model = None
-                            game.selected_tile = None
                             self.gameStateManager.changestate('runP2')
                             game.run()
                         else:
-                            if(self.gameStateManager.save_model in SM_ModellList):
-                                game.selected_Model = self.gameStateManager.save_model
+                            if(self.gameStateManager.savestate == 'reroll'):
+                                self.gameStateManager.changestate('reroll')
+                                self.gameStateManager.savestate = None
+                                game.run()
+                            elif(self.gameStateManager.save_model in SM_ModellList):
                                 game.selected_tile = self.gameStateManager.save_tile
-                            self.gameStateManager.changestate('actP1')
-                            game.run()
+                                game.selected_Model = self.gameStateManager.save_model
+                                self.gameStateManager.changestate('actP1')
+                                game.run()
+                            else:
+                                self.gameStateManager.changestate('runP1')
+                                game.run()
                 self.gameStateManager.melee_turn = False
                 self.gameStateManager.gs_moveturn = False
                 self.gameStateManager.gs_turnaftermove = None
@@ -1356,6 +1381,10 @@ class gamestateTurn:
                         game.clicked_tile = None
                         game.clicked_model = None
                         self.gameStateManager.changestate('runP2')
+                        game.run()
+                    elif(self.gameStateManager.savestate == 'reroll'):
+                        self.gameStateManager.changestate('reroll')
+                        self.gameStateManager.savestate = None
                         game.run()
                     else:
                         self.gameStateManager.changestate('actP1')
@@ -1920,10 +1949,9 @@ class OOC_Activation:
                             pressed = True
 
                 if(self.turn_button.draw(screen)):
-                    if((game.selected_Model.AP != 0) or ((game.is_playing == game.player1) and (game.CP != 0))):
+                    if(game.CP != 0):
                         self.Manager.changestate('turn')
                         game.run()
-                    else:print('no AP/CP')
 
                 if(self.shoot_button.draw(screen)):
                     if(game.selected_Model != None):
@@ -1934,14 +1962,14 @@ class OOC_Activation:
                             elif(((game.CP) != 0) and (game.selected_Model.weapon != 'flamer')):
                                 self.Manager.changestate('shoot')
                                 game.run()
-                            else: print('nicht genug AP')
+                            else: 
+                                SB.problem = 'Not enough CP!'
 
                 if(self.melee_button.draw(screen)):
                     if(game.selected_Model != None):
                         if((game.CP) != 0):
                             pressed = True
                             game.melee()
-                        else: print('nicht genug AP')
             
                 if(self.ocDoor_button.draw(screen)):
                     pressed = True
@@ -1962,9 +1990,9 @@ class OOC_Activation:
                             game.selected_Model.guard = False
                             pressed = True
 
-                if(self.un_jam_button.draw(screen)):
-                    if(game.CP != 0):
-                        if(game.selected_Model.jam == True):
+                if((game.selected_Model.jam == True) and (game.selected_Model.overwatch == True)):
+                    if(self.un_jam_button.draw(screen)):
+                        if(game.CP != 0):
                             game.redAP(game.selected_Model, 1)
                             game.selected_Model.jam = False
                             pressed = True
@@ -1981,6 +2009,7 @@ class OOC_Activation:
                 game.selected_tile = None
                 game.clicked_tile = None
                 game.clicked_model = None
+                SB.problem = ''
                 game.run()
 
             pygame.display.update()
@@ -2251,6 +2280,8 @@ class Player2Activation:
             self.activated_model = game.selected_Model
         elif((self.activated_model not in GS_ModellList) or (self.activated_model not in BL_ModellList)):
             self.activated_model == None
+
+        SB.hint = 'Press X-Button to finish model activation.'
                                                                                                                 
         self.move_image = pygame.image.load('Pictures/move.png')
         self.turn_image = pygame.image.load('Pictures/turn.png')
@@ -2799,6 +2830,7 @@ class gamestate_reveal:
     def __init__(self) -> None:
         self.Manager = gameStateManager
         self.active = False
+        self.origin_tile = None
 
     def run(self):
         self.place_image = pygame.image.load('Pictures/placemodel.png')
@@ -2810,6 +2842,7 @@ class gamestate_reveal:
             self.revModel = game.selected_Model
             self.Manager.rev_count = self.revModel.count
             tile = game.selected_tile
+            self.origin_tile = tile
 
             tile.is_occupied = False
             BL_ModellList.remove(tile.occupand)
@@ -2898,7 +2931,7 @@ class gamestate_reveal:
 
             for row in map:
                 for tile in row:
-                    if(((tile.x == game.selected_tile.x) or (tile.x == (game.selected_tile.x -1)) or (tile.x == (game.selected_tile.x +1))) and ((tile.y == game.selected_tile.y) or (tile.y == (game.selected_tile.y -1)) or (tile.y == (game.selected_tile.y +1)))):
+                    if(((tile.x == self.origin_tile.x) or (tile.x == (self.origin_tile.x -1)) or (tile.x == (self.origin_tile.x +1))) and ((tile.y == self.origin_tile.y) or (tile.y == (self.origin_tile.y -1)) or (tile.y == (self.origin_tile.y +1)))):
                         if((tile.is_occupied == False) & (((tile.is_door == True) & (tile.is_open == True)) or (tile.is_door == False)) & (tile.is_wall == False) & (tile.is_entrypoint == False)):
                             lis.append(tile)
         
@@ -2908,11 +2941,18 @@ class gamestate_reveal:
                     if(game.is_playing == game.player1):
                         game.selected_tile = self.Manager.save_tile
                         game.selected_Model = self.Manager.save_model
-                        if(self.Manager.SM_move == True):
+                        if(self.Manager.savestate == 'reroll'):
+                            self.Manager.changestate('reroll')
+                            self.Manager.savestate = None
+                            game.selected_tile = None
+                            game.selected_Model = None
+                            game.run()
+                        elif((self.Manager.SM_move == True) and (game.selected_Model.weapon != 'flamer')):
                             self.Manager.changestate('shoot')
                             game.run()
                         else:
                             self.Manager.changestate('actP1')
+                            game.run()
                     else: 
                         self.Manager.changestate('runP2')
                         game.selected_Model = None
@@ -3043,11 +3083,11 @@ class Tile:
 
             if(self.is_occupied):
                 if(self.occupand == game.selected_Model):
-                    if((game.is_playing == game.player1) and (self.occupand in SM_ModellList)):
+                    if((self.occupand in SM_ModellList)):
                         image = pygame.image.load('Pictures/Models/SM_select.png')
-                    elif((game.is_playing == game.player2) and (self.occupand in GS_ModellList)):
+                    elif((self.occupand in GS_ModellList)):
                         image = pygame.image.load('Pictures/Models/GS_select.png')
-                    elif((game.is_playing == game.player2) and (self.occupand in BL_ModellList)):
+                    elif((self.occupand in BL_ModellList)):
                         image = pygame.image.load('Pictures/Models/Blip-select.png')
 
                 elif(self.occupand == game.clicked_model):
@@ -3172,6 +3212,7 @@ class Sidebar():
         self.roll = ''
         self.amount = ''
         self.bl_count = 0
+        self.problem = ''
 
     def display(self,screen):
 
@@ -3195,6 +3236,10 @@ class Sidebar():
         roll_Text = my_font.render('Last Roll: ' + str(self.roll), False, (0,0,0))
         amount_Text = my_font.render('Remaining Modells: ' + self.amount, False, (0,0,0))
         clicked_text = my_font.render('CLicked Model:', False, (0,0,0))
+        problem_text = my_font.render(self.problem, False, (255,0,0))
+        flamer_ammo_text = my_font.render('Ammo: '+str(game.Heavy_flamer_ammo), False, (0,0,0))
+        assault_ammo_text = my_font.render('Ammo: '+str(game.Assault_cannon_Ammo), False, (0,0,0))
+        assault_reload_text = my_font.render('Reload: '+str(game.Assault_cannon_reload),False, (0,0,0))
 
         if(state == 'ooc'):
             is_playing_text = my_font.render('playing: '+ game.player1,False, (0,0,0))
@@ -3246,17 +3291,25 @@ class Sidebar():
                 screen.blit(CP_Text, (810,90)) 
                 if(smodel in SM_ModellList):
                     screen.blit(active_model_weapon, (810,150))
-                    screen.blit(active_model_rank, (810,180))   
+                    screen.blit(active_model_rank, (810,180)) 
+                screen.blit(problem_text, (810,450))  
 
             case('runP1'):
+                screen.blit(problem_text, (810,450))  
                 if(smodel != None):
-                    screen.blit(is_playing_text, (810,30))
-                    screen.blit(active_model_AP, (810,60))
-                    screen.blit(CP_Text, (810,90))
-                    screen.blit(hint_Text, (810,120))
-                    screen.blit(roll_Text, (810,150))
-                    screen.blit(active_model_weapon, (810,180))
-                    screen.blit(active_model_rank, (810,210)) 
+                    if(smodel in SM_ModellList):
+                        screen.blit(is_playing_text, (810,30))
+                        screen.blit(active_model_AP, (810,60))
+                        screen.blit(CP_Text, (810,90))
+                        screen.blit(hint_Text, (810,120))
+                        screen.blit(roll_Text, (810,150))
+                        screen.blit(active_model_weapon, (810,180))
+                        screen.blit(active_model_rank, (810,210)) 
+                        if(smodel.weapon == 'flamer'):
+                            screen.blit(flamer_ammo_text, (810,240))
+                        elif(smodel.weapon == 'AssaultCanon'):
+                            screen.blit(assault_ammo_text, (810,240))
+                            screen.blit(assault_reload_text, (810,270))
                 else:
                     screen.blit(is_playing_text, (810,30))
                     screen.blit(CP_Text, (810,60))
@@ -3264,6 +3317,7 @@ class Sidebar():
                     screen.blit(roll_Text, (810,120))
 
             case('actP1'):
+                screen.blit(problem_text, (810,450))  
                 if(smodel != None):
                     if(smodel in SM_ModellList):
                         screen.blit(is_playing_text, (810,30))
@@ -3273,6 +3327,11 @@ class Sidebar():
                         screen.blit(active_model_weapon, (810,150))
                         screen.blit(active_model_rank, (810,180)) 
                         screen.blit(roll_Text, (810,210))
+                        if(smodel.weapon == 'flamer'):
+                            screen.blit(flamer_ammo_text, (810,240))
+                        elif(smodel.weapon == 'AssaultCanon'):
+                            screen.blit(assault_ammo_text, (810,240))
+                            screen.blit(assault_reload_text, (810,270))
 
             case('reroll'):
                 screen.blit(is_playing_text, (810,30))
@@ -3280,17 +3339,28 @@ class Sidebar():
                 screen.blit(hint_Text, (810,90))
 
             case('ooc'):
+                screen.blit(problem_text, (810,450)) 
+                screen.blit(CP_Text, (810,60)) 
+                screen.blit(is_playing_text, (810,30))
+                screen.blit(hint_Text, (810,120))
                 if(smodel != None):
                     if(smodel in SM_ModellList):
-                        screen.blit(is_playing_text, (810,30))
-                        screen.blit(active_model_AP, (810,60))
-                        screen.blit(CP_Text, (810,90))
+                        screen.blit(active_model_AP, (810,90))
                         screen.blit(hint_Text, (810,120))
                         screen.blit(active_model_weapon, (810,150))
                         screen.blit(active_model_rank, (810,180)) 
                         screen.blit(roll_Text, (810,210))
+                        if(smodel.weapon == 'flamer'):
+                            screen.blit(flamer_ammo_text, (810,240))
+                        elif(smodel.weapon == 'AssaultCanon'):
+                            screen.blit(assault_ammo_text, (810,240))
+                            screen.blit(assault_reload_text, (810,270))
+                        elif(smodel.jam == True):
+                            t = my_font.render('Weapon jammed!', False, (0,0,0))
+                            screen.blit(t, (810,240))
 
             case('runP2'):
+                screen.blit(problem_text, (810,450))
                 if(smodel != None):
                     if(self.bl_count != 0):
                         bl_c = my_font.render('Value: '+str(self.bl_count),False,(0,0,0))
@@ -3302,9 +3372,24 @@ class Sidebar():
                     screen.blit(roll_Text, (810,150))
                     if(cmodel != None):
                         if(cmodel in SM_ModellList):
-                            screen.blit(clicked_text, (810,390))
-                            screen.blit(clicked_model_weapon,(810,420))
-                            screen.blit(clicked_model_rank, (810, 450))
+                            if(cmodel.weapon == 'flamer'):
+                                screen.blit(clicked_text, (810,330))
+                                screen.blit(clicked_model_weapon,(810,360))
+                                screen.blit(clicked_model_rank, (810, 390))
+                                screen.blit(flamer_ammo_text, (810,420))
+                            elif(cmodel.weapon == 'AssaultCanon'):
+                                screen.blit(clicked_text, (810,300))
+                                screen.blit(clicked_model_weapon,(810,330))
+                                screen.blit(clicked_model_rank, (810, 360))
+                                screen.blit(assault_ammo_text, (810,390))
+                                screen.blit(assault_reload_text, (810,420))
+                            else:
+                                screen.blit(clicked_text, (810,360))
+                                screen.blit(clicked_model_weapon,(810,390))
+                                screen.blit(clicked_model_rank, (810, 420))
+                                if(smodel.jam == True):
+                                    t = my_font.render('Weapon jammed!', False, (0,0,0))
+                                    screen.blit(t, (810,330))
                 else:
                     screen.blit(is_playing_text, (810,30))
                     screen.blit(CP_Text, (810,60))
@@ -3312,11 +3397,24 @@ class Sidebar():
                     screen.blit(roll_Text, (810,120))
                     if(cmodel != None):
                         if(cmodel in SM_ModellList):
-                            screen.blit(clicked_text, (810,390))
-                            screen.blit(clicked_model_weapon,(810,420))
-                            screen.blit(clicked_model_rank, (810, 450))
+                            if(cmodel.weapon == 'flamer'):
+                                screen.blit(clicked_text, (810,330))
+                                screen.blit(clicked_model_weapon,(810,360))
+                                screen.blit(clicked_model_rank, (810, 390))
+                                screen.blit(flamer_ammo_text, (810,420))
+                            elif(cmodel.weapon == 'AssaultCanon'):
+                                screen.blit(clicked_text, (810,300))
+                                screen.blit(clicked_model_weapon,(810,330))
+                                screen.blit(clicked_model_rank, (810, 360))
+                                screen.blit(assault_ammo_text, (810,390))
+                                screen.blit(assault_reload_text, (810,420))
+                            else:
+                                screen.blit(clicked_text, (810,360))
+                                screen.blit(clicked_model_weapon,(810,390))
+                                screen.blit(clicked_model_rank, (810, 420))
 
             case('actP2'):
+                screen.blit(problem_text, (810,450))
                 if(smodel != None):
                     if(self.bl_count != 0):
                         bl_c = my_font.render('Value: '+str(self.bl_count),False,(0,0,0))
@@ -3328,11 +3426,28 @@ class Sidebar():
                     screen.blit(roll_Text, (810,150))
                 if(cmodel != None):
                     if(cmodel in SM_ModellList):
-                        screen.blit(clicked_text, (810,390))
-                        screen.blit(clicked_model_weapon,(810,420))
-                        screen.blit(clicked_model_rank, (810, 450))
+                        if(cmodel in SM_ModellList):
+                            if(cmodel.weapon == 'flamer'):
+                                screen.blit(clicked_text, (810,330))
+                                screen.blit(clicked_model_weapon,(810,360))
+                                screen.blit(clicked_model_rank, (810, 390))
+                                screen.blit(flamer_ammo_text, (810,420))
+                            elif(cmodel.weapon == 'AssaultCanon'):
+                                screen.blit(clicked_text, (810,300))
+                                screen.blit(clicked_model_weapon,(810,330))
+                                screen.blit(clicked_model_rank, (810, 360))
+                                screen.blit(assault_ammo_text, (810,390))
+                                screen.blit(assault_reload_text, (810,420))
+                            else:
+                                screen.blit(clicked_text, (810,360))
+                                screen.blit(clicked_model_weapon,(810,390))
+                                screen.blit(clicked_model_rank, (810, 420))
+                                if(smodel.jam == True):
+                                    t = my_font.render('Weapon jammed!', False, (0,0,0))
+                                    screen.blit(t, (810,330))
 
             case('shoot'):
+                screen.blit(problem_text, (810,450))
                 if(smodel in SM_ModellList):
                     if(smodel.susf == True):
                         sus = my_font.render('Sustained', False, (0,0,0))
@@ -3341,11 +3456,17 @@ class Sidebar():
                     screen.blit(active_model_AP, (810,60))
                     screen.blit(active_model_weapon, (810,150))
                     screen.blit(active_model_rank, (810,180)) 
+                    if(smodel.weapon == 'flamer'):
+                        screen.blit(flamer_ammo_text, (810,240))
+                    elif(smodel.weapon == 'AssaultCanon'):
+                        screen.blit(assault_ammo_text, (810,240))
+                        screen.blit(assault_reload_text, (810,270))
                 screen.blit(is_playing_text, (810,30))
                 screen.blit(CP_Text, (810,90))
                 screen.blit(hint_Text, (810,120))
 
             case('gsprep'):
+                screen.blit(problem_text, (810,450))
                 screen.blit(hint_Text, (810,30))
                 screen.blit(amount_Text, (810,90))
                 screen.blit(CP_Text, (810,60))
@@ -3354,11 +3475,12 @@ class Sidebar():
                     screen.blit(bl_c, (810, 120))
                 if(cmodel != None):
                     if(cmodel in SM_ModellList):
-                            screen.blit(clicked_text, (810,390))
-                            screen.blit(clicked_model_weapon,(810,420))
-                            screen.blit(clicked_model_rank, (810, 450))
+                            screen.blit(clicked_text, (810,360))
+                            screen.blit(clicked_model_weapon,(810,390))
+                            screen.blit(clicked_model_rank, (810, 420))
 
             case('smplace'):
+                screen.blit(problem_text, (810,450))
                 screen.blit(is_playing_text, (810,30))
                 screen.blit(CP_Text, (810,60))
                 screen.blit(amount_Text, (810,90))
@@ -3367,6 +3489,7 @@ class Sidebar():
                 screen.blit(active_model_rank, (810,150)) 
 
             case('gsplace'):
+                screen.blit(problem_text, (810,450))
                 if(self.bl_count != 0):
                     bl_c = my_font.render('Value: '+str(self.bl_count),False,(0,0,0))
                     screen.blit(bl_c, (810, 150))
@@ -3376,6 +3499,7 @@ class Sidebar():
                 screen.blit(hint_Text, (810,120))
 
             case('reveal'):
+                screen.blit(problem_text, (810,450))
                 screen.blit(is_playing_text, (810,30))
                 screen.blit(CP_Text, (810,60))
                 screen.blit(amount_Text, (810,90))
