@@ -2287,10 +2287,6 @@ class briefing:
                         game.run()
 
                 pygame.display.update()
-            # if(self.continue_button.draw(screen)):
-            #     self.Manager.changestate('smplace')
-            #     screen.fill((50,50,50))
-            #     game.run()
             pygame.display.update()
 
 
@@ -4031,14 +4027,15 @@ class Sidebar():
                         sus = my_font.render('Sustained', False, (0,0,0))
                         screen.blit(sus,(810,210))
                 if(smodel != None):
-                    screen.blit(active_model_AP, (810,60))
-                    screen.blit(active_model_weapon, (810,150))
-                    screen.blit(active_model_rank, (810,180)) 
-                    if(smodel.weapon == 'flamer'):
-                        screen.blit(flamer_ammo_text, (810,240))
-                    elif(smodel.weapon == 'AssaultCanon'):
-                        screen.blit(assault_ammo_text, (810,240))
-                        screen.blit(assault_reload_text, (810,270))
+                    if(smodel in SM_ModellList):
+                        screen.blit(active_model_AP, (810,60))
+                        screen.blit(active_model_weapon, (810,150))
+                        screen.blit(active_model_rank, (810,180)) 
+                        if(smodel.weapon == 'flamer'):
+                            screen.blit(flamer_ammo_text, (810,240))
+                        elif(smodel.weapon == 'AssaultCanon'):
+                            screen.blit(assault_ammo_text, (810,240))
+                            screen.blit(assault_reload_text, (810,270))
                 screen.blit(is_playing_text, (810,30))
                 screen.blit(CP_Text, (810,90))
                 screen.blit(hint_Text, (810,120))
