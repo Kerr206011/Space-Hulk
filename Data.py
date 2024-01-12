@@ -1,6 +1,7 @@
 import pygame
 import random 
 import sys
+import time
 
 SM_ModellList = []                     #a list of Space Marine models
 GS_ModellList = []                     #a list of Genstealer models
@@ -51,6 +52,50 @@ class Button():
 
         return action
 
+    def safedraw(self, surface):    #only returns True if the Mouse is released and on the Button
+        action = False
+
+        #get mouse position
+        pos = pygame.mouse.get_pos()
+        #get mouse state
+        mouse_state = pygame.mouse.get_pressed()[0] == 1
+
+        # Check if mouse is over the button
+        if self.rect.collidepoint(pos):
+            # Check if mouse button is pressed down
+            if mouse_state and not self.prev_mouse_state:
+                self.clicked = True
+
+         # Check if mouse button is released
+        if not mouse_state and self.prev_mouse_state:
+            if self.clicked:
+                if(self.rect.collidepoint(pos)):
+                    action = True
+            self.clicked = False
+
+        #draw button on screen
+        surface.blit(self.image, (self.rect.x, self.rect.y))
+
+         # Update previous mouse state
+        self.prev_mouse_state = mouse_state
+
+        return action
+
+    def hover(self, surface):
+        action = False
+
+        #get mouse position
+        pos = pygame.mouse.get_pos()
+
+        # Check if mouse is over the button
+        if self.rect.collidepoint(pos):
+            action = True
+
+        #draw button on screen
+        surface.blit(self.image, (self.rect.x, self.rect.y))
+
+        return action
+    
 class GameStateManager:
     def __init__(self, state) -> None:
         self.state = state
@@ -1818,7 +1863,7 @@ class gamestate_level:
                         tile.group = 'b'
                     x += 1
 
-                self.Manager.changestate('smplace')
+                self.Manager.changestate('cuts')
                 game.run()
 
             if(lvl2_button.draw(screen)):
@@ -2066,6 +2111,189 @@ class gamestate_level:
                 game.run()
             pygame.display.update()
 
+class briefing:
+    def __init__(self) -> None:
+        self.Manager = gameStateManager
+
+    def run(self):
+        self.continue_image = pygame.image.load('Pictures/continue.png')
+        self.continue_button = Button(810, 650, self.continue_image,1)
+
+        cutscene = True
+        briefing = False
+
+        my_font = pygame.font.SysFont('Bahnschrift', 40)
+        texts = ['loading Briefing > ... complete','Mission > burn the controlroom ...','Enemy objective > Stop the clensing of the controlroom ...','Deployment > west corridor of section 34C12H ...','Forces > ...requesting ... done ...','> sergeant with Powersword and Stormbolter','> Battlebrother with Heavy Flamer and Powerfist','> 3 Battlebrothers with Stormbolters and Powerfists','Enemys? > ... checking auspex ... pinging ...','> auspex_ping == 2','> enemy reinforcements ... chance == high','> let fury be your guide, let vengance be your song. For the Emperor!','>deployment commencing ....']
+        text_1 = ''
+        text_2 = ''
+        text_3 = ''
+        text_4 = ''
+        text_5 = ''
+        text_6 = ''
+        text_7 = ''
+        text_8 = ''
+        text_9 = ''
+        text_10 = ''
+        text_11 = ''
+        text_12 = ''
+        text_13 = ''
+
+        a = 0
+        b = 0
+        c = 0
+        d = 0
+        e = 0
+        f = 0
+        g = 0
+        h = 0 
+        i = 0
+        j = 0
+        k = 0
+        l = 0
+        m = 0
+
+        screen.fill((50,50,50))
+        while(True):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            while(cutscene):
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            text_1 = texts[0]
+                            text_2 = texts[1]
+                            text_3 = texts[2]
+                            text_4 = texts[3]
+                            text_5 = texts[4]
+                            text_6 = texts[5]
+                            text_7 = texts[6]
+                            text_8 = texts[7]
+                            text_9 = texts[8]
+                            text_10 = texts[9]
+                            text_11 = texts[10]
+                            text_12 = texts[11]
+                            text_13 = texts[12]
+
+                line_1 = my_font.render(text_1, False, (0,0,0))
+                line_2 = my_font.render(text_2, False, (0,0,0))
+                line_3 = my_font.render(text_3, False, (0,0,0))
+                line_4 = my_font.render(text_4, False, (0,0,0))
+                line_5 = my_font.render(text_5, False, (0,0,0))
+                line_6 = my_font.render(text_6, False, (0,0,0))
+                line_7 = my_font.render(text_7, False, (0,0,0))
+                line_8 = my_font.render(text_8, False, (0,0,0))
+                line_9 = my_font.render(text_9, False, (0,0,0))
+                line_10 = my_font.render(text_10, False, (0,0,0))
+                line_11 = my_font.render(text_11, False, (0,0,0))
+                line_12 = my_font.render(text_12, False, (0,0,0))
+                line_13 = my_font.render(text_13, False, (0,0,0))
+                screen.blit(line_1, (20,20))
+                screen.blit(line_2, (20,70))
+                screen.blit(line_3, (20,120))
+                screen.blit(line_4, (20, 170))
+                screen.blit(line_5, (20, 220))
+                screen.blit(line_6, (20, 270))
+                screen.blit(line_7, (20, 320))
+                screen.blit(line_8, (20, 370))
+                screen.blit(line_9, (20, 420))
+                screen.blit(line_10, (20, 470))
+                screen.blit(line_11, (20, 520))
+                screen.blit(line_12, (20, 570))
+                screen.blit(line_13, (20, 620))
+                if(text_1 != texts[0]):
+                    text_1 += texts[0][a]
+                    a += 1
+                    time.sleep(0.15)
+                elif(text_2 != texts[1]):
+                    text_2 += texts[1][b]
+                    b += 1
+                    time.sleep(0.15)
+                elif(text_3 != texts[2]):
+                    text_3 += texts[2][c]
+                    c += 1
+                    time.sleep(0.15)
+                elif(text_4 != texts[3]):
+                    text_4 += texts[3][d]
+                    d += 1
+                    time.sleep(0.15)
+                elif(text_5 != texts[4]):
+                    text_5 += texts[4][e]
+                    e += 1
+                    time.sleep(0.15)
+                elif(text_6 != texts[5]):
+                    text_6 += texts[5][f]
+                    f += 1
+                    time.sleep(0.15)
+                elif(text_7 != texts[6]):
+                    text_7 += texts[6][g]
+                    g += 1
+                    time.sleep(0.15)
+                elif(text_8 != texts[7]):
+                    text_8 += texts[7][h]
+                    h += 1
+                    time.sleep(0.15)
+                elif(text_9 != texts[8]):
+                    text_9 += texts[8][i]
+                    i += 1
+                    time.sleep(0.15)
+                elif(text_10 != texts[9]):
+                    text_10 += texts[9][j]
+                    j += 1
+                    time.sleep(0.15)
+                elif(text_11 != texts[10]):
+                    text_11 += texts[10][k]
+                    k += 1
+                    time.sleep(0.15)
+                elif(text_12 != texts[11]):
+                    text_12 += texts[11][l]
+                    l += 1
+                    time.sleep(0.15)
+                elif(text_13 != texts[12]):
+                    text_13 += texts[12][m]
+                    m += 1
+                    time.sleep(0.15)
+                elif(self.continue_button.draw(screen)):
+                    cutscene = False
+                    briefing = True
+                    screen.fill((50,50,50))
+                    a = 0
+                pygame.display.update()
+
+            while(briefing):
+                pictures = ['Pictures/map_1_SM_deploy.png','Pictures/map_1_GS_deploy.png','Pictures/map_1_SM_goal.png']
+                texts = ['Player 1 deploys his 5 Space Marines on these squares','Player 2 Deploys his 2 Blips on these squares','Player 1 needs to shoot the heavy flamer here']
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                picture = pygame.image.load(pictures[a])
+                picture = pygame.transform.scale(picture, (600,600))
+                text = my_font.render(texts[a], False, (0,0,0))
+                screen.blit(picture, (0,0))
+                screen.blit(text, (20,600))
+                if(self.continue_button.draw(screen)):
+                    if(a < 2):
+                        a += 1
+                        screen.fill((50,50,50))
+                    else:
+                        briefing = False
+                        self.Manager.changestate('smplace')
+                        screen.fill((50,50,50))
+                        game.run()
+
+                pygame.display.update()
+            # if(self.continue_button.draw(screen)):
+            #     self.Manager.changestate('smplace')
+            #     screen.fill((50,50,50))
+            #     game.run()
+            pygame.display.update()
+
+
 class CP_reroll:
     def __init__(self) -> None:
         self.Manager = gameStateManager
@@ -2165,7 +2393,7 @@ class Player1Turn:
             SB.display(screen)
             BB.display(screen)
 
-            if(self.changeturn_button.draw(screen)):
+            if(self.changeturn_button.safedraw(screen)):
                 Player1Activation.activated_model = None
                 game.selected_Model = None
                 game.is_playing = game.player2
@@ -2581,7 +2809,7 @@ class Player2Turn:
                     else:
                         SB.bl_count = 0
 
-            if(self.changeturn_button.draw(screen)):
+            if(self.changeturn_button.safedraw(screen)):
                 Player2Activation.activated_model = None
                 game.checkwin()
                 game.is_playing = game.player1
