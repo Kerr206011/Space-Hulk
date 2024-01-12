@@ -93,6 +93,7 @@ class Game:                                         #can variables be exported t
         self.Assault_cannon_reload = True
         self.Heavy_flamer_ammo = 6
         self.CP = random.randint(1,6)               #a random number of CP for the sm player to use
+        self.psy_points = 20
 
     def SM_prep(self):
         self.is_playing = self.player1
@@ -179,6 +180,38 @@ class Game:                                         #can variables be exported t
                 elif(w):
                     self.Manager.changestate('smwin')
                     game.run()
+            case(2):
+                for row in map:
+                    for tile in row:
+                        if(tile.is_lurkingpoint == True):
+                            if(tile.is_occupied == True):
+                                tile.is_occupied = False
+                                BL_ModellList.remove(tile.occupand)
+                                tile.occupand = None
+                Sw = False
+                lis = []
+                for row in map:
+                    for tile in row:
+                        if(tile.is_entrypoint == True):
+                            a = False
+                            for row in map:
+                                for obj in row:
+                                    if(obj.occupand in SM_ModellList):
+                                        if(self.gsdistance(obj,tile)):
+                                            a = True
+                            if(a == False):
+                                lis.append(tile)
+                if(lis.__len__() == 0):
+                    self.Manager.changestate('smwin')
+                    game.run()
+                if(self.states['gsprep'].bl_list.__len__() == 0):
+                    if((BL_ModellList.__len__() == 0) and (GS_ModellList.__len__() == 0)):
+                        self.Manager.changestate('smwin')
+                        game.run()
+                if(SM_ModellList.__len__() == 0):
+                    self.Manager.changestate('gswin')
+                    game.run()
+                
 
     def vision(self,model,tile):
         ofset_x = 0
@@ -455,12 +488,12 @@ class Game:                                         #can variables be exported t
         if(self.selected_Model in SM_ModellList):
             liste = game.vision(self.selected_Model,self.selected_tile)
             hit = False
+            fatal = False
             match(self.selected_Model.weapon):
                 case('fist'):
                     a = random.randint(1,6)
                     b = random.randint(1,6)
                     c = 0
-                    print(a,b,c)
                 case('powerSword'):
                     a = random.randint(1,6)
                     b = random.randint(1,6)
@@ -475,7 +508,10 @@ class Game:                                         #can variables be exported t
                         b = random.randint(1,6)
                         c = random.randint(1,6)
                         game.Assault_cannon_Ammo -= 1
-                        print(a,b,c)
+                        if((game.Assault_cannon_reload == False) and ((a == b) and (b == c))):
+                            fatal = True
+                    else:
+                        SB.problem = 'No Ammo!'
                 case('flamer'):
                     a = 0
                     b = 0
@@ -572,6 +608,28 @@ class Game:                                         #can variables be exported t
                 SB.roll = str(a) + ' | ' + str(b) + ' | ' +str(c)
             else:
                 SB.roll = str(a) + ' | ' + str(b)
+
+        if(fatal):
+            self.selected_Model = None
+            self.selected_tile.is_occupied = False
+            self.selected_tile.occupand = None
+            for section in self.Manager.sections:
+                if(self.selected_tile in section):
+                    for tile in section:
+                        roll = random.randint(1,6)
+                        if(roll >= 4):
+                            if(tile.is_occupied):
+                                if(tile.occupand in SM_ModellList):
+                                    tile.is_occupied = False
+                                    SM_ModellList.remove(tile.occupand)
+                                    tile.occupand = None
+                                elif(tile.occupand in GS_ModellList):
+                                    tile.is_occupied = False
+                                    GS_ModellList.remove(tile.occupand)
+                                    tile.occupand = None
+                            elif(tile.is_door):
+                                tile.is_door = False
+            self.selected_tile = None
 
     def ocDoor(self):
         a = False
@@ -697,6 +755,9 @@ class Game:                                         #can variables be exported t
                             case('flamer'):
                                 SM1 = random.randint(1,6)
                                 SB.roll = str(SM1)
+                            case('hammer'):
+                                SM1 = random.randint(1,6) + 1
+                                SB.roll = str(SM1)
                         if(self.selected_Model.rank == 'sergeant'):
                             SM1 += 1
                             if(SM2 != 0):
@@ -745,7 +806,6 @@ class Game:                                         #can variables be exported t
                                         SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('powerSword'):
                                         SM1 = random.randint(1,6)
-                                        print(GS1,GS2,GS3,SM1,SM2)  
                                         if(((SM1 < GS1) or (SM1 < GS2) or (SM1 < GS3)) or ((SM2 > SM1) and ((SM2 < GS1) or (SM2 < GS2) or (SM2 < GS3)))):
                                             if((GS1 > GS2) and (GS1 > GS3)):
                                                 GS1 = random.randint(1,6)
@@ -762,11 +822,15 @@ class Game:                                         #can variables be exported t
                                         else:
                                             SM2 += 1
                                         SB.roll = 'SM: '+str(SM1)+' | '+str(SM2)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
+                                    case('hammer'):
+                                        SM1 = random.randint(1,6) +1 
+                                        GS3 = 0
                                 if(self.selected_Model.rank == 'sergeant'):
                                     SM1 += 1
-                                    if(SM2 != 0):
-                                        SM2 += 1
-                                    SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
+                                    if(self.selected_Model.weapon == 'hammer'):
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)
+                                    else:
+                                        SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                 if(((SM1 > GS1) & (SM1 > GS2) & (SM1 > GS3)) or ((SM2 > GS1) & (SM2 > GS2) & (SM2 > GS3))):
                                     self.clicked_tile.is_occupied = False
                                     self.clicked_tile.occupand = None
@@ -777,8 +841,7 @@ class Game:                                         #can variables be exported t
                                     self.selected_tile.occupand = None
                                     SM_ModellList.remove(self.selected_Model)
                                     self.selected_Model = None
-                                else:
-                                    print(GS1,GS2,GS3,'|',SM1,SM2)  
+                                else: 
                                     self.Manager.melee_turn = True
                                     self.Manager.changestate('turn')
                                     self.run()
@@ -810,7 +873,6 @@ class Game:                                         #can variables be exported t
                                         SB.roll = 'SM: '+str(SM1)+' | '+str(SM2) +'|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                     case('powerSword'):
                                         SM1 = random.randint(1,6)
-                                        print(GS1,GS2,GS3,SM1,SM2)  
                                         if(((SM1 < GS1) or (SM1 < GS2) or (SM1 < GS3)) or ((SM2 > SM1) and ((SM2 < GS1) or (SM2 < GS2) or (SM2 < GS3)))):
                                             if((GS1 > GS2) and (GS1 > GS3)):
                                                 GS1 = random.randint(1,6)
@@ -818,11 +880,19 @@ class Game:                                         #can variables be exported t
                                                 GS2 = random.randint(1,6)
                                             else:
                                                 GS3 = random.randint(1,6)
+                                    case('hammer'):
+                                        SM1 = random.randint(1,6) + 1
+                                        if(facing):   
+                                            GS3 = 0
+                                            SB.roll = 'SM: '+str(SM1)+'|| GS: '+str(GS1)+ ' | '+str(GS2)
+                                        else:
+                                            SB.roll = 'SM: '+str(SM1)+'|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                 if(self.clicked_model.rank == 'sergeant'):
                                     SM1 += 1
-                                    if(SM2 != 0):
-                                        SM2 += 1
-                                    SB.roll = 'SM: '+str(SM1)+ '|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
+                                    if((facing) and (self.clicked_model.weapon == 'hammer')):
+                                        SB.roll = 'SM: '+str(SM1)+'|| GS: '+str(GS1)+ ' | '+str(GS2)
+                                    else:
+                                        SB.roll = 'SM: '+str(SM1)+'|| GS: '+str(GS1)+ ' | '+str(GS2)+ ' | '+str(GS3)
                                 if(self.clicked_model.guard == True):
                                     if(((SM1 < GS1) or (SM1 < GS2) or (SM1 < GS3)) or ((SM2 != 0) and ((SM2 < GS1) or (SM2 < GS2) or (SM2 < GS3)))):
                                         if((SM2 > SM1) or (SM2 == 0)):
@@ -834,6 +904,11 @@ class Game:                                         #can variables be exported t
                                                 SM1 += 1
                                             else:
                                                 SM2 += 1
+                                            if(self.clicked_model.weapon == 'hammer'):
+                                                if((SM1 > SM2) or (SM2 == 0)):
+                                                    SM1 += 1
+                                                else:
+                                                    SM2 += 1
                                         if((self.clicked_model.weapon == 'claws') and (facing)):
                                             if((SM1 > SM2) or (SM2 == 0)):
                                                 SM1 += 1
@@ -862,8 +937,7 @@ class Game:                                         #can variables be exported t
                                     self.selected_tile.occupand = None
                                     GS_ModellList.remove(self.selected_Model)
                                     self.selected_Model = None
-                                else:
-                                    print(GS1,GS2,GS3,SM1,SM2)  
+                                else: 
                                     self.Manager.melee_turn = True
                                     self.Manager.changestate('turn')
                                     self.run()
@@ -871,7 +945,6 @@ class Game:                                         #can variables be exported t
                         SB.problem = 'Select a Target!'
                 else:
                     SB.problem = 'Model needs to face the Target!'
-            print(GS1,GS2,GS3,SM1,SM2)
 
         for row in map: 
             for tile in row:
@@ -1067,7 +1140,6 @@ class Game:                                         #can variables be exported t
                     self.Manager.save_tile = self.selected_tile
                     self.reveal(self.Manager.rev_models[0])
                 elif(lis != []):
-                    print(lis.__len__())
                     if((self.selected_Model.weapon != 'claws') and (self.selected_Model.weapon != 'flamer')):
                         self.Manager.changestate('shoot')
                         game.run()
@@ -1163,7 +1235,6 @@ class gamestateTurn:
                         for tile in row:
                             tile.size += event.y
                             tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
-                            print(event.y)
                     screen.fill((50,50,50))
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_s:
@@ -1275,7 +1346,6 @@ class gamestateTurn:
                                 case(0,-1): game.selected_Model.face = (0,1)
                             if(self.gameStateManager.turn == False):
                                 game.redAP(game.selected_Model,1)
-                                print(game.selected_Model.AP)
 
             if((self.gameStateManager.gs_moveturn == True) and (self.gameStateManager.turn == False)):
                 if(self.move_button.draw(screen)):
@@ -1494,8 +1564,12 @@ class gamestate_level:
         lvl1_image = pygame.image.load('Pictures/cease.png')
         lvl1_button = Button(200,self.y,lvl1_image,1)
 
+        lvl2_button = Button(200, self.y + 70, lvl1_image, 1)
+
         while(True):
             lvl1_button.rect.topleft = (200,self.y)
+            lvl2_button.rect.topleft = (200,self.y + 70)
+
             screen.fill((50, 50, 50))
 
             for event in pygame.event.get():
@@ -1504,7 +1578,6 @@ class gamestate_level:
                     sys.exit()
                 if event.type == pygame.MOUSEWHEEL:
                     self.y -= event.y
-                    print(event.y)
 
             if(lvl1_button.draw(screen)):
                 game.level = 1
@@ -1747,6 +1820,250 @@ class gamestate_level:
 
                 self.Manager.changestate('smplace')
                 game.run()
+
+            if(lvl2_button.draw(screen)):
+                game.level = 2
+                removetiles = []
+                game.states['gsprep'].bl_list = [1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,3,3,3]
+
+                for tile in map[0]:
+                    if(tile.x < 19) or (tile.x > 23):
+                        removetiles.append(tile)
+                    else:
+                        tile.is_wall = True
+
+                for tile in map[1]:
+                    if(tile.x < 19) or (tile.x > 23):
+                        removetiles.append(tile)
+                    elif(tile.x == 19 or tile.x == 23):
+                        tile.is_wall = True
+
+                for tile in map[2]:
+                    if(tile.x < 19) or (tile.x > 23):
+                        removetiles.append(tile)
+                    elif(tile.x == 19 or tile.x == 23):
+                        tile.is_wall = True
+
+                for tile in map[3]:
+                    if(tile.x < 19) or (tile.x > 23):
+                        removetiles.append(tile)
+                    elif(tile.x == 19 or tile.x == 23):
+                        tile.is_wall = True
+
+                for tile in map[4]:
+                    if(tile.x < 19) or (tile.x > 23):
+                        removetiles.append(tile)
+                    elif(tile.x != 21):
+                        tile.is_wall = True
+                    else:
+                        tile.is_door = True
+                        
+                for tile in map[5]:
+                    if(tile.x < 20) or (tile.x > 22 and tile.x < 25):
+                        removetiles.append(tile)
+                    elif(tile.x != 21):
+                        tile.is_wall = True
+
+                for tile in map[6]:
+                    if(tile.x < 20) or (tile.x > 22 and tile.x < 25):
+                        removetiles.append(tile)
+                    elif(tile.x == 20 or tile.x == 22 or tile.x == 25 or tile.x == 29):
+                        tile.is_wall = True
+                    elif(tile.x > 25 and tile.x <29):
+                        tile.is_lurkingpoint = True
+
+                for tile in map[7]:
+                    if(tile.x < 20) or (tile.x > 22 and tile.x < 25):
+                        removetiles.append(tile)
+                    elif(tile.x == 20 or tile.x == 22 or (tile.x > 24 and tile.x != 27)):
+                        tile.is_wall = True
+                    elif(tile.x == 27):
+                        tile.is_entrypoint = True
+
+                for tile in map[8]:
+                    if(tile.x < 14) or (tile.x == 29):
+                        removetiles.append(tile)
+                    elif(tile.x != 21 and tile.x != 27):
+                        tile.is_wall = True
+
+                for tile in map[9]:
+                    if(tile.x < 14) or (tile.x == 29):
+                        removetiles.append(tile)
+                    elif(tile.x == 14 or tile.x == 28):
+                        tile.is_wall = True
+                    elif(tile.x == 16):
+                        tile.is_door = True
+                for tile in map[10]:
+                    if(tile.x < 6 or ( tile.x > 10 and tile.x < 14) or tile.x == 29):
+                        removetiles.append(tile)
+                    elif((tile.x > 5 and tile.x < 11) or tile.x == 14 or (tile.x > 15 and tile.x < 21) or (tile.x > 21 and tile.x <27) or tile.x ==28):
+                        tile.is_wall = True
+                        
+                for tile in map[11]:
+                    if(tile.x == 29):
+                        removetiles.append(tile)
+                    elif(tile.x < 7 or (tile.x > 9 and tile.x < 15) or (tile.x > 15 and tile.x < 21) or (tile.x > 21 and tile.x <27) or tile.x ==28):
+                        tile.is_wall = True
+
+                for tile in map[12]:
+                    if(tile.x == 29):
+                        removetiles.append(tile)
+                    elif(tile.x == 0 or tile.x == 28):
+                        tile.is_wall = True
+                    elif(tile.x == 6 or tile.x == 10):
+                        tile.is_door = True
+
+                for tile in map[13]:
+                    if(tile.x == 29):
+                        removetiles.append(tile)
+                    elif(tile.x < 7 or (tile.x > 9 and tile.x < 21) or (tile.x > 21 and tile.x <27) or tile.x ==28):
+                        tile.is_wall = True
+
+                for tile in map[14]:
+                    if(tile.x < 6 or (tile.x > 10 and tile.x < 20) or tile.x == 23 or tile.x == 24):
+                        removetiles.append(tile)
+                    elif(tile.x == 6 or tile.x == 7 or tile.x == 9 or tile.x == 10 or tile.x == 20 or tile.x == 22 or tile.x ==25 or tile.x == 26 or tile.x == 28 or tile.x == 29):
+                        tile.is_wall = True
+                    elif(tile.x == 8):
+                        tile.is_door = True
+                    elif(tile.x == 27):
+                        tile.is_entrypoint = True
+
+                for tile in map[15]:
+                    if(tile.x < 7 or (tile.x > 9 and tile.x < 20) or tile.x == 23 or tile.x == 24):
+                        removetiles.append(tile)
+                    elif(tile.x == 7 or tile.x == 9 or tile.x == 20 or tile.x == 22 or tile.x == 25 or tile.x == 29):
+                        tile.is_wall = True
+                    elif(tile.x > 25 and tile.x < 29):
+                        tile.is_lurkingpoint = True
+
+                for tile in map[16]:
+                    if(tile.x < 7 or (tile.x > 9 and tile.x < 20) or tile.x == 23 or tile.x == 24):
+                        removetiles.append(tile)
+                    elif(tile.x == 7 or tile.x == 9 or tile.x == 20 or tile.x == 22 or tile.x >24):
+                        tile.is_wall = True
+                    elif(tile.x > 25 and tile.x < 29):
+                        tile.is_lurkingpoint = True
+
+                for tile in map[17]:
+                    if(tile.x < 7 or (tile.x > 14 and tile.x < 20) or tile.x > 22):
+                        removetiles.append(tile)
+                    elif(tile.x == 7 or (tile.x > 8 and tile.x < 15) or tile.x == 20 or tile.x == 22):
+                        tile.is_wall = True
+
+                for tile in map[18]:
+                    if(tile.x < 7 or tile.x == 15 or tile.x == 16 or tile.x > 25):
+                        removetiles.append(tile)
+                    elif(tile.x == 7 or tile.x == 9 or tile.x == 10 or tile.x == 14 or (tile.x > 16 and  tile.x < 21) or (tile.x > 21 and tile.x < 26)):
+                        tile.is_wall = True
+                    elif(tile.x > 10 and tile.x < 14):
+                        tile.is_lurkingpoint = True
+
+                for tile in map[19]:
+                    if(tile.x < 6 or tile.x == 15 or tile.x == 16 or tile.x > 25):
+                        removetiles.append(tile)
+                    elif(tile.x == 6 or tile.x == 7 or tile.x == 9 or tile.x == 10 or tile.x == 11 or tile.x == 13 or tile.x == 14 or tile.x == 17 or tile.x == 19 or tile.x == 20 or tile.x == 22 or tile.x == 23 or tile.x == 25):
+                        tile.is_wall = True
+                    elif(tile.x == 18 or tile.x == 24):
+                        tile.is_lurkingpoint = True
+                    elif(tile.x == 12): 
+                        tile.is_entrypoint = True
+                    elif(tile.x == 8): 
+                        tile.is_door = True
+
+                for tile in map[20]:
+                    if(tile.x < 6 or tile.x == 14 or tile.x == 15 or tile.x == 16 or tile.x > 25):
+                        removetiles.append(tile)
+                    elif(tile.x == 6 or tile.x == 10 or tile.x == 11 or tile.x == 13 or tile.x == 17 or tile.x == 25):
+                        tile.is_wall = True
+                    elif(tile.x == 18 or tile.x == 24):
+                        tile.is_lurkingpoint = True
+                    elif(tile.x == 19 or tile.x == 23): 
+                        tile.is_entrypoint = True
+
+                for tile in map[21]:
+                    if(tile.x < 6 or tile.x == 14 or tile.x == 15 or tile.x == 16 or tile.x > 25):
+                        removetiles.append(tile)
+                    elif(tile.x == 6 or tile.x == 13 or tile.x == 17 or tile.x == 19 or tile.x == 25 or (tile.x > 19 and tile.x < 24)):
+                        tile.is_wall = True
+                    elif(tile.x == 18 or tile.x == 24):
+                        tile.is_lurkingpoint = True
+                    elif(tile.x == 11):
+                        tile.is_door = True
+
+                for tile in map[22]:
+                    if(tile.x < 6 or tile.x == 14 or tile.x == 15 or tile.x == 16 or tile.x > 25 or (tile.x > 19 and tile.x < 23)):
+                        removetiles.append(tile)
+                    elif(tile.x == 6 or tile.x == 10 or tile.x == 11 or tile.x == 13 or (tile.x > 16 and tile.x < 20) or (tile.x > 22 and tile.x < 28)):
+                        tile.is_wall = True
+
+                for tile in map[23]:
+                    if(tile.x < 6 or tile.x > 14):
+                        removetiles.append(tile)
+                    elif((tile.x > 5 and tile.x < 12) or tile.x == 14 or tile.x == 13):
+                        tile.is_wall = True
+                    elif(tile.x == 12):
+                        tile.is_entrypoint = True
+
+                for tile in map[24]:
+                    if(tile.x < 10 or tile.x > 14):
+                        removetiles.append(tile)
+                    elif(tile.x == 10 or tile.x == 14):
+                        tile.is_wall = True
+                    elif(tile.x > 10 and tile.x < 14):
+                        tile.is_lurkingpoint = True
+
+                for tile in map[25]:
+                    if(tile.x < 10 or tile.x > 14):
+                        removetiles.append(tile)
+                    elif(tile.x > 9 and tile.x < 15):
+                        tile.is_wall = True
+
+                for ins in removetiles:
+                    for row in map:
+                        for tile in row:
+                            if(tile == ins):
+                                tile.is_used = False                                                                                                                                                           
+                for tile in [map[12][1],map[12][2],map[12][3], map[12][4],map[12][5]]:
+                    tile.is_SMentry = True
+
+                for model in [SpaceMarine('hammer', 'sergeant'),SpaceMarine('AssaultCanon','Battlebrother'),SpaceMarine('chainFist','Battlebrother'),SpaceMarine('fist','Battlebrother'),SpaceMarine('fist','Battlebrother')]:
+                    SM_ModellList.append(model)
+
+                game.reinforcement = 2
+                game.gs_start = 0
+
+                gameStateManager.sections = [[map[12][1],map[12][2],
+                                              map[12][3],map[12][4],map[12][5]],
+                                              [map[12][6],map[12][7],map[12][8],map[12][9],map[12][10],map[11][7],map[11][8],map[11][9],map[13][7],map[13][8],map[13][9],map[14][8]],
+                                              [map[12][11],map[12][12],map[12][13]],
+                                              [map[15][8],map[16][8],map[17][8],map[18][8]],
+                                              [map[19][8],map[20][7],map[20][8],map[20][9],map[21][7],map[21][8],map[21][9],map[21][10],map[22][7],map[22][8],map[22][9]],
+                                              [map[21][11],map[21][12],map[20][12],map[22][12]],
+                                              [map[12][14],map[12][15],map[11][15],map[12][16]],
+                                              [map[10][15],map[9][15],map[9][16]],
+                                              [map[9][17],map[9][18],map[9][19]],
+                                              [map[9][20],map[9][21],map[9][22],map[8][21],map[10][21]],
+                                              [map[7][21],map[6][21],map[5][21]],
+                                              [map[4][21],map[3][20],map[3][21],map[3][22],map[2][20],map[2][21],map[2][22],map[1][20],map[1][21],map[1][22]],
+                                              [map[9][23],map[9][24],map[9][25]],
+                                              [map[9][26],map[9][27],map[8][27],map[10][27]],
+                                              [map[11][27],map[12][27],map[12][26],map[13][27]],
+                                              [map[12][25],map[12][24],map[12][23]],
+                                              [map[12][22],map[12][21],map[12][20],map[13][21],map[11][21]],
+                                              [map[14][21],map[15][21],map[16][21],map[17][21],map[18][21]],
+                                              [map[19][21],map[20][21],map[20][20],map[20][22]],
+                                              [map[12][19],map[12][18],map[12][17]]]
+                screen.fill((50,50,50))
+                x = 0
+                liste = [1,4,6,8,16,18,14,12,10]
+                while (x < liste.__len__()):
+                    for tile in gameStateManager.sections[liste[x]]:
+                        tile.group = 'b'
+                    x += 1
+
+                self.Manager.changestate('smplace')
+                game.run()
             pygame.display.update()
 
 class CP_reroll:
@@ -1809,7 +2126,6 @@ class Player1Turn:
                         for tile in row:
                             tile.size += event.y
                             tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
-                            print(event.y)
                     screen.fill((50,50,50))
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_s:
@@ -1854,9 +2170,6 @@ class Player1Turn:
                 game.selected_Model = None
                 game.is_playing = game.player2
                 game.GS_prep()
-                print(self.Manager.givestate())
-                print(game.is_playing)
-                print('0')
                 self.Manager.changestate('gsprep')
                 game.run()
             
@@ -1886,6 +2199,7 @@ class OOC_Activation:
         self.guard_image = pygame.image.load('Pictures/guard.png')
         self.overwatch_image = pygame.image.load('Pictures/overwatch.png')
         self.unjam_image = pygame.image.load('Pictures/unjam.png')
+        self.reload_image = pygame.image.load('Pictures/Wall.png')
 
         self.turn_button = Button(870, 500, self.turn_image, 1)
         self.move_button = Button(810, 500, self.move_image, 1)
@@ -1896,6 +2210,7 @@ class OOC_Activation:
         self.guard_button = Button(1170, 500, self.guard_image, 1)
         self.overwatch_button = Button(1230, 500, self.overwatch_image, 1)
         self.un_jam_button = Button(810, 560, self.unjam_image, 1)
+        self.reload_button = Button(810, 560, self.reload_image, 1)
         SB.hint = 'Use CP for an out of sequence activation?'
         
         while(True):
@@ -1908,7 +2223,6 @@ class OOC_Activation:
                         for tile in row:
                             tile.size += event.y
                             tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
-                            print(event.y)
                     screen.fill((50,50,50))
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_s:
@@ -1955,7 +2269,7 @@ class OOC_Activation:
 
                 if(self.shoot_button.draw(screen)):
                     if(game.selected_Model != None):
-                        if(game.selected_Model.weapon != 'claws'):
+                        if((game.selected_Model.weapon != 'claws') and (game.selected_Model.weapon != 'hammer')):
                             if(((game.CP) > 1) and (game.selected_Model.weapon == 'flamer')):
                                 self.Manager.changestate('shoot')
                                 game.run()
@@ -1970,7 +2284,7 @@ class OOC_Activation:
                         if((game.CP) != 0):
                             pressed = True
                             game.melee()
-            
+                                        
                 if(self.ocDoor_button.draw(screen)):
                     pressed = True
                     game.ocDoor()
@@ -1984,12 +2298,22 @@ class OOC_Activation:
 
                 if(self.overwatch_button.draw(screen)):
                     if((game.CP) > 1):
-                        if(game.selected_Model.weapon != 'flamer'):
+                        if((game.selected_Model.weapon != 'flamer') and (game.selected_Model.weapon != 'claws') and (game.selected_Model.weapon != 'hammer')):
                             game.redAP(game.selected_Model, 2)
                             game.selected_Model.overwatch = True
                             game.selected_Model.guard = False
                             pressed = True
+                        else:
+                            SB.problem = 'Equipped weapon cannot overwatch!'
 
+                if(game.selected_Model.weapon == 'AssaultCanon'):
+                    if(game.Assault_cannon_reload):
+                        if(self.reload_button.draw(screen)):
+                            if((game.selected_Model.AP + game.CP) > 3):
+                                game.Assault_cannon_Ammo = 10
+                                game.Assault_cannon_reload = False
+                            else:
+                                SB.problem = 'Not enough AP/CP'
                 if((game.selected_Model.jam == True) and (game.selected_Model.overwatch == True)):
                     if(self.un_jam_button.draw(screen)):
                         if(game.CP != 0):
@@ -2036,6 +2360,7 @@ class Player1Activation:
         self.oc_door_image = pygame.image.load('Pictures/interact.png')
         self.guard_image = pygame.image.load('Pictures/guard.png')
         self.overwatch_image = pygame.image.load('Pictures/overwatch.png')
+        self.reload_image = pygame.image.load('Pictures/Wall.png')
 
         self.turn_button = Button(870, 500, self.turn_image, 1)
         self.move_button = Button(810, 500, self.move_image, 1)
@@ -2045,6 +2370,7 @@ class Player1Activation:
         self.ocDoor_button = Button(1110, 500, self.oc_door_image, 1)
         self.guard_button = Button(1170, 500, self.guard_image, 1)
         self.overwatch_button = Button(1230, 500, self.overwatch_image, 1)
+        self.reload_button = Button(810, 560, self.reload_image, 1)
 
         while(True):
             for event in pygame.event.get():
@@ -2056,7 +2382,6 @@ class Player1Activation:
                         for tile in row:
                             tile.size += event.y
                             tile.rect.topleft = ((tile.x * tile.size), (tile.y * tile.size))
-                            print(event.y)
                     screen.fill((50,50,50))
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_s:
@@ -2123,7 +2448,7 @@ class Player1Activation:
                         if((self.activated_model != game.selected_Model) and (self.activated_model in SM_ModellList)):
                             self.activated_model.AP = 0
                             self.activated_model = game.selected_Model
-                        if(game.selected_Model.weapon != 'claws'):
+                        if((game.selected_Model.weapon != 'claws') and (game.selected_Model.weapon != 'hammer')):
                             if(((game.selected_Model.AP + game.CP) > 1) and (game.selected_Model.weapon == 'flamer')):
                                 self.Manager.changestate('shoot')
                                 game.run()
@@ -2161,7 +2486,7 @@ class Player1Activation:
 
             if(self.overwatch_button.draw(screen)):
                 if((game.selected_Model.AP + game.CP) > 1):
-                    if(game.selected_Model.weapon != 'flamer'):
+                    if((game.selected_Model.weapon != 'flamer') and (game.selected_Model.weapon != 'claws') and (game.selected_Model.weapon != 'hammer')):
                         if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
                                 if((self.activated_model != game.selected_Model) and (game.selected_Model in SM_ModellList)):
                                     self.activated_model.AP = 0
@@ -2169,7 +2494,17 @@ class Player1Activation:
                                 game.redAP(game.selected_Model, 2)
                                 game.selected_Model.overwatch = True
                                 game.selected_Model.guard = False
+                    else:
+                        SB.problem = 'Equipped weapon cannot overwatch!'
 
+            if(game.selected_Model.weapon == 'AssaultCanon'):
+                if(game.Assault_cannon_reload):
+                    if(self.reload_button.draw(screen)):
+                        if((game.selected_Model.AP + game.CP) > 3):
+                                game.Assault_cannon_Ammo = 10
+                                game.Assault_cannon_reload = False
+                        else:
+                            SB.problem = 'Not enough AP/CP'
             pygame.display.update()
 
 class Player2Turn:
@@ -2491,13 +2826,20 @@ class gamestate_shoot:
 class gamestate_reinforcement:
     def __init__(self) -> None:
         self.Manager = gameStateManager
+        self.bl_list = []                       #list to store certain blips(Mission specific)
 
     def run(self):
+        amount = game.reinforcement
         bl_count = 0
         match(game.level):
             case(1):
                 bl_count = random.randint(1,3)
-        amount = game.reinforcement
+            case(2):
+                if(self.bl_list.__len__() == 0):
+                    amount = 0
+                else:
+                    bl_count = random.choice(self.bl_list)
+                    self.bl_list.remove(bl_count)
         self.place_image = pygame.image.load('Pictures/placemodel.png')
         self.amount_image = pygame.image.load('Pictures/Wall.png')
         self.place_button = Button(810, 500, self.place_image, 1)
@@ -2568,6 +2910,10 @@ class gamestate_reinforcement:
                         match(game.level):
                             case(1):
                                 bl_count = random.randint(1,3)
+                            case(2):
+                                if(self.bl_list.__len__() != 0):
+                                    bl_count = random.choice(self.bl_list)
+                                    self.bl_list.remove(bl_count)
                         game.clicked_tile.is_occupied = True
                         BL_ModellList.append(game.clicked_tile.occupand)
                         amount -= 1
@@ -2728,6 +3074,8 @@ class gamestate_gsplace:
         match(game.level):
             case(1):
                 bl_count = random.randint(1,3)
+            case(2):
+                bl_count = 0
         self.amount_image = pygame.image.load('Pictures/Wall.png')
         self.place_image = pygame.image.load('Pictures/placemodel.png')
         self.place_button = Button(810, 500, self.place_image, 1)
@@ -3261,6 +3609,8 @@ class Sidebar():
                         wpn = 'Chainfist & Stormbolter'
                     case('claws'):
                         wpn = 'Lightning Claws'
+                    case('hammer'):
+                        wpn = 'Thunderhammer and Stormshield'
                 active_model_weapon = my_font.render('weapon: '+ wpn, False,(0,0,0))
                 active_model_rank = my_font.render('rank: '+ (smodel.rank), False,(0,0,0))
 

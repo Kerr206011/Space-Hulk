@@ -28,7 +28,11 @@ features:
     sm_place braucht liste
     bei win werte auf None / 0 setzten
     neuer sm_startpoint
+    not enough cp einfügen
+    reload button(AssaultCanon)
+    perhaps fix flamer flaming die selbe sekton?
+    andere Guard farbe
 
 referenz:
 rank : 'sergeant'
-weapon : 'fist','AssaultCanon','powerSword,'flamer','chainFist','claws'
+weapon : 'fist','AssaultCanon','powerSword,'flamer','chainFist','claws','hammer'
