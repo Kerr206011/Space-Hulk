@@ -2123,7 +2123,7 @@ class briefing:
         briefing = False
 
         my_font = pygame.font.SysFont('Bahnschrift', 40)
-        texts = ['loading Briefing > ... complete','Mission > burn the controlroom ...','Enemy objective > Stop the clensing of the controlroom ...','Deployment > west corridor of section 34C12H ...','Forces > ...requesting ... done ...','> sergeant with Powersword and Stormbolter','> Battlebrother with Heavy Flamer and Powerfist','> 3 Battlebrothers with Stormbolters and Powerfists','Enemys? > ... checking auspex ... pinging ...','> auspex_ping == 2','> enemy reinforcements ... chance == high','> let fury be your guide, let vengance be your song. For the Emperor!','>deployment commencing ....']
+        texts = ['loading Briefing > ... complete','Mission > burn the controlroom ...','Enemy objective > launch escape pods ...','Deployment > west corridor of section 34C12H ...','Forces > ...requesting ... done ...','> sergeant with Powersword and Stormbolter','> Battlebrother with Heavy Flamer and Powerfist','> 3 Battlebrothers with Stormbolters and Powerfists','Enemys? > ... checking auspex ... pinging ...','> auspex_ping == 2','> enemy reinforcements ... chance of  survival > low','> let fury be your guide, let vengance be your song. For the Emperor!','>deployment commencing ....']
         text_1 = ''
         text_2 = ''
         text_3 = ''
@@ -2208,55 +2208,55 @@ class briefing:
                 if(text_1 != texts[0]):
                     text_1 += texts[0][a]
                     a += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_2 != texts[1]):
                     text_2 += texts[1][b]
                     b += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_3 != texts[2]):
                     text_3 += texts[2][c]
                     c += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_4 != texts[3]):
                     text_4 += texts[3][d]
                     d += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_5 != texts[4]):
                     text_5 += texts[4][e]
                     e += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_6 != texts[5]):
                     text_6 += texts[5][f]
                     f += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_7 != texts[6]):
                     text_7 += texts[6][g]
                     g += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_8 != texts[7]):
                     text_8 += texts[7][h]
                     h += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_9 != texts[8]):
                     text_9 += texts[8][i]
                     i += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_10 != texts[9]):
                     text_10 += texts[9][j]
                     j += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_11 != texts[10]):
                     text_11 += texts[10][k]
                     k += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_12 != texts[11]):
                     text_12 += texts[11][l]
                     l += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(text_13 != texts[12]):
                     text_13 += texts[12][m]
                     m += 1
-                    time.sleep(0.15)
+                    time.sleep(0.1)
                 elif(self.continue_button.draw(screen)):
                     cutscene = False
                     briefing = True
@@ -4000,25 +4000,24 @@ class Sidebar():
                     screen.blit(roll_Text, (810,150))
                 if(cmodel != None):
                     if(cmodel in SM_ModellList):
-                        if(cmodel in SM_ModellList):
-                            if(cmodel.weapon == 'flamer'):
-                                screen.blit(clicked_text, (810,330))
-                                screen.blit(clicked_model_weapon,(810,360))
-                                screen.blit(clicked_model_rank, (810, 390))
-                                screen.blit(flamer_ammo_text, (810,420))
-                            elif(cmodel.weapon == 'AssaultCanon'):
-                                screen.blit(clicked_text, (810,300))
-                                screen.blit(clicked_model_weapon,(810,330))
-                                screen.blit(clicked_model_rank, (810, 360))
-                                screen.blit(assault_ammo_text, (810,390))
-                                screen.blit(assault_reload_text, (810,420))
-                            else:
-                                screen.blit(clicked_text, (810,360))
-                                screen.blit(clicked_model_weapon,(810,390))
-                                screen.blit(clicked_model_rank, (810, 420))
-                                if(smodel.jam == True):
-                                    t = my_font.render('Weapon jammed!', False, (0,0,0))
-                                    screen.blit(t, (810,330))
+                        if(cmodel.weapon == 'flamer'):
+                            screen.blit(clicked_text, (810,330))
+                            screen.blit(clicked_model_weapon,(810,360))
+                            screen.blit(clicked_model_rank, (810, 390))
+                            screen.blit(flamer_ammo_text, (810,420))
+                        elif(cmodel.weapon == 'AssaultCanon'):
+                            screen.blit(clicked_text, (810,300))
+                            screen.blit(clicked_model_weapon,(810,330))
+                            screen.blit(clicked_model_rank, (810, 360))
+                            screen.blit(assault_ammo_text, (810,390))
+                            screen.blit(assault_reload_text, (810,420))
+                        else:
+                            screen.blit(clicked_text, (810,360))
+                            screen.blit(clicked_model_weapon,(810,390))
+                            screen.blit(clicked_model_rank, (810, 420))
+                            if(cmodel.jam == True):
+                                t = my_font.render('Weapon jammed!', False, (0,0,0))
+                                screen.blit(t, (810,330))
 
             case('shoot'):
                 screen.blit(problem_text, (810,450))
