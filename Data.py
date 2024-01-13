@@ -631,7 +631,7 @@ class Game:                                         #can variables be exported t
                         self.redAP(self.selected_Model, 1)
                         self.selected_Model.guard = False
                     if((self.selected_Model.weapon == 'fist') or (self.selected_Model.weapon == 'powerSword') or (self.selected_Model.weapon == 'chainFist')):
-                        if((a == 6) or (b == 6) or (c == 6)):
+                        if(((a == 6) or (b == 6)) or ((self.selected_Model.susf) and ((a > 4) or (b > 4)))):
                             self.clicked_tile.is_door = False
                     self.selected_Model.susf = True
 
@@ -3961,7 +3961,7 @@ class Sidebar():
                                 screen.blit(clicked_text, (810,360))
                                 screen.blit(clicked_model_weapon,(810,390))
                                 screen.blit(clicked_model_rank, (810, 420))
-                                if(smodel.jam == True):
+                                if(cmodel.jam == True):
                                     t = my_font.render('Weapon jammed!', False, (0,0,0))
                                     screen.blit(t, (810,330))
                 else:
