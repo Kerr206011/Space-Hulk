@@ -151,9 +151,9 @@ class Game:                                         #can variables be exported t
         self.round += 1
         for Model in SM_ModellList:
             Model.AP = 4
-            self.overwatch = False
-            self.guard = False
-            self.jam = False
+            Model.overwatch = False
+            Model.guard = False
+            Model.jam = False
         self.CP = random.randint(1,6)
         self.Manager.ooc = False
         self.Manager.ooc_models = []
@@ -1186,8 +1186,7 @@ class Game:                                         #can variables be exported t
                     self.reveal(self.Manager.rev_models[0])
                 elif(lis != []):
                     if((self.selected_Model.weapon != 'claws') and (self.selected_Model.weapon != 'flamer')):
-                        self.Manager.changestate('shoot')
-                        game.run()
+                        self.Manager.SM_move = True
             elif(self.is_playing == self.player2):
                 if(self.selected_Model in GS_ModellList):
                     self.Manager.gs_turnaftermove = self.selected_Model
@@ -1220,7 +1219,8 @@ class Game:                                         #can variables be exported t
                                     self.Manager.save_model = self.selected_Model
                                     self.Manager.save_tile = self.selected_tile
                                     self.reveal(self.Manager.rev_models[0])
-                                
+                    self.clicked_model = None
+                    self.clicked_tile = None
                 if(self.selected_Model in BL_ModellList):
                     c = False
                     for row in map:
@@ -2645,7 +2645,6 @@ class Player1Activation:
                     if((self.activated_model != game.selected_Model) and (game.selected_Model in SM_ModellList)):
                         self.activated_model.AP = 0
                         self.activated_model = game.selected_Model
-                    self.Manager.SM_move = True
                     game.moveModel()
 
             if(self.turn_button.draw(screen)):
