@@ -501,40 +501,82 @@ class Game:                                         #can variables be exported t
         distance = abs(z)
         return distance
     
+    # def tiletdistance(self, tiles, tilee, rang):
+    #     paths = []
+    #     x = 0
+    #     r = False
+    #     a = True
+    #     tilestart = tiles
+    #     chelis = [map[tilestart.y][tilestart.x + 1],map[tilestart.y][tilestart.x - 1],map[tilestart.y + 1][tilestart.x],map[tilestart.y - 1][tilestart.x]]
+    #     for tile in chelis:
+    #         if((tile.is_wall == False) and ((tile.is_door == False) or ((tile.is_door == True) and (tile.is_open == True))) and (tile.is_buring == False) and (tile.is_occupied == False)):
+    #             paths.append([tile])
+    #     while(a):
+    #         c = True
+    #         chetile = paths[0][paths[0].__len__() - 1]
+    #         chelist = [map[chetile.y][chetile.x + 1],map[chetile.y][chetile.x - 1],map[chetile.y + 1][chetile.x],map[chetile.y - 1][chetile.x]]
+    #         for tile in chelist:
+    #             if((tile.is_wall == False) and ((tile.is_door == False) or ((tile.is_door == True) and (tile.is_open == True))) and (tile.is_buring == False) and (tile.is_occupied == False)):
+    #                 c = False
+    #                 if(tile in paths[0]):
+    #                     new_path = paths[0]
+    #                     new_path.append(tile)
+    #                     paths.append(new_path)
+    #         if(c):
+    #             paths.remove(paths[0])
+    #         for path in paths:
+    #             if(tilee in path):
+    #                 r = True
+    #             elif(path.__len__() == rang):
+    #                 paths.remove(path)
+            
+    #         if(r == True):
+    #             a = False
+    #         elif(paths.__len__() == 0):
+    #             a = False
+    #     return r
+
     def tiletdistance(self, tiles, tilee, rang):
         paths = []
         x = 0
         r = False
         a = True
         tilestart = tiles
-        chelis = [map[tilestart.y][tilestart.x + 1],map[tilestart.y][tilestart.x - 1],map[tilestart.y + 1][tilestart.x],map[tilestart.y - 1][tilestart.x]]
+        chelis = [map[tilestart.y][tilestart.x + 1], map[tilestart.y][tilestart.x - 1], map[tilestart.y + 1][tilestart.x], map[tilestart.y - 1][tilestart.x]]
+        
         for tile in chelis:
-            if((tile.is_wall == False) and ((tile.is_door == False) or ((tile.is_door == True) and (tile.is_open == True))) and (tile.is_buring == False) and (tile.is_occupied == False)):
+            if ((tile.is_wall == False) and ((tile.is_door == False) or (tile.is_door and tile.is_open)) and (tile.is_buring == False) and (tile.is_occupied == False)):
                 paths.append([tile])
-        while(a):
-            c = True
-            chetile = paths[0][paths[0].__len__() - 1]
-            chelist = [map[chetile.y][chetile.x + 1],map[chetile.y][chetile.x - 1],map[chetile.y + 1][chetile.x],map[chetile.y - 1][chetile.x]]
-            for tile in chelist:
-                if((tile.is_wall == False) and ((tile.is_door == False) or ((tile.is_door == True) and (tile.is_open == True))) and (tile.is_buring == False) and (tile.is_occupied == False)):
-                    c = False
-                    if(tile in paths[0]):
-                        new_path = paths[0]
-                        new_path.append(tile)
-                        paths.append(new_path)
-            if(c):
-                paths.remove(paths[0])
+
+        while a:
+            new_paths = []
             for path in paths:
-                if(tilee in path):
+                chetile = path[-1]
+                chelist = [map[chetile.y][chetile.x + 1], map[chetile.y][chetile.x - 1], map[chetile.y + 1][chetile.x], map[chetile.y - 1][chetile.x]]
+
+                for tile in chelist:
+                    if((tile.is_wall == False) and ((tile.is_door == False) or (tile.is_door and tile.is_open)) and (tile.is_buring == False) and (tile.is_occupied == False)):
+                        if tile not in path:
+                            new_path = path.copy()
+                            new_path.append(tile)
+                            if(len(path) > rang):
+                                pass
+                            else:
+                                new_paths.append(new_path)
+
+                if tilee in path:
                     r = True
-                elif(path.__len__() == rang):
-                    paths.remove(path)
-            
-            if(r == True):
+                    break
+                elif len(path) == rang:
+                    continue  # Skip adding this path to the new_paths list
+                
+
+            paths = new_paths
+
+            if r or len(paths) == 0:
                 a = False
-            elif(paths.__len__() == 0):
-                a = False
-        return r
+
+            return r
 
     def gsdistance(self,tiles,tilee):
         ran = False
