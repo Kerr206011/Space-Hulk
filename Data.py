@@ -2,6 +2,7 @@ import pygame
 import random 
 import sys
 import time
+from collections import deque
 
 SM_ModellList = []                     #a list of Space Marine models
 GS_ModellList = []                     #a list of Genstealer models
@@ -500,83 +501,6 @@ class Game:                                         #can variables be exported t
         z = x+y
         distance = abs(z)
         return distance
-    
-    # def tiletdistance(self, tiles, tilee, rang):
-    #     paths = []
-    #     x = 0
-    #     r = False
-    #     a = True
-    #     tilestart = tiles
-    #     chelis = [map[tilestart.y][tilestart.x + 1],map[tilestart.y][tilestart.x - 1],map[tilestart.y + 1][tilestart.x],map[tilestart.y - 1][tilestart.x]]
-    #     for tile in chelis:
-    #         if((tile.is_wall == False) and ((tile.is_door == False) or ((tile.is_door == True) and (tile.is_open == True))) and (tile.is_buring == False) and (tile.is_occupied == False)):
-    #             paths.append([tile])
-    #     while(a):
-    #         c = True
-    #         chetile = paths[0][paths[0].__len__() - 1]
-    #         chelist = [map[chetile.y][chetile.x + 1],map[chetile.y][chetile.x - 1],map[chetile.y + 1][chetile.x],map[chetile.y - 1][chetile.x]]
-    #         for tile in chelist:
-    #             if((tile.is_wall == False) and ((tile.is_door == False) or ((tile.is_door == True) and (tile.is_open == True))) and (tile.is_buring == False) and (tile.is_occupied == False)):
-    #                 c = False
-    #                 if(tile in paths[0]):
-    #                     new_path = paths[0]
-    #                     new_path.append(tile)
-    #                     paths.append(new_path)
-    #         if(c):
-    #             paths.remove(paths[0])
-    #         for path in paths:
-    #             if(tilee in path):
-    #                 r = True
-    #             elif(path.__len__() == rang):
-    #                 paths.remove(path)
-            
-    #         if(r == True):
-    #             a = False
-    #         elif(paths.__len__() == 0):
-    #             a = False
-    #     return r
-
-    def tiletdistance(self, tiles, tilee, rang):
-        paths = []
-        x = 0
-        r = False
-        a = True
-        tilestart = tiles
-        chelis = [map[tilestart.y][tilestart.x + 1], map[tilestart.y][tilestart.x - 1], map[tilestart.y + 1][tilestart.x], map[tilestart.y - 1][tilestart.x]]
-        
-        for tile in chelis:
-            if ((tile.is_wall == False) and ((tile.is_door == False) or (tile.is_door and tile.is_open)) and (tile.is_buring == False) and (tile.is_occupied == False)):
-                paths.append([tile])
-
-        while a:
-            new_paths = []
-            for path in paths:
-                chetile = path[-1]
-                chelist = [map[chetile.y][chetile.x + 1], map[chetile.y][chetile.x - 1], map[chetile.y + 1][chetile.x], map[chetile.y - 1][chetile.x]]
-
-                for tile in chelist:
-                    if((tile.is_wall == False) and ((tile.is_door == False) or (tile.is_door and tile.is_open)) and (tile.is_buring == False) and (tile.is_occupied == False)):
-                        if tile not in path:
-                            new_path = path.copy()
-                            new_path.append(tile)
-                            if(len(path) > rang):
-                                pass
-                            else:
-                                new_paths.append(new_path)
-
-                if tilee in path:
-                    r = True
-                    break
-                elif len(path) == rang:
-                    continue  # Skip adding this path to the new_paths list
-                
-
-            paths = new_paths
-
-            if r or len(paths) == 0:
-                a = False
-
-            return r
 
     def gsdistance(self,tiles,tilee):
         ran = False
@@ -608,6 +532,7 @@ class Game:                                         #can variables be exported t
                 k = False
         return ran
     
+
     def shoot(self):
         if(self.selected_Model in SM_ModellList):
             liste = game.vision(self.selected_Model,self.selected_tile)
@@ -2804,11 +2729,6 @@ class Player1Activation:
                     SB.problem = 'Not enough AP/CP!'
 
             if(self.overwatch_button.draw(screen)):
-                for row in map:
-                    for tile in row:
-                        if(tile.occupand in GS_ModellList):
-                            if(game.tiletdistance(game.selected_tile,tile,12)):
-                                print('in range')
                 if((game.selected_Model.AP + game.CP) > 1):
                     if((game.selected_Model.weapon != 'flamer') and (game.selected_Model.weapon != 'claws') and (game.selected_Model.weapon != 'hammer')):
                         if((game.is_playing == game.player1) and (game.selected_Model in SM_ModellList)):
@@ -3254,10 +3174,9 @@ class gamestate_reinforcement:
                             for row in map:
                                 for obj in row:
                                     if(obj.occupand in SM_ModellList):
-                                        if(game.gsdistance(obj,tile)):
+                                        if(obj.is_path_within_distance(tile, 7)):
                                             for lkp in [map[tile.y][tile.x + 1],map[tile.y][tile.x - 1],map[tile.y + 1][tile.x],map[tile.y - 1][tile.x],map[tile.y +1][tile.x + 1],map[tile.y + 1][tile.x - 1],map[tile.y - 1][tile.x - 1],map[tile.y - 1][tile.x + 1]]:
                                                 if lkp.is_lurkingpoint:
-                                                    print('ä')
                                                     if lkp.is_occupied == True:
                                                         lkp.occupand.AP = 0
                 self.Manager.changestate('runP2')
@@ -3839,6 +3758,30 @@ class Tile:
                 game.clicked_tile = self
             self.clicked = False
 
+    def is_path_within_distance(self, target_tile, max_distance):
+        visited = set()
+        queue = deque([(self.x, self.y, 0)])
+
+        while queue:
+            current_x, current_y, distance = queue.popleft()
+            current_tile = map[current_y][current_x]
+
+            if current_tile == target_tile:
+                return True  # Path found within distance
+
+            if distance < max_distance:
+                neighbors = [(current_x + 1, current_y), (current_x - 1, current_y),
+                             (current_x, current_y + 1), (current_x, current_y - 1)]
+
+                for nx, ny in neighbors:
+                    if 0 <= nx < map_width and 0 <= ny < map_height:
+                        neighbor_tile = map[ny][nx]
+                        if not neighbor_tile.is_wall and (nx, ny) not in visited:
+                            visited.add((nx, ny))
+                            queue.append((nx, ny, distance + 1))
+
+        return False  # No path found within distance
+    
 class Model:
     def __init__(self, AP, image):
         self.AP = AP
