@@ -2008,6 +2008,82 @@ class gamestate_level:
                     elif(tile.x == 20) or (tile.x == 28):
                         tile.is_door = True
 
+                for tile in map[10]:
+                    if(tile.x == 18) or (tile.x > 21 and tile.x < 27) or (tile.x > 29 and tile.x < 34) or (tile.x > 38):
+                        removetiles.append(tile)
+                    elif(tile.x == 0) or (tile.x == 17) or (tile.x == 19) or (tile.x == 21) or (tile.x == 27) or (tile.x == 29) or (tile.x == 34) or (tile.x == 38):
+                        tile.is_wall = True
+                    elif(tile.x == 1):
+                        tile.is_lurkingpoint = True
+                    elif(tile.x == 2):
+                        tile.is_entrypoint = True
+
+                for tile in map[11]:
+                    if(tile.x == 18) or (tile.x > 21 and tile.x < 27) or (tile.x > 29 and tile.x < 34) or (tile.x > 38):
+                        removetiles.append(tile)
+                    elif(tile.x == 0) or (tile.x == 2) or (tile.x == 3) or (tile.x == 5) or (tile.x == 6) or (tile.x > 7 and tile.x < 18) or (tile.x == 19) or (tile.x == 21) or (tile.x == 27) or (tile.x == 29) or (tile.x == 34) or (tile.x == 38):
+                        tile.is_wall = True
+                    elif(tile.x == 1):
+                        tile.is_lurkingpoint = True
+
+                for tile in map[12]:
+                    if(tile.x > 8 and tile.x < 19) or (tile.x > 21 and tile.x < 26) or (tile.x > 30 and tile.x < 34) or (tile.x == 39) or (tile.x > 44):
+                        removetiles.append(tile)
+                    elif(tile.x >= 0 and tile.x < 4) or (tile.x > 4 and tile.x < 9) or (tile.x == 19) or (tile.x == 21) or (tile.x == 26) or (tile.x == 27) or (tile.x == 29) or (tile.x == 30) or (tile.x == 34) or (tile.x == 35) or (tile.x == 37) or (tile.x == 38) or (tile.x > 39 and tile.x < 45):
+                        tile.is_wall = True
+                    elif(tile.x == 4):
+                        tile.is_entrypoint = True
+                    elif(tile.x == 28):
+                        tile.is_door = True
+
+                for tile in map[13]:
+                    if(tile.x < 2) or (tile.x > 6 and tile.x < 19) or (tile.x > 21 and tile.x < 26) or (tile.x > 44):
+                        removetiles.append(tile)
+                    elif(tile.x == 2) or (tile.x == 6) or (tile.x == 19) or (tile.x == 21) or (tile.x == 26) or (tile.x > 29 and tile.x < 36) or (tile.x > 36 and tile.x < 41) or (tile.x == 44):
+                        tile.is_wall = True
+                    elif(tile.x > 2 and tile.x < 6):
+                        tile.is_lurkingpoint = True
+                    elif(tile.x == 36):
+                        tile.is_door = True
+
+                for tile in map[14]:
+                    if(tile.x < 2) or (tile.x > 6 and tile.x < 19) or (tile.x > 21 and tile.x < 26) or (tile.x > 44):
+                        removetiles.append(tile)
+                    elif(tile.x > 1 and tile.x < 7) or (tile.x == 19) or (tile.x == 21) or (tile.x == 26) or (tile.x == 44):
+                        tile.is_wall = True
+                    elif(tile.x == 30):
+                        tile.is_door = True
+
+                for tile in map[15]:
+                    if(tile.x < 18) or (tile.x > 22 and tile.x < 26) or (tile.x > 44):
+                        removetiles.append(tile)
+                    elif(tile.x == 18) or (tile.x == 19) or (tile.x == 21) or (tile.x == 22) or (tile.x == 26) or (tile.x > 29 and tile.x < 36) or (tile.x > 36 and tile.x < 41) or (tile.x == 44):
+                        tile.is_wall = True
+                    elif(tile.x == 20) or (tile.x == 36):
+                        tile.is_door = True
+
+                for tile in map[16]:
+                    if(tile.x < 15) or (tile.x > 22 and tile.x < 26) or (tile.x > 30 and tile.x < 35) or (tile.x == 38) or (tile.x == 39) or (tile.x > 44):
+                        removetiles.append(tile)
+                    elif(tile.x > 14 and tile.x < 19) or (tile.x == 22) or (tile.x == 26) or (tile.x == 27) or (tile.x == 29) or (tile.x == 30) or (tile.x == 35) or (tile.x == 37) or (tile.x == 40) or (tile.x == 41) or (tile.x == 43) or (tile.x == 44):
+                        tile.is_wall = True
+                    elif(tile.x == 28) or (tile.x == 42):
+                        tile.is_door = True
+
+                for tile in map[17]:
+                    if(tile.x < 15) or (tile.x > 22 and tile.x < 27) or (tile.x > 29 and tile.x < 35) or (tile.x > 37 and  tile.x < 41) or (tile.x > 43):
+                        removetiles.append(tile)
+                    elif(tile.x == 15) or (tile.x == 22) or (tile.x == 27) or (tile.x == 29) or (tile.x == 35) or (tile.x == 37) or (tile.x == 41) or (tile.x == 43):
+                        tile.is_wall = True
+                    elif(tile.x == 18):
+                        tile.is_door = True
+
+                for tile in map[18]:# nicht fertig
+                    if(tile.x < 15) or (tile.x > 22 and tile.x < 27) or (tile.x > 29 and tile.x < 35) or (tile.x > 37 and  tile.x < 41) or (tile.x > 43):
+                        removetiles.append(tile)
+                    elif():
+                        tile.is_wall = True
+
                 for ins in removetiles:
                     for row in map:
                         for tile in row:
