@@ -3575,48 +3575,49 @@ class Tile:
                 screen.blit(imaget, (self.xb*self.size, self.yb*self.size))
     
     def interact(self):
-        pos = pygame.mouse.get_pos()
-        if(self.rect.collidepoint(pos)) and (pygame.mouse.get_pressed()[0] == 1):
-            self.clicked = True
-        if(pygame.mouse.get_pressed()[0] == 0 and self.clicked):
-            if((gameStateManager.givestate() == 'ooc') and (self.occupand in gameStateManager.ooc_models)):
-                game.selected_Model = self.occupand
-                game.selected_tile = self
-            elif((gameStateManager.givestate() == 'ooc') and (self.occupand not in SM_ModellList)):
-                game.clicked_model = self.occupand
-                game.clicked_tile = self
-
-            elif(gameStateManager.givestate() == 'shoot'):
-                if(self.is_occupied == True):
-                    if self.occupand in GS_ModellList:
-                        game.clicked_tile = self
-                        game.clicked_model = self.occupand
-                elif(self.is_door == True and self.is_open == False):
-                    game.clicked_tile = self
-            elif(gameStateManager.givestate() == 'actP1'):
-                if(self.is_occupied == True):
-                    if self.occupand in GS_ModellList:
-                        game.clicked_tile = self
-                        game.clicked_model = self.occupand
-                else:
-                    game.clicked_tile = self
-            elif(gameStateManager.givestate() == 'actP2'):
-                if(self.is_occupied == True):
-                    if self.occupand in SM_ModellList:
-                        game.clicked_tile = self
-                        game.clicked_model = self.occupand
-                else:
-                    game.clicked_tile = self
-            elif(((self.is_occupied) and (self.occupand in SM_ModellList) and (game.is_playing == game.player1)) or ((self.is_occupied) and ((self.occupand in GS_ModellList) or (self.occupand in BL_ModellList)) and (game.is_playing == game.player2))):
-                game.selected_Model = self.occupand
-                game.selected_tile = self
-            elif(self.is_occupied):
+        if(self.is_used):
+            pos = pygame.mouse.get_pos()
+            if(self.rect.collidepoint(pos)) and (pygame.mouse.get_pressed()[0] == 1):
+                self.clicked = True
+            if(pygame.mouse.get_pressed()[0] == 0 and self.clicked):
+                if((gameStateManager.givestate() == 'ooc') and (self.occupand in gameStateManager.ooc_models)):
+                    game.selected_Model = self.occupand
+                    game.selected_tile = self
+                elif((gameStateManager.givestate() == 'ooc') and (self.occupand not in SM_ModellList)):
                     game.clicked_model = self.occupand
-                    print(self.occupand)
                     game.clicked_tile = self
-            else:
-                game.clicked_tile = self
-            self.clicked = False
+
+                elif(gameStateManager.givestate() == 'shoot'):
+                    if(self.is_occupied == True):
+                        if self.occupand in GS_ModellList:
+                            game.clicked_tile = self
+                            game.clicked_model = self.occupand
+                    elif(self.is_door == True and self.is_open == False):
+                        game.clicked_tile = self
+                elif(gameStateManager.givestate() == 'actP1'):
+                    if(self.is_occupied == True):
+                        if self.occupand in GS_ModellList:
+                            game.clicked_tile = self
+                            game.clicked_model = self.occupand
+                    else:
+                        game.clicked_tile = self
+                elif(gameStateManager.givestate() == 'actP2'):
+                    if(self.is_occupied == True):
+                        if self.occupand in SM_ModellList:
+                            game.clicked_tile = self
+                            game.clicked_model = self.occupand
+                    else:
+                        game.clicked_tile = self
+                elif(((self.is_occupied) and (self.occupand in SM_ModellList) and (game.is_playing == game.player1)) or ((self.is_occupied) and ((self.occupand in GS_ModellList) or (self.occupand in BL_ModellList)) and (game.is_playing == game.player2))):
+                    game.selected_Model = self.occupand
+                    game.selected_tile = self
+                elif(self.is_occupied):
+                        game.clicked_model = self.occupand
+                        print(self.occupand)
+                        game.clicked_tile = self
+                else:
+                    game.clicked_tile = self
+                self.clicked = False
 
     def is_path_within_distance(self, target_tile, max_distance):
         visited = set()
