@@ -1976,6 +1976,38 @@ class gamestate_level:
                     elif(tile.x == 16):
                         tile.is_door = True
 
+                for tile in map[7]:
+                    if(tile.x > 30):
+                        removetiles.append(tile)
+                    elif(tile.x == 0) or (tile.x == 30):
+                        tile.is_wall = True
+                    elif(tile.x == 1):
+                        tile.is_lurkingpoint = True
+                    elif(tile.x == 2):
+                        tile.is_entrypoint =True
+                    elif(tile.x == 18) or (tile.x == 22) or (tile.x == 26):
+                        tile.is_door = True
+
+                for tile in map[8]:
+                    if(tile.x > 30 and tile.x < 34) or (tile.x > 38):
+                        removetiles.append(tile)
+                    elif(tile.x == 0) or (tile.x == 2) or (tile.x == 3) or (tile.x > 4 and tile.x < 16) or (tile.x == 17) or (tile.x == 18) or (tile.x > 21 and tile.x < 27) or (tile.x == 30) or (tile.x > 33 and tile.x < 39):
+                        tile.is_wall = True
+                    elif(tile.x == 1):
+                        tile.is_lurkingpoint = True
+                    elif(tile.x == 16):
+                        tile.is_door = True
+
+                for tile in map[9]:
+                    if(tile.x > 22 and tile.x < 26) or (tile.x > 30 and tile.x < 34) or (tile.x > 38):
+                        removetiles.append(tile)
+                    elif(tile.x == 0) or (tile.x == 2) or (tile.x == 3) or (tile.x > 4 and tile.x < 16) or (tile.x > 16 and tile.x < 20) or (tile.x == 21) or (tile.x == 22) or (tile.x == 26) or (tile.x == 27) or (tile.x == 29) or (tile.x == 30) or (tile.x == 34) or (tile.x == 38):
+                        tile.is_wall = True
+                    elif(tile.x == 1):
+                        tile.is_lurkingpoint = True
+                    elif(tile.x == 20) or (tile.x == 28):
+                        tile.is_door = True
+
                 for ins in removetiles:
                     for row in map:
                         for tile in row:
