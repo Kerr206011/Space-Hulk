@@ -2081,7 +2081,7 @@ class gamestate_level:
                 for tile in map[18]:# nicht fertig
                     if(tile.x < 15) or (tile.x > 22 and tile.x < 27) or (tile.x > 29 and tile.x < 35) or (tile.x > 37 and  tile.x < 41) or (tile.x > 43):
                         removetiles.append(tile)
-                    elif():
+                    elif(tile.x == 15) or (tile.x == 17) or (tile.x == 18) or (tile.x == 22) or (tile.x == 27) or (tile.x == 29) or (tile.x == 35) or (tile.x == 37) or (tile.x == 41) or (tile.x == 43):
                         tile.is_wall = True
 
                 for ins in removetiles:
