@@ -35,4 +35,3 @@ while True:
 
     # Update the display
     pygame.display.flip()
-    #git test comment
