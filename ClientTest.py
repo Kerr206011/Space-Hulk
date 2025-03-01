@@ -1,28 +1,36 @@
 import socket
 import threading
 
-SERVER_HOST = '127.0.0.1'  # Change to the server's IP for Internet play
-SERVER_PORT = 5000
+class Client:
+    def __init__(self, host='127.0.0.1', port=5000):
+        self.server_host = host
+        self.server_port = port
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-def listen_to_server(sock):
-    while True:
-        try:
-            data = sock.recv(1024)
-            if not data:
+    def listen_to_server(self):
+        while True:
+            try:
+                data = self.client_socket.recv(1024)
+                if not data:
+                    break
+                print(f"\nServer: {data.decode()}\nEnter message: ", end="", flush=True)
+            except:
                 break
-            print(f"Server: {data.decode()}")
-        except:
-            break
 
-def start_client():
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect((SERVER_HOST, SERVER_PORT))
-    threading.Thread(target=listen_to_server, args=(client,)).start()
-    while True:
-        msg = input("Enter message: ")
-        if msg == "quit":
-            break
-        client.send(msg.encode())
-    client.close()
+    def start(self):
+        try:
+            self.client_socket.connect((self.server_host, self.server_port))
+            threading.Thread(target=self.listen_to_server, daemon=True).start()
+            while True:
+                msg = input("Enter message: ")
+                if msg.lower() == "quit":
+                    break
+                self.client_socket.send(msg.encode())
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            self.client_socket.close()
+            print("Disconnected from server.")
 
-start_client()
+client = Client()
+client.start()
